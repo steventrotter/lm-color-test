@@ -50,6 +50,24 @@ button { cursor: pointer; }
 /* ─────────────────────────────────────────── */
 /* TOOLBAR (chrome, no-print)                 */
 /* ─────────────────────────────────────────── */
+/* ─────────────────────────────────────────── */
+/* TYPOGRAPHY SIZE TOKENS                      */
+/*                                             */
+/* Document body content uses --text-body (18px floor, per LM rule).
+   Small text uses --text-small (16px floor). Mono chrome (toolbar
+   labels, hex inputs, version badges, status tags) stays smaller via
+   the --text-mono-* tokens since it's UI affordance, not body content.
+   Tweak any of these in one place to retune the whole document.    */
+/* ─────────────────────────────────────────── */
+:root {
+  --text-body:        18px;   /* sec-intro, doc-cover-intro, announcement body, announcement link */
+  --text-small:       16px;   /* secondary doc-body content */
+  --text-button:      18px;   /* button preview pill text (Section 06) */
+  --text-mono-meta:   11px;   /* mono labels and hex meta in chrome */
+  --text-mono-tag:    10.5px; /* smaller tag-style mono labels */
+  --text-mono-micro:  10px;   /* footnote-style mono in document margin */
+}
+
 .toolbar {
   background: var(--chrome);
   color: #fff;
@@ -346,7 +364,7 @@ button { cursor: pointer; }
 .doc-cover-title .editable:hover { border-bottom-color: var(--hair); }
 .doc-cover-title .editable:focus { outline: none; border-bottom-color: var(--lm-teal); }
 .doc-cover-intro {
-  font-size: 13.5px;
+  font-size: var(--text-body);
   color: var(--lm-mute);
   line-height: 1.55;
 }
@@ -383,9 +401,9 @@ button { cursor: pointer; }
   color: var(--lm-ink);
 }
 .sec-intro {
-  font-size: 12.5px;
+  font-size: var(--text-body);
   color: var(--lm-mute);
-  max-width: 580px;
+  max-width: 640px;
   line-height: 1.55;
 }
 .sec-controls {
@@ -870,9 +888,9 @@ button { cursor: pointer; }
   display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
 }
 .btn-pair .pill {
-  padding: 11px 22px;
+  padding: 13px 26px;
   font-weight: 700;
-  font-size: 13.5px;
+  font-size: var(--text-button);
   border: none;
   background: var(--btn-base);
   color: var(--btn-base-text);
@@ -1404,7 +1422,7 @@ button { cursor: pointer; }
 }
 .ann-body {
   font-family: var(--poppins);
-  font-size: 14px;
+  font-size: var(--text-body);
   line-height: 1.55;
   margin-bottom: 8px;
   white-space: pre-wrap;
@@ -1412,7 +1430,7 @@ button { cursor: pointer; }
 }
 .ann-read {
   font-family: var(--poppins);
-  font-size: 14px;
+  font-size: var(--text-body);
   font-weight: 600;
   text-decoration: underline;
   text-decoration-thickness: 1.5px;
@@ -1657,6 +1675,192 @@ button { cursor: pointer; }
 .swatch-warn .tip-bubble { white-space: normal; }
 
 /* ─────────────────────────────────────────── */
+/* PM DROPDOWN ON DOC COVER                    */
+/* ─────────────────────────────────────────── */
+.doc-cover-pm {
+  margin-top: 14px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: var(--text-mono-meta);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lm-quiet);
+}
+.doc-cover-pm .lbl { font-weight: 500; }
+.pm-select {
+  font-family: var(--mono);
+  font-size: var(--text-mono-tag);
+  letter-spacing: 0.05em;
+  background: transparent;
+  border: 1px solid var(--hair);
+  border-radius: 3px;
+  padding: 5px 26px 5px 10px;
+  color: var(--lm-ink);
+  cursor: pointer;
+  text-transform: uppercase;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path fill='%23999' d='M2.5 4.5l3.5 3.5 3.5-3.5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+.pm-select:focus { outline: none; border-color: var(--lm-teal); }
+.pm-readonly {
+  font-family: var(--mono);
+  font-size: var(--text-mono-tag);
+  letter-spacing: 0.05em;
+  color: var(--lm-ink);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* ─────────────────────────────────────────── */
+/* RESTYLED LOGO BG CHIP (mini circle + hex label)  */
+/* ─────────────────────────────────────────── */
+.logo-meta .logo-bg-chip {
+  /* Override the older 14px square; mirrors .ann-tint-chip pattern. */
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,0.18);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: transform 0.1s;
+}
+.logo-meta .logo-bg-chip:hover { transform: scale(1.1); }
+.logo-bg-hex {
+  font-family: var(--mono);
+  font-size: var(--text-mono-tag);
+  letter-spacing: 0.05em;
+  color: var(--lm-ink);
+  text-transform: uppercase;
+}
+.logo-bg-copywrap {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 2px;
+}
+
+/* ─────────────────────────────────────────── */
+/* GOOGLE FONTS BROWSE LINK (Section 05)       */
+/* ─────────────────────────────────────────── */
+.font-browse-link {
+  font-family: var(--mono);
+  font-size: var(--text-mono-tag);
+  letter-spacing: 0.05em;
+  color: var(--lm-quiet);
+  text-decoration: none;
+  border: 1px solid var(--hair);
+  border-radius: 3px;
+  padding: 6px 12px;
+  transition: color 0.15s, border-color 0.15s;
+  text-transform: uppercase;
+}
+.font-browse-link:hover { color: var(--lm-teal); border-color: var(--lm-teal); }
+
+/* ─────────────────────────────────────────── */
+/* SEND FEEDBACK SECTION (Section 08, mailto)  */
+/* ─────────────────────────────────────────── */
+.feedback-block {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.feedback-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: var(--lm-teal-deep);
+  color: #fff;
+  padding: 16px 28px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-family: var(--poppins);
+  transition: background 0.18s ease;
+  align-self: flex-start;
+  max-width: 100%;
+}
+.feedback-btn:hover { background: #004142; color: #fff; }
+.feedback-btn[hidden] { display: none; }
+.feedback-btn-label {
+  font-size: var(--text-button);
+  font-weight: 700;
+  line-height: 1.2;
+}
+.feedback-btn-pm {
+  font-family: var(--mono);
+  font-size: var(--text-mono-tag);
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+  text-transform: uppercase;
+  opacity: 0.88;
+}
+.feedback-empty {
+  font-family: var(--poppins);
+  font-size: var(--text-body);
+  color: var(--lm-mute);
+  background: rgba(0,0,0,0.025);
+  border-left: 3px solid var(--lm-quiet);
+  padding: 16px 20px;
+  border-radius: 0 4px 4px 0;
+  max-width: 640px;
+  line-height: 1.55;
+}
+.feedback-empty[hidden] { display: none; }
+
+/* ─────────────────────────────────────────── */
+/* RULE 5 OVERRIDE CONTROLS                    */
+/* ─────────────────────────────────────────── */
+.rule-override-row {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: var(--text-mono-tag);
+  letter-spacing: 0.04em;
+  color: var(--lm-quiet);
+}
+.rule-override-btn {
+  background: transparent;
+  border: 1px solid var(--hair);
+  border-radius: 3px;
+  padding: 5px 10px;
+  font-family: var(--mono);
+  font-size: var(--text-mono-tag);
+  letter-spacing: 0.05em;
+  color: var(--lm-quiet);
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: color 0.15s, border-color 0.15s;
+}
+.rule-override-btn:hover { color: var(--lm-teal); border-color: var(--lm-teal); }
+.rule-override-btn.is-active {
+  color: var(--warn);
+  border-color: var(--warn);
+}
+.rule-override-btn.is-active:hover { color: #fff; background: var(--warn); border-color: var(--warn); }
+
+/* When Rule 5 is overridden, the row in the panel reads as "skipped by PM"
+   instead of failing. The dot gets a muted treatment to communicate that
+   it's no longer being enforced. */
+.rule-row.is-overridden .rule-dot { background: var(--lm-quiet); color: #fff; }
+.rule-row.is-overridden .rule-status { color: var(--lm-quiet); }
+.rule-row.is-overridden .rule-detail::after {
+  content: 'Overridden by PM – hidden in client share links.';
+  display: block;
+  margin-top: 6px;
+  color: var(--warn);
+  font-family: var(--mono);
+  font-size: var(--text-mono-tag);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ─────────────────────────────────────────── */
 /* READ-ONLY MODE                             */
 /* ─────────────────────────────────────────── */
 body.ro .toolbar > * { display: none; }
@@ -1692,9 +1896,19 @@ body.ro .ann-mode-wrap,
 body.ro .rules-float,
 body.ro .rev-block { display: none !important; }
 body.ro .ann-controls { justify-content: flex-end; }
-body.ro .logo-bg-input,
-body.ro .logo-bg-chip { display: none; }
+body.ro .logo-bg-chip,
+body.ro .logo-bg-copywrap { display: none; }
 body.ro .logo-meta .lbl { display: none; }
+body.ro .pm-select { display: none; }
+body.ro .pm-readonly { display: inline; }
+body:not(.ro) .pm-readonly { display: none; }
+/* Hide entire feedback section if no PM selected in client view (set by JS) */
+body.ro .sec-feedback.no-pm { display: none; }
+body.ro .sec-feedback .feedback-empty { display: none !important; }
+/* Rule 5 row is hidden entirely in client view when PM has overridden it */
+body.ro .rule-row.is-overridden { display: none !important; }
+/* Override toggle is staff-only - never expose it to clients via share URL */
+body.ro .rule-override-row { display: none !important; }
 body.ro .rev-block.has-content {
   display: block !important;
 }
@@ -1896,6 +2110,8 @@ body.ro .ann-card { cursor: default !important; }
 
   <div class="tb-spacer"></div>
 
+  <button class="tb-btn" onclick="openPaletteUrl()" title="Open palette editor in a new tab">Palette &#8599;</button>
+
   <input type="file" id="loadJsonInput" accept=".json" style="display:none" onchange="handleLoadJson(event)">
   <button class="tb-btn" onclick="document.getElementById('loadJsonInput').click()">Open</button>
 
@@ -1914,6 +2130,13 @@ body.ro .ann-card { cursor: default !important; }
         <div>
           <div class="lbl">Share read only (client)</div>
           <div class="hint">Locked URL for client review</div>
+        </div>
+      </button>
+      <button role="menuitem" onclick="exportDeveloperMD()">
+        <span class="ico">⤓</span>
+        <div>
+          <div class="lbl">Developer Spec (MD)</div>
+          <div class="hint">Markdown summary for theme-build tickets</div>
         </div>
       </button>
       <button role="menuitem" onclick="exportSave()">
@@ -1945,9 +2168,22 @@ body.ro .ann-card { cursor: default !important; }
     <!-- Cover -->
     <div class="doc-cover">
       <div>
-        <div class="doc-cover-meta" id="coverMeta">COLOR TEST · ROUND 01 · APR 2026</div>
+        <div class="doc-cover-meta" id="coverMeta">COLOR TEST · APR 2026</div>
         <div class="doc-cover-title">
           <input class="editable" id="coverTitle" placeholder="Client Name" oninput="updateClient(this.value)">
+        </div>
+        <div class="doc-cover-pm" id="coverPmRow">
+          <span class="lbl">Project Manager</span>
+          <select class="pm-select no-print" id="pmSelect" onchange="onPMChange(this.value)" aria-label="Project Manager">
+            <option value="">(Select PM)</option>
+            <option value="valerie">Valerie</option>
+            <option value="lauren">Lauren</option>
+            <option value="lindsay">Lindsay</option>
+            <option value="dustin">Dustin</option>
+            <option value="steven">Steven</option>
+            <option value="support">Support</option>
+          </select>
+          <span class="pm-readonly" id="pmReadonly" hidden></span>
         </div>
         <div class="doc-cover-intro">
           Accessibility review of your selected color palette, typography, and interactive elements against WCAG 2.1 AA standards. Prepared by Library Market for client approval.
@@ -1961,7 +2197,7 @@ body.ro .ann-card { cursor: default !important; }
         <div class="sec-num">01</div>
         <div class="sec-titlewrap">
           <div class="sec-title">Logo Lockup</div>
-          <div class="sec-intro">Confirm the approved wordmark treatment. Default background is white (most library headers); change the hex below if the logo will sit on a colored header.</div>
+          <div class="sec-intro">Confirm the approved wordmark treatment. Default background is white (most library headers); click the color chip below to change it if the logo will sit on a colored header.</div>
         </div>
         <div class="sec-controls no-print">
           <label class="logo-uploadlabel" for="logoInput">Upload SVG</label>
@@ -1976,37 +2212,19 @@ body.ro .ann-card { cursor: default !important; }
           </div>
           <div class="logo-meta">
             <span class="lbl">Background</span>
-            <span class="logo-bg-chip" id="logoBgChip" style="background:#FFFFFF"></span>
-            <input class="logo-bg-input" id="logoBgInput" value="#FFFFFF" maxlength="7" oninput="onLogoBgChange(this.value)" aria-label="Logo background hex">
+            <button type="button" class="logo-bg-chip" id="logoBgChip" style="background:#FFFFFF"
+                    onclick="openPicker('logoBg', 'logo')" title="Click to edit" aria-label="Edit logo background color"></button>
+            <span class="logo-bg-hex" id="logoBgHex">#FFFFFF</span>
+            <span class="logo-bg-copywrap no-print" id="logoBgCopy"></span>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- SECTION 02 - PALETTE URL -->
+    <!-- SECTION 02 - COLOR PALETTE -->
     <section class="sec">
       <div class="sec-header">
         <div class="sec-num">02</div>
-        <div class="sec-titlewrap">
-          <div class="sec-title">Palette URL</div>
-          <div class="sec-intro">Open this link to make visual edits to the palette. The URL auto-updates whenever you change a color below.</div>
-        </div>
-        <div class="sec-controls no-print">
-          <button class="mini-btn" onclick="copyPaletteUrl()">Copy</button>
-          <button class="mini-btn" onclick="openPaletteUrl()">Open</button>
-        </div>
-      </div>
-      <div class="sec-body">
-        <div class="url-block">
-          <a id="paletteUrl" class="url" href="#" target="_blank" rel="noopener"></a>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION 03 - COLOR PALETTE -->
-    <section class="sec">
-      <div class="sec-header">
-        <div class="sec-num">03</div>
         <div class="sec-titlewrap">
           <div class="sec-title">Color Palette</div>
           <div class="sec-intro" id="paletteIntro">Brand and calendar taxonomy colors. Contrast ratios shown beneath each swatch are measured against #EFEFEF (calendar background).</div>
@@ -2033,10 +2251,10 @@ body.ro .ann-card { cursor: default !important; }
       </div>
     </section>
 
-    <!-- SECTION 04 - STATUS COLORS -->
+    <!-- SECTION 03 - STATUS COLORS -->
     <section class="sec">
       <div class="sec-header">
-        <div class="sec-num">04</div>
+        <div class="sec-num">03</div>
         <div class="sec-titlewrap">
           <div class="sec-title">Status Colors</div>
           <div class="sec-intro">Calibrated success, danger, warning, and info indicators. Body text auto-flips to #1A1A1A or #FFFFFF based on background luminance, so each color is guaranteed readable without manual contrast tuning.</div>
@@ -2047,10 +2265,10 @@ body.ro .ann-card { cursor: default !important; }
       </div>
     </section>
 
-    <!-- SECTION 05 - ANNOUNCEMENT COLORS -->
+    <!-- SECTION 04 - ANNOUNCEMENT COLORS -->
     <section class="sec">
       <div class="sec-header">
-        <div class="sec-num">05</div>
+        <div class="sec-num">04</div>
         <div class="sec-titlewrap">
           <div class="sec-title">Announcement Colors</div>
           <div class="sec-intro">Preview of leveled announcements. Each row can be set to <strong>Tinted</strong> (status hex at 20% opacity, dark body, primary link) or <strong>Full</strong> (status hex at 100%, body auto-flips to dark or white based on background luminance). On a light Full background the link tries Primary first and auto-flips to dark when Primary fails WCAG AA against that background. Add as many as the client uses.</div>
@@ -2064,10 +2282,10 @@ body.ro .ann-card { cursor: default !important; }
       </div>
     </section>
 
-    <!-- SECTION 06 - TYPOGRAPHY -->
+    <!-- SECTION 05 - TYPOGRAPHY -->
     <section class="sec">
       <div class="sec-header">
-        <div class="sec-num">06</div>
+        <div class="sec-num">05</div>
         <div class="sec-titlewrap">
           <div class="sec-title">Typography</div>
           <div class="sec-intro" id="typographyIntro">Secondary font drives all headings (H1-H6) by default; primary font is locked for body and small text. Use the dropdown on any heading row to override that row to primary. Base size is 18px; the heading scale steps up by 1.25x, 1.5x, 1.75x, 2x, and 2.5x.</div>
@@ -2084,15 +2302,16 @@ body.ro .ann-card { cursor: default !important; }
             <input id="secondaryFontInput" value="Lato" placeholder="Lato">
           </div>
           <button class="mini-btn" onclick="applyFonts()">Apply Fonts</button>
+          <a class="font-browse-link no-print" href="https://fonts.google.com" target="_blank" rel="noopener" title="Browse Google Fonts in a new tab">Browse Google Fonts &#8599;</a>
         </div>
         <div class="type-block" id="typeBlock"></div>
       </div>
     </section>
 
-    <!-- SECTION 07 - BUTTON STATES -->
+    <!-- SECTION 06 - BUTTON STATES -->
     <section class="sec">
       <div class="sec-header">
-        <div class="sec-num">07</div>
+        <div class="sec-num">06</div>
         <div class="sec-titlewrap">
           <div class="sec-title">Button States</div>
           <div class="sec-intro">Buttons displayed on the calendar background (#EFEFEF) to show real in-context contrast at base and hover.</div>
@@ -2103,10 +2322,10 @@ body.ro .ann-card { cursor: default !important; }
       </div>
     </section>
 
-    <!-- SECTION 08 - TEST RESULTS -->
+    <!-- SECTION 07 - TEST RESULTS -->
     <section class="sec">
       <div class="sec-header">
-        <div class="sec-num">08</div>
+        <div class="sec-num">07</div>
         <div class="sec-titlewrap">
           <div class="sec-title">Accessibility Test Results</div>
           <div class="sec-intro">The five Library Market color rules evaluated against the current palette, plus a full contrast matrix for staff documentation.</div>
@@ -2120,13 +2339,35 @@ body.ro .ann-card { cursor: default !important; }
       </div>
     </section>
 
+    <!-- SECTION 08 - SEND FEEDBACK (client mailto path) -->
+    <section class="sec sec-feedback" id="feedbackSection">
+      <div class="sec-header">
+        <div class="sec-num">08</div>
+        <div class="sec-titlewrap">
+          <div class="sec-title">Send Feedback</div>
+          <div class="sec-intro">When you have reviewed the colors, typography, and contrast above, send your decision back to your project manager. Approve as-is or request revisions; the email opens in your default mail program with the share link already attached.</div>
+        </div>
+      </div>
+      <div class="sec-body">
+        <div class="feedback-block" id="feedbackBlock">
+          <a id="feedbackMailto" class="feedback-btn" href="#" rel="noopener" target="_blank">
+            <span class="feedback-btn-label">Send Feedback to Project Manager</span>
+            <span class="feedback-btn-pm" id="feedbackBtnPm"></span>
+          </a>
+          <div class="feedback-empty" id="feedbackEmpty" hidden>
+            No project manager has been selected for this color test yet. Once a PM is set on the cover, this button will compose an email back to them.
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- REVISION NOTES -->
     <section class="sec no-print">
       <div class="sec-header">
         <div class="sec-num">↺</div>
         <div class="sec-titlewrap">
           <div class="sec-title">Revision Notes</div>
-          <div class="sec-intro">Internal notes for this round (not shared with client). Does not appear in printed output.</div>
+          <div class="sec-intro">Internal notes for this round. Visible to staff only; never appears in client-facing share links.</div>
         </div>
       </div>
       <div class="sec-body">
@@ -2139,7 +2380,7 @@ body.ro .ann-card { cursor: default !important; }
     <!-- FOOTER -->
     <div class="doc-footer">
       <span class="sig">Prepared by <span class="tl">Library</span><span class="or">Market</span></span>
-      <span id="footerMeta">v1 · April 30, 2026 · ROUND 01</span>
+      <span id="footerMeta">v1 · April 30, 2026</span>
     </div>
   </div>
 </div>
@@ -2195,15 +2436,13 @@ const S = {
   logoSmallPng: null,    // small PNG data URL for share URL
   notes: '',
   readOnly: false,
+  pm: '',                // Project Manager (one of the LM PM names, or empty)
+  rule5Override: false,  // PM-only override: suppresses Rule 5 from per-chip badges and from client-facing test results
   colors: [
-    { id:'primary',   label:'Primary',          hex:'#D53175', role:'primary',          group:'brand', removable:false },
-    { id:'p-hover',   label:'Primary Hover',    hex:'#4E0D32', role:'primary-hover',    group:'brand', removable:false },
-    { id:'secondary', label:'Secondary',        hex:'#813B96', role:'secondary',        group:'brand', removable:false },
-    { id:'s-hover',   label:'Secondary Hover',  hex:'#3F194F', role:'secondary-hover',  group:'brand', removable:false },
-    { id:'age-1',     label:'Age Group 1',      hex:'#CDB540', role:'age',              group:'age',   removable:true  },
-    { id:'age-2',     label:'Age Group 2',      hex:'#CF4750', role:'age',              group:'age',   removable:true  },
-    { id:'age-3',     label:'Age Group 3',      hex:'#848080', role:'age',              group:'age',   removable:true  },
-    { id:'age-4',     label:'Age Group 4',      hex:'#D0631A', role:'age',              group:'age',   removable:true  },
+    { id:'primary',   label:'Primary',          hex:'#3A3A3A', role:'primary',          group:'brand', removable:false },
+    { id:'p-hover',   label:'Primary Hover',    hex:'#1F1F1F', role:'primary-hover',    group:'brand', removable:false },
+    { id:'secondary', label:'Secondary',        hex:'#5A5A5A', role:'secondary',        group:'brand', removable:false },
+    { id:'s-hover',   label:'Secondary Hover',  hex:'#3A3A3A', role:'secondary-hover',  group:'brand', removable:false },
   ],
   status: {
     Success: '#63A05A',
@@ -2428,32 +2667,28 @@ function removeLogo() {
   const inp = document.getElementById('logoInput');
   if (inp) inp.value = '';
 }
+// onLogoBgChange is retained as a no-op shim. As of v2.10 the logo bg is
+// edited through the Vesper picker (clicking the mini chip), not through a
+// hex input field. Any legacy code path that still calls this stays safe.
 function onLogoBgChange(val) {
-  const inp = document.getElementById('logoBgInput');
   let h = String(val || '').trim();
   if (!h.startsWith('#')) h = '#' + h;
-  // Expand 3-char shorthand (#fff → #ffffff)
   if (h.length === 4) h = '#' + h[1]+h[1]+h[2]+h[2]+h[3]+h[3];
   if (isValidHex(h)) {
-    h = h.toUpperCase();
-    S.logoBg = h;
-    const canvas = document.getElementById('logoCanvas');
-    const chip = document.getElementById('logoBgChip');
-    if (canvas) canvas.style.background = h;
-    if (chip) chip.style.background = h;
-    if (inp) inp.classList.remove('invalid');
-  } else {
-    if (inp) inp.classList.add('invalid');
+    S.logoBg = h.toUpperCase();
+    applyLogoBg();
   }
 }
 function applyLogoBg() {
-  // Apply current S.logoBg to UI (used after restore)
+  // Apply current S.logoBg to UI (canvas + mini chip + hex label + copy button).
   const canvas = document.getElementById('logoCanvas');
   const chip = document.getElementById('logoBgChip');
-  const inp = document.getElementById('logoBgInput');
+  const hexEl = document.getElementById('logoBgHex');
+  const copyWrap = document.getElementById('logoBgCopy');
   if (canvas) canvas.style.background = S.logoBg;
   if (chip) chip.style.background = S.logoBg;
-  if (inp) inp.value = S.logoBg;
+  if (hexEl) hexEl.textContent = S.logoBg;
+  if (copyWrap) copyWrap.innerHTML = copyHexButton(S.logoBg);
 }
 
 // ─── PALETTE URL (auto-generated Vesper Colors) ────────────────────────────
@@ -2462,8 +2697,12 @@ function buildPaletteUrl() {
   return `https://vesperapps.com/colors/view/${hexes}`;
 }
 function renderPaletteUrl() {
-  const url = buildPaletteUrl();
+  // Section 02 (palette URL display) was removed in v2.10. The toolbar
+  // Palette button calls openPaletteUrl() directly via buildPaletteUrl().
+  // This function is retained as a no-op for any legacy call sites.
   const a = document.getElementById('paletteUrl');
+  if (!a) return;
+  const url = buildPaletteUrl();
   a.textContent = url;
   a.href = url;
 }
@@ -2712,8 +2951,8 @@ function renderMeta() {
   const month = new Date().toLocaleDateString('en-US', { month:'short' }).toUpperCase();
   const year = new Date().getFullYear();
   document.getElementById('versionBadge').textContent = 'v' + S.version;
-  document.getElementById('coverMeta').textContent = `COLOR TEST · ROUND ${round} · ${month} ${year}`;
-  document.getElementById('footerMeta').textContent = `v${S.version} · ${S.date} · ROUND ${round}`;
+  document.getElementById('coverMeta').textContent = `COLOR TEST · ${month} ${year}`;
+  document.getElementById('footerMeta').textContent = `v${S.version} · ${S.date}`;
 }
 
 // ─── RENDER: SWATCHES ─────────────────────────────────────────────────────
@@ -2823,7 +3062,10 @@ function chipRuleFailures(c) {
       });
     }
     // Rule 5: taxonomy pair fails colorblindness distinguishability.
-    const cbFails = taxonomyCBFailures(c);
+    // PM override (set in editor) suppresses Rule 5 from per-chip badges
+    // so the client view never lights up a `!` for a rule the PM has
+    // already accepted as "good enough."
+    const cbFails = S.rule5Override ? [] : taxonomyCBFailures(c);
     if (cbFails.length === 1) {
       const f = cbFails[0];
       fails.push({
@@ -3182,7 +3424,7 @@ function evaluateRules() {
         }
       }
     }
-    rules.push({
+    const r5 = {
       id: 5,
       title: 'Taxonomy colors distinguishable under colorblindness',
       detail: `Each pair of taxonomy colors must keep ≥ ${CB_DISTINGUISH_THRESHOLD}:1 contrast under deuteranopia, protanopia, tritanopia, and achromatopsia simulation. Tests every pair (${pairCount} for ${ageColors.length} colors).`,
@@ -3193,7 +3435,17 @@ function evaluateRules() {
           }))
         : [{ label: `All ${pairCount} pairs distinguishable in every CB mode`, pass: true }],
       pass: failingPairs.length === 0,
-    });
+    };
+    // PM override: rule 5 is so subjective in the corner cases that we
+    // give the PM a way to accept it without bothering the client with
+    // a warning. We mark `pass: null` so it drops out of the failing
+    // count and the float-panel listing, plus an `overridden` flag the
+    // renderer uses to relabel and (in client view) hide the row.
+    if (S.rule5Override) {
+      r5.pass = null;
+      r5.overridden = true;
+    }
+    rules.push(r5);
   }
 
   return rules;
@@ -3202,22 +3454,46 @@ function evaluateRules() {
 function renderRules() {
   const rules = evaluateRules();
   const html = rules.map(rule => {
+    const overridden = rule.overridden === true;
     const cls = rule.pass === null ? 'skip' : (rule.pass ? 'pass' : 'fail');
-    const label = rule.pass === null ? '-' : (rule.pass ? 'PASS' : 'FAIL');
-    const icon = rule.pass === null ? '–' : (rule.pass ? '✓' : '×');
-    const partsHTML = rule.parts.length
+    let label = rule.pass === null ? '-' : (rule.pass ? 'PASS' : 'FAIL');
+    let icon = rule.pass === null ? '–' : (rule.pass ? '✓' : '×');
+    if (overridden) {
+      label = 'OVERRIDE';
+      icon = '·';
+    }
+    const partsHTML = rule.parts.length && !overridden
       ? `<div class="rule-parts">${rule.parts.map(p => `
             <span class="part ${p.pass === false ? 'fail' : (p.pass === true ? 'pass' : '')}">
               · ${p.label}${p.ratio !== undefined ? ` (${p.ratio.toFixed(2)}:1)` : ''}
             </span>`).join('')}</div>`
       : '';
+    // Rule 5 specifically gets an editor-only override toggle. Shown when
+    // the rule is currently failing OR currently overridden, so the PM can
+    // turn the override on (when failing) or off (to re-enforce). Hidden in
+    // .ro client view via the no-print class is wrong here - we want it
+    // visible to staff but not to clients, so guard with body:not(.ro) in CSS.
+    let overrideBtnHTML = '';
+    if (rule.id === 5 && (rule.pass === false || overridden)) {
+      const btnLabel = overridden ? 'Undo override' : 'Override Rule 5 (PM)';
+      const btnCls = overridden ? 'rule-override-btn is-active' : 'rule-override-btn';
+      const note = overridden
+        ? 'Rule 5 is currently overridden. Client share links will not show this rule.'
+        : 'If this rule is failing in an edge case the PM has reviewed and accepted, you can override it. Client share links will hide the rule.';
+      overrideBtnHTML = `
+        <div class="rule-override-row no-print" data-pm-only>
+          <button class="${btnCls}" type="button" onclick="toggleRule5Override()">${btnLabel}</button>
+          <span class="hint">${escapeHtml(note)}</span>
+        </div>`;
+    }
     return `
-      <div class="rule-row">
+      <div class="rule-row${overridden ? ' is-overridden' : ''}">
         <div class="rule-dot ${cls}">${icon}</div>
         <div>
           <div class="rule-title">Rule ${rule.id} · ${rule.title}</div>
           <div class="rule-detail">${rule.detail}</div>
           ${partsHTML}
+          ${overrideBtnHTML}
         </div>
         <div class="rule-status ${cls}">${label}</div>
       </div>
@@ -3225,6 +3501,14 @@ function renderRules() {
   }).join('');
   document.getElementById('rulesPanel').innerHTML = html;
   return rules;
+}
+
+// Rule 5 PM override toggle. State serializes via captureState() so JSON
+// saves and share URLs both round-trip the override. Re-renders everything
+// so per-chip badges update and the float panel recounts.
+function toggleRule5Override() {
+  S.rule5Override = !S.rule5Override;
+  renderAll();
 }
 function renderValidation(rules) {
   if (!rules) rules = evaluateRules();
@@ -3278,7 +3562,7 @@ function toggleRulesFloat() {
     else panel.setAttribute('hidden', '');
   }
 }
-// Smooth-scroll to the full rules panel in Section 08 and collapse the
+// Smooth-scroll to the full rules panel in Section 07 and collapse the
 // floating widget so it doesn't cover the destination.
 function jumpToRulesPanel() {
   const target = document.getElementById('rulesPanel');
@@ -3564,6 +3848,11 @@ function openPicker(kind, id) {
       currentHex = ann.customHex || S.status[ann.tint] || '#888888';
       title = 'Custom Announcement Color';
     }
+  } else if (kind === 'logoBg') {
+    // Logo preview background. Mirrors the announcement custom-hex pattern
+    // so the picker UX is identical across every chip in the document.
+    currentHex = S.logoBg || '#FFFFFF';
+    title = 'Logo Background';
   }
   const { r, g, b } = hexToRgb(currentHex);
   const hsv = rgbToHsv(r, g, b);
@@ -3598,6 +3887,11 @@ function confirmPicker() {
       ann.tint = 'Custom';
       ann.customHex = hex;
     }
+  } else if (PK.target.kind === 'logoBg') {
+    // Logo preview background. Update state and reflect to the canvas + chip
+    // immediately via applyLogoBg() before the broader renderAll() pass.
+    S.logoBg = hex;
+    applyLogoBg();
   }
   closePicker();
   renderAll();
@@ -3736,6 +4030,8 @@ function captureState() {
     logoData: S.logoData,
     logoMime: S.logoMime,
     logoBg: S.logoBg,
+    pm: S.pm,
+    rule5Override: S.rule5Override,
   };
 }
 function restoreState(obj) {
@@ -3774,6 +4070,8 @@ function restoreState(obj) {
   if (obj.notes !== undefined) S.notes = obj.notes;
   if (obj.logoData) { S.logoData = obj.logoData; S.logoMime = obj.logoMime; }
   if (obj.logoBg) S.logoBg = obj.logoBg;
+  if (typeof obj.pm === 'string') S.pm = obj.pm;
+  S.rule5Override = obj.rule5Override === true;
   // Refresh UI inputs
   const cn = document.getElementById('clientName');
   const ct = document.getElementById('coverTitle');
@@ -3962,8 +4260,273 @@ function renderAll() {
   const rules = renderRules();
   renderValidation(rules);
   renderMatrix();
-  renderPaletteUrl();
+  renderPMDisplay();
+  // Feedback section is async (it builds a share URL for the mailto body).
+  // Fire-and-forget; renderAll() callers do not need to wait on it.
+  renderFeedback();
 }
+
+// ─── PROJECT MANAGER + FEEDBACK SECTION ────────────────────────────
+// PM dropdown lives on the doc cover. Selecting a PM enables the mailto
+// button at the bottom of the document so the client can email feedback
+// directly back to the right person at LM. State is serialized to JSON
+// + share URL so a re-loaded test always knows who to send back to.
+const PM_DIRECTORY = {
+  valerie: 'Valerie',
+  lauren:  'Lauren',
+  lindsay: 'Lindsay',
+  dustin:  'Dustin',
+  steven:  'Steven',
+  support: 'Support',
+};
+function pmDisplayName(key) { return PM_DIRECTORY[key] || ''; }
+function pmEmail(key) { return key ? key + '@librarymarket.com' : ''; }
+
+function onPMChange(val) {
+  S.pm = (val || '').trim();
+  renderPMDisplay();
+  renderFeedback();
+}
+
+function renderPMDisplay() {
+  const sel = document.getElementById('pmSelect');
+  const ro  = document.getElementById('pmReadonly');
+  if (sel) sel.value = S.pm || '';
+  if (ro) {
+    const name = pmDisplayName(S.pm);
+    if (name) {
+      ro.textContent = name;
+      ro.hidden = false;
+    } else {
+      ro.textContent = '';
+      ro.hidden = true;
+    }
+  }
+}
+
+// Build the share URL once + memoize it for the mailto body. We rebuild
+// any time the document state actually changes by reading the captured
+// state hash; reusing a stale URL would mean the email points at an old
+// version of the test.
+let _feedbackUrlCache = { stateHash: null, url: null };
+function _stateHashShallow() {
+  // Quick non-cryptographic fingerprint of the bits the share URL
+  // actually encodes. Stringify the captureState shape; share URL build
+  // is cheap relative to a full render but we still skip when nothing
+  // shareable changed.
+  try { return JSON.stringify(captureState()); } catch (e) { return String(Date.now()); }
+}
+
+async function buildFeedbackMailto() {
+  if (!S.pm) return null;
+  const client = (S.clientName || 'Untitled Client').trim();
+  const subject = `Color Test Feedback: ${client} (v${S.version})`;
+  const hash = _stateHashShallow();
+  let shareUrl = '(share link unavailable)';
+  if (_feedbackUrlCache.stateHash === hash && _feedbackUrlCache.url) {
+    shareUrl = _feedbackUrlCache.url;
+  } else {
+    try {
+      const result = await buildShareUrl(true); // read-only client URL
+      if (result && result.url) {
+        shareUrl = result.url;
+        _feedbackUrlCache = { stateHash: hash, url: result.url };
+      }
+    } catch (e) {}
+  }
+  const bodyLines = [
+    `Color test review for ${client} (v${S.version}).`,
+    '',
+    `Reviewed at: ${shareUrl}`,
+    '',
+    '---',
+    '',
+    'Approved as-is.',
+    '',
+    'Requesting revisions:',
+    '',
+    '',
+  ];
+  return `mailto:${pmEmail(S.pm)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
+}
+
+async function renderFeedback() {
+  const sec   = document.getElementById('feedbackSection');
+  const link  = document.getElementById('feedbackMailto');
+  const empty = document.getElementById('feedbackEmpty');
+  const pmLbl = document.getElementById('feedbackBtnPm');
+  if (!sec) return;
+  // Toggle a marker class so body.ro CSS can hide the entire section in
+  // client view when no PM has been chosen (an empty CTA is worse than no CTA).
+  sec.classList.toggle('no-pm', !S.pm);
+  if (!S.pm) {
+    if (link)  link.hidden = true;
+    if (empty) empty.hidden = false;
+    return;
+  }
+  if (empty) empty.hidden = true;
+  if (link) link.hidden = false;
+  if (pmLbl) pmLbl.textContent = `to ${pmDisplayName(S.pm)} at Library Market`;
+  const mailto = await buildFeedbackMailto();
+  if (link && mailto) link.href = mailto;
+}
+
+// ─── DEVELOPER MD EXPORT ──────────────────────────────────────
+// Markdown summary intended to attach to a Jira theme-build ticket so
+// devs don't have to crawl the client-ready color test and pick out
+// hex codes. Skips WCAG rules + reference constants per scope.
+function exportDeveloperMD() {
+  document.getElementById('exportMenu').classList.remove('open');
+  const lines = [];
+  const client = (S.clientName || 'Untitled Client').trim();
+  const today = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  lines.push(`# Color Spec - ${client}`);
+  lines.push('');
+  lines.push(`**Version:** v${S.version}`);
+  lines.push(`**Exported:** ${today}`);
+  if (S.pm) {
+    lines.push(`**Project Manager:** ${pmDisplayName(S.pm)} (${pmEmail(S.pm)})`);
+  } else {
+    lines.push(`**Project Manager:** (not set)`);
+  }
+  lines.push('');
+  // Brand colors (Primary, Primary Hover, Secondary, Secondary Hover) with
+  // contrast vs the calendar background.
+  lines.push('## Brand Colors');
+  lines.push('');
+  lines.push('| Role | Hex | Contrast vs #EFEFEF |');
+  lines.push('|------|-----|---------------------|');
+  const roles = [
+    ['Primary',         'primary'],
+    ['Primary Hover',   'primary-hover'],
+    ['Secondary',       'secondary'],
+    ['Secondary Hover', 'secondary-hover'],
+  ];
+  roles.forEach(([label, role]) => {
+    if ((role === 'secondary' || role === 'secondary-hover') && !S.hasSecondary) return;
+    const c = S.colors.find(x => x.role === role);
+    if (!c) return;
+    const r = contrast(c.hex, '#EFEFEF');
+    const rate = ratingBadge(r).label;
+    lines.push(`| ${label} | \`${c.hex}\` | ${r.toFixed(2)}:1 (${rate}) |`);
+  });
+  lines.push('');
+  // Status colors
+  lines.push('## Status Colors');
+  lines.push('');
+  lines.push('| Role | Hex |');
+  lines.push('|------|-----|');
+  ['Success', 'Danger', 'Warning', 'Info'].forEach(name => {
+    lines.push(`| ${name} | \`${S.status[name] || ''}\` |`);
+  });
+  lines.push('');
+  // Calendar Taxonomy
+  lines.push('## Calendar Taxonomy');
+  lines.push('');
+  const taxonomy = S.colors.filter(c => c.group === 'age');
+  if (taxonomy.length === 0) {
+    lines.push('_No taxonomy colors defined._');
+  } else {
+    lines.push('| Label | Hex |');
+    lines.push('|-------|-----|');
+    taxonomy.forEach(c => {
+      lines.push(`| ${c.label} | \`${c.hex}\` |`);
+    });
+  }
+  lines.push('');
+  // Logo background
+  lines.push('## Logo Background');
+  lines.push('');
+  lines.push(`Hex: \`${S.logoBg || '#FFFFFF'}\``);
+  lines.push('');
+  // Typography
+  lines.push('## Typography');
+  lines.push('');
+  lines.push(`**Primary font:** ${S.primaryFont}`);
+  lines.push(`**Secondary font:** ${S.secondaryFont}`);
+  lines.push('');
+  lines.push('| Role | Font | Size | Weight | Case |');
+  lines.push('|------|------|------|--------|------|');
+  S.typeRows.forEach(row => {
+    const fontName = row.font === 'secondary' ? S.secondaryFont : S.primaryFont;
+    const caseLabel = row.case === 'upper' ? 'UPPERCASE'
+                    : row.case === 'lower' ? 'lowercase'
+                    : 'Title Case';
+    const sizeLabel = (Math.round(row.size * 10) / 10) + 'px';
+    lines.push(`| ${row.tag} | ${fontName} | ${sizeLabel} | ${row.weight} | ${caseLabel} |`);
+  });
+  lines.push('');
+  // Buttons (base + hover, contrast delta)
+  lines.push('## Buttons');
+  lines.push('');
+  const primary = S.colors.find(x => x.role === 'primary');
+  const primaryHover = S.colors.find(x => x.role === 'primary-hover');
+  if (primary && primaryHover) {
+    const delta = contrast(primary.hex, primaryHover.hex);
+    lines.push(`**Primary button:** base \`${primary.hex}\` → hover \`${primaryHover.hex}\` (${delta.toFixed(2)}:1 delta)`);
+  }
+  if (S.hasSecondary) {
+    const sec = S.colors.find(x => x.role === 'secondary');
+    const secHover = S.colors.find(x => x.role === 'secondary-hover');
+    if (sec && secHover) {
+      const delta = contrast(sec.hex, secHover.hex);
+      lines.push(`**Secondary button:** base \`${sec.hex}\` → hover \`${secHover.hex}\` (${delta.toFixed(2)}:1 delta)`);
+    }
+  }
+  lines.push('');
+  // Announcements
+  lines.push('## Announcements');
+  lines.push('');
+  if (S.announcements.length === 0) {
+    lines.push('_No announcements defined._');
+  } else {
+    lines.push('| # | Tint | Mode | Body |');
+    lines.push('|---|------|------|------|');
+    S.announcements.forEach((a, i) => {
+      const tintLabel = a.tint === 'Custom' ? `Custom \`${(a.customHex || '').toUpperCase()}\`` : a.tint;
+      const modeLabel = a.mode === 'full' ? 'Full' : 'Tinted';
+      const bodyClean = (a.body || '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
+      lines.push(`| ${i + 1} | ${tintLabel} | ${modeLabel} | ${bodyClean} |`);
+    });
+  }
+  lines.push('');
+  const md = lines.join('\n');
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const safeName = client.replace(/[^A-Za-z0-9]+/g, '');
+  a.download = `LM-ColorSpec-${safeName}-v${S.version}.md`;
+  a.href = url;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  flashToolbar('Developer MD downloaded');
+}
+
+// ─── KEYBOARD SHORTCUT: 'c' cycles colorblind modes ─────────────
+// Lets the user iterate through Normal -> Deutan -> Protan -> Tritan ->
+// Achromat -> Normal without leaving the keyboard. Skipped when focus is
+// in any editable field (so typing 'c' into a hex input doesn't hijack)
+// and when the picker overlay is open (it has its own focus context).
+const CB_CYCLE = ['none', 'deut', 'prot', 'trit', 'achr'];
+function _isEditableTarget(t) {
+  if (!t) return false;
+  const tag = (t.tagName || '').toUpperCase();
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+  if (t.isContentEditable) return true;
+  return false;
+}
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key !== 'c' && e.key !== 'C') return;
+  if (_isEditableTarget(e.target)) return;
+  if (typeof PK !== 'undefined' && PK && PK.open) return;
+  e.preventDefault();
+  const idx = CB_CYCLE.indexOf(S.cbMode);
+  const next = CB_CYCLE[((idx < 0 ? 0 : idx) + 1) % CB_CYCLE.length];
+  setCBMode(next);
+});
 
 // ─── INIT ─────────────────────────────────────────────────────────────────
 // Track whether the user has touched anything in this session - beforeunload
