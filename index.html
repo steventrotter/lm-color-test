@@ -240,7 +240,7 @@ button { cursor: pointer; }
   font-size: 42px;
   font-weight: 600;
   letter-spacing: -0.025em;
-  line-height: 1.05;
+  line-height: 1.2;
   margin-bottom: 14px;
 }
 .doc-cover-title .editable {
@@ -249,9 +249,10 @@ button { cursor: pointer; }
   border-bottom: 1px dashed transparent;
   font: inherit;
   letter-spacing: inherit;
+  line-height: inherit;
   color: inherit;
   width: 100%;
-  padding: 0;
+  padding: 0 0 4px 0;
   transition: border-color 0.15s;
 }
 .doc-cover-title .editable:hover { border-bottom-color: var(--hair); }
@@ -530,6 +531,45 @@ button { cursor: pointer; }
 }
 .swatch .meta .hex-input:focus { outline: none; color: var(--lm-teal); }
 .swatch .meta .hex-input.invalid { color: var(--fail); }
+
+/* Shared hex-with-copy unit. Used in palette swatches, status meta, and  */
+/* the button preview meta strip. The .hex-row is the flex container so   */
+/* the input/text and the copy button sit on a single line.                */
+.hex-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.hex-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  color: var(--lm-quiet);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+  vertical-align: middle;
+}
+.hex-copy:hover { color: var(--lm-ink); background: var(--hair-light); }
+.hex-copy:focus-visible { outline: 1px solid var(--lm-teal); outline-offset: 1px; }
+.hex-copy svg { width: 11px; height: 11px; display: block; }
+.hex-copy .ic-check { display: none; }
+.hex-copy.copied { color: var(--pass); background: rgba(47,133,90,0.10); }
+.hex-copy.copied .ic-clip { display: none; }
+.hex-copy.copied .ic-check { display: block; }
+/* Inline variant for the button preview meta strip — flows with mono text */
+.hex-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  vertical-align: middle;
+}
 .swatch .meta .ratio.pass { color: var(--pass); font-weight: 600; }
 .swatch .meta .ratio.warn { color: var(--warn); font-weight: 600; }
 .swatch .meta .ratio.fail { color: var(--fail); font-weight: 600; }
@@ -625,6 +665,17 @@ button { cursor: pointer; }
   letter-spacing: 0.02em;
   gap: 3px;
 }
+.status-cell .meta .hex-input {
+  background: transparent;
+  border: none;
+  font: inherit;
+  color: inherit;
+  width: 78px;
+  padding: 0;
+  letter-spacing: 0.02em;
+}
+.status-cell .meta .hex-input:focus { outline: none; color: var(--lm-teal); }
+.status-cell .meta .hex-input.invalid { color: var(--fail); }
 
 /* ─────────────────────────────────────────── */
 /* SEC 05 - TYPOGRAPHY                        */
@@ -661,29 +712,47 @@ button { cursor: pointer; }
   border: 1px solid var(--hair);
 }
 .type-row {
-  display: grid;
-  grid-template-columns: 60px 110px 1fr;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   border-top: 1px solid var(--hair-light);
-  padding: 14px 18px;
-  align-items: baseline;
-  gap: 16px;
+  padding: 20px 22px;
 }
 .type-row:first-child { border-top: none; }
+.type-row .sample {
+  display: block;
+  width: 100%;
+  line-height: 1.25;
+  color: var(--lm-ink);
+  /* Slight bottom padding ensures descenders aren't visually crowded */
+  /* against the controls strip below.                                  */
+  padding-bottom: 2px;
+  word-break: break-word;
+}
+.type-row .type-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--lm-quiet);
+  letter-spacing: 0.05em;
+}
 .type-row .tag {
   font-family: var(--mono);
   font-size: 10.5px;
   color: var(--lm-quiet);
   letter-spacing: 0.1em;
-}
-.type-row .role {
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.08em;
   text-transform: uppercase;
+  /* Fixed width so the controls line up nicely across rows.            */
+  min-width: 50px;
 }
-.type-row .role.primary { color: #2C5282; }
-.type-row .role.secondary { color: var(--lm-quiet); }
-.type-row .sample { line-height: 1.25; color: var(--lm-ink); }
+.type-row .ctrl-sep {
+  width: 1px;
+  height: 12px;
+  background: var(--hair);
+}
 
 /* ─────────────────────────────────────────── */
 /* SEC 06 - BUTTON STATES                     */
@@ -824,10 +893,11 @@ button { cursor: pointer; }
 }
 .matrix-row {
   display: grid;
-  grid-template-columns: 200px repeat(3, 1fr);
+  grid-template-columns: 200px repeat(4, 1fr);
   padding: 12px 16px;
   align-items: center;
   border-top: 1px solid var(--hair-light);
+  gap: 8px;
 }
 .matrix-row.head {
   border-top: none;
@@ -875,7 +945,53 @@ button { cursor: pointer; }
 .matrix-row .ratio-cell.fail { color: var(--fail); }
 .matrix-row .ratio-cell.pass .badge { background: rgba(47,133,90,0.12); color: var(--pass); }
 .matrix-row .ratio-cell.warn .badge { background: rgba(183,121,31,0.12); color: var(--warn); }
-.matrix-row .ratio-cell.fail .badge { background: rgba(197,48,48,0.1); color: var(--fail); }
+.matrix-row .ratio-cell.fail .badge { background: rgba(197,48,48,0.1);  color: var(--fail); }
+
+/* ─────────────────────────────────────────── */
+/* MATRIX — narrow viewport stacked layout    */
+/* ─────────────────────────────────────────── */
+/* At narrow viewports (tablet) the 5-column grid runs out of room and the */
+/* ratio + badge columns get crushed. Switch each row to a stacked card:   */
+/* color name on top, then each background test as a "Background → Ratio" */
+/* row below it. The wide-layout header row hides since each card carries  */
+/* its own background labels via data-bg. Threshold ≈ matrix container     */
+/* width getting under ~520px, which lines up with viewport ≤ 900px.       */
+@media (max-width: 900px) {
+  .matrix-row.head { display: none; }
+  .matrix-row {
+    display: block;
+    padding: 16px 18px;
+    gap: 0;
+  }
+  .matrix-row .name-cell {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--hair-light);
+    font-size: 13px;
+  }
+  .matrix-row .ratio-cell {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    text-align: left;
+    padding: 6px 0;
+    gap: 12px;
+  }
+  .matrix-row .ratio-cell + .ratio-cell {
+    border-top: 1px dashed var(--hair-light);
+  }
+  .matrix-row .ratio-cell::before {
+    content: attr(data-bg);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--lm-quiet);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    /* Even if the row has the pass/warn/fail color, the bg label stays    */
+    /* in the muted color so the colored ratio is what the eye lands on.  */
+  }
+  .matrix-row .ratio-cell .badge { margin-left: 6px; }
+}
 
 /* Revision notes */
 .rev-block {
@@ -1284,16 +1400,15 @@ button { cursor: pointer; }
 }
 
 /* ─────────────────────────────────────────── */
-/* TYPOGRAPHY WEIGHT SELECTOR + WARNING       */
+/* TYPOGRAPHY CONTROLS (font / weight / case) */
 /* ─────────────────────────────────────────── */
-.type-row {
-  grid-template-columns: 50px 110px 80px 1fr !important;
-}
 .type-row .font-cell {
   display: flex;
   align-items: center;
 }
-.type-row .font-select {
+.type-row .font-select,
+.type-row .weight-select,
+.type-row .case-select {
   background: transparent;
   border: 1px solid transparent;
   font-family: var(--mono);
@@ -1303,10 +1418,14 @@ button { cursor: pointer; }
   padding: 2px 4px;
   border-radius: 3px;
   cursor: pointer;
-  text-transform: uppercase;
 }
-.type-row .font-select:hover { border-color: var(--hair); }
-.type-row .font-select:focus { outline: none; border-color: var(--lm-teal); }
+.type-row .font-select { text-transform: uppercase; }
+.type-row .font-select:hover,
+.type-row .weight-select:hover,
+.type-row .case-select:hover { border-color: var(--hair); }
+.type-row .font-select:focus,
+.type-row .weight-select:focus,
+.type-row .case-select:focus { outline: none; border-color: var(--lm-teal); }
 .type-row .font-select.primary { color: #2C5282; }
 .type-row .font-select.secondary { color: var(--lm-quiet); }
 .type-row .font-locked {
@@ -1323,19 +1442,6 @@ button { cursor: pointer; }
   align-items: center;
   gap: 6px;
 }
-.type-row .weight-select {
-  background: transparent;
-  border: 1px solid transparent;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  color: var(--lm-mute);
-  letter-spacing: 0.05em;
-  padding: 2px 4px;
-  border-radius: 3px;
-  cursor: pointer;
-}
-.type-row .weight-select:hover { border-color: var(--hair); }
-.type-row .weight-select:focus { outline: none; border-color: var(--lm-teal); }
 .type-row .weight-warn {
   display: none;
   position: relative;
@@ -1747,9 +1853,9 @@ body.ro .ann-card { cursor: default !important; }
         <div class="sec-controls no-print"></div>
       </div>
       <div class="sec-body" id="colorsWrapper">
-        <!-- Brand subgroup -->
+        <!-- Links & Buttons subgroup -->
         <div class="group-header">
-          <span class="name">Brand</span>
+          <span class="name">Links &amp; Buttons</span>
           <span class="count" id="brandCount">2 colors</span>
         </div>
         <div id="brandRow"></div>
@@ -1952,12 +2058,12 @@ const S = {
   ],
   // Typography rows with per-row weights
   typeRows: [
-    { tag: 'H1',         font: 'secondary', size: 45,   weight: 600, sample: 'Find your next favorite book' },
-    { tag: 'H2',         font: 'secondary', size: 36,   weight: 600, sample: 'Upcoming events this week' },
-    { tag: 'H3',         font: 'secondary', size: 31.5, weight: 500, sample: 'Children\u2019s Storytime' },
-    { tag: 'H4',         font: 'secondary', size: 27,   weight: 500, sample: 'Registration required' },
-    { tag: 'H5',         font: 'secondary', size: 22.5, weight: 600, sample: 'Ages 3-5 · 30 minutes' },
-    { tag: 'H6',         font: 'secondary', size: 18,   weight: 600, sample: 'Tuesday · 10:00am' },
+    { tag: 'H1',         font: 'secondary', size: 45,   weight: 600, case: 'title', sample: 'Find your next favorite book' },
+    { tag: 'H2',         font: 'secondary', size: 36,   weight: 600, case: 'title', sample: 'Upcoming events this week' },
+    { tag: 'H3',         font: 'secondary', size: 31.5, weight: 500, case: 'title', sample: 'Children\u2019s Storytime' },
+    { tag: 'H4',         font: 'secondary', size: 27,   weight: 500, case: 'title', sample: 'Registration required' },
+    { tag: 'H5',         font: 'secondary', size: 22.5, weight: 600, case: 'title', sample: 'Ages 3-5 · 30 minutes' },
+    { tag: 'H6',         font: 'secondary', size: 18,   weight: 600, case: 'title', sample: 'Tuesday · 10:00am' },
     { tag: 'Body',       font: 'primary',   size: 18,   weight: 400, sample: 'Join us for stories, songs, and rhymes designed to build early literacy skills in a fun, welcoming environment.' },
     { tag: 'Small Text', font: 'primary',   size: 16,   weight: 400, sample: 'Sponsored by the Friends of the Library' },
   ],
@@ -1993,6 +2099,56 @@ function normHex(h) {
   return h.toUpperCase();
 }
 function readableOn(bg) { return lum(bg) > 0.179 ? '#1a1a1a' : '#ffffff'; }
+
+// ─── COLORBLIND SIMULATION (math) ──────────────────────────────────────────
+// Same matrix values as the visual SVG filters in <defs>, applied in JS so
+// rules can test simulated distinguishability without rendering. Each matrix
+// is row-major 3x3 (RGB only); achromatopsia uses BT.709 luma weights to
+// match the SVG `feColorMatrix type="saturate" values="0"` filter.
+const CB_SIM_MATRICES = {
+  deut: [0.625, 0.375, 0,
+         0.7,   0.3,   0,
+         0,     0.3,   0.7],
+  prot: [0.567, 0.433, 0,
+         0.558, 0.442, 0,
+         0,     0.242, 0.758],
+  trit: [0.95,  0.05,  0,
+         0,     0.433, 0.567,
+         0,     0.475, 0.525],
+  achr: [0.2126, 0.7152, 0.0722,
+         0.2126, 0.7152, 0.0722,
+         0.2126, 0.7152, 0.0722],
+};
+const CB_SIM_LABELS = {
+  deut: 'Deuteranopia', prot: 'Protanopia',
+  trit: 'Tritanopia',   achr: 'Achromatopsia',
+};
+function simulateCB(hex, mode) {
+  const m = CB_SIM_MATRICES[mode];
+  if (!m) return hex.toUpperCase();
+  const { r, g, b } = hexToRgb(hex);
+  const nr = m[0]*r + m[1]*g + m[2]*b;
+  const ng = m[3]*r + m[4]*g + m[5]*b;
+  const nb = m[6]*r + m[7]*g + m[8]*b;
+  const clamp = v => Math.max(0, Math.min(255, Math.round(v)));
+  const hx = v => clamp(v).toString(16).padStart(2, '0');
+  return ('#' + hx(nr) + hx(ng) + hx(nb)).toUpperCase();
+}
+// Distinguishability threshold between two simulated colors. Matches the
+// existing Rule 3 lenience (1.5:1) so all CB-distinguishability rules use
+// the same bar. Tighten to 2.0 or 3.0 if real-world testing flags too few.
+const CB_DISTINGUISH_THRESHOLD = 1.5;
+// Returns { pass, failingModes: [{mode, label, ratio}] } for a color pair
+// across all four CB simulations. Normal vision is excluded — the question
+// is specifically "do they remain distinct under color blindness?"
+function pairCBDistinguishable(hex1, hex2, threshold = CB_DISTINGUISH_THRESHOLD) {
+  const failingModes = [];
+  for (const mode of ['deut', 'prot', 'trit', 'achr']) {
+    const r = contrast(simulateCB(hex1, mode), simulateCB(hex2, mode));
+    if (r < threshold) failingModes.push({ mode, label: CB_SIM_LABELS[mode], ratio: r });
+  }
+  return { pass: failingModes.length === 0, failingModes };
+}
 
 // ─── COLORBLIND ────────────────────────────────────────────────────────────
 const CB_MODES = {
@@ -2256,9 +2412,62 @@ function removeColor(id) {
   S.colors.forEach(c => { if (c.group === 'age' && /^Age Group \d+$/.test(c.label)) c.label = 'Age Group ' + (n++); });
   renderAll();
 }
-function onStatusChange(name, val) {
-  S.status[name] = val.toUpperCase();
-  renderStatus();
+function onStatusHexInput(name, val, inputEl) {
+  if (!val) return;
+  let h = val.trim();
+  if (!h.startsWith('#')) h = '#' + h;
+  if (isValidHex(h)) {
+    S.status[name] = h.toUpperCase();
+    inputEl.classList.remove('invalid');
+    renderAll();
+  } else {
+    inputEl.classList.add('invalid');
+  }
+}
+
+// ─── COPY-TO-CLIPBOARD HELPERS ────────────────────────────────────────────
+// copyHex(btn, value): if `value` is provided, copy that. Otherwise look for
+// the previous-sibling input/span and copy its current value. Used by the
+// hex copy buttons in palette swatches, status meta, and button preview.
+function copyHex(btn, value) {
+  let text = value;
+  if (text === undefined) {
+    const sib = btn.previousElementSibling;
+    if (sib) text = sib.value !== undefined ? sib.value : sib.textContent;
+  }
+  text = String(text || '').trim().toUpperCase();
+  if (!text) return;
+  const flash = () => {
+    btn.classList.add('copied');
+    setTimeout(() => btn.classList.remove('copied'), 1100);
+  };
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); flash(); } catch (e) {}
+    document.body.removeChild(ta);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(flash).catch(fallback);
+  } else {
+    fallback();
+  }
+}
+// Returns the HTML for a copy-hex button. Two SVG icons inside (clipboard +
+// check); CSS toggles them via the .copied class. Embed-ready string so it
+// can sit anywhere in render templates.
+function copyHexButton(explicitValue) {
+  const onclick = explicitValue !== undefined
+    ? `copyHex(this, '${explicitValue.replace(/'/g, "\\'")}')`
+    : `copyHex(this)`;
+  return `<button class="hex-copy no-print" type="button" onclick="${onclick}" aria-label="Copy hex to clipboard" title="Copy hex">
+    <svg class="ic-clip" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="10" height="10" rx="1.5"/><path d="M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1"/></svg>
+    <svg class="ic-check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 8 7 12 13 4"/></svg>
+  </button>`;
 }
 
 // ─── RENDER: META + COVER ─────────────────────────────────────────────────
@@ -2305,7 +2514,10 @@ function swatchHTML(c) {
           : `${c.label}`}
       </div>
       <div class="meta">
-        <input class="hex-input" value="${c.hex}" oninput="onHexInput('${c.id}', this.value, this)" maxlength="7">
+        <span class="hex-row">
+          <input class="hex-input" value="${c.hex}" oninput="onHexInput('${c.id}', this.value, this)" maxlength="7" aria-label="${c.label} hex">
+          ${copyHexButton()}
+        </span>
         <span class="ratio ${b.cls}">${r.toFixed(2)}:1 · ${b.label}</span>
       </div>
     </div>
@@ -2342,14 +2554,18 @@ function renderStatus() {
   grid.innerHTML = Object.entries(S.status).map(([name, hex]) => {
     const r = contrast(hex, '#FFFFFF');
     const b = ratingBadge(r);
+    const ratioVar = b.cls === 'pass' ? 'pass' : b.cls === 'warn' ? 'warn' : 'fail';
     return `
       <div class="status-cell">
         <div class="pad" style="background:${hex}" onclick="openPicker('status','${name}')" title="Click to edit">
           ${name.toUpperCase()}
         </div>
         <div class="meta">
-          <span>${hex.toUpperCase()}</span>
-          <span style="color:var(--${b.cls === 'pass' ? 'pass' : b.cls === 'warn' ? 'warn' : 'fail'})">${r.toFixed(2)}:1</span>
+          <span class="hex-row">
+            <input class="hex-input" value="${hex.toUpperCase()}" oninput="onStatusHexInput('${name}', this.value, this)" maxlength="7" aria-label="${name} hex">
+            ${copyHexButton()}
+          </span>
+          <span style="color:var(--${ratioVar})">${r.toFixed(2)}:1</span>
         </div>
       </div>
     `;
@@ -2357,6 +2573,11 @@ function renderStatus() {
 }
 
 // ─── RENDER: TYPOGRAPHY ───────────────────────────────────────────────────
+// Maps the row's case setting to a CSS text-transform value.
+// 'title' = no transform (preserve as-typed); 'upper' / 'lower' apply uppercase/lowercase.
+function caseToCSS(c) {
+  return c === 'upper' ? 'uppercase' : c === 'lower' ? 'lowercase' : 'none';
+}
 function renderTypography() {
   const pf = S.primaryFont;
   const sf = S.secondaryFont;
@@ -2365,24 +2586,44 @@ function renderTypography() {
     const fontName = r.font === 'primary' ? pf : sf;
     const supported = isWeightSupported(fontName, r.weight);
     const opts = weightOptions.map(w => `<option value="${w}" ${w === r.weight ? 'selected' : ''}>${w}</option>`).join('');
-    const isLocked = r.tag === 'Body' || r.tag === 'Small Text';
-    const fontControl = isLocked
+    const isBodyOrSmall = r.tag === 'Body' || r.tag === 'Small Text';
+    const isHeading = !isBodyOrSmall;
+
+    const fontControl = isBodyOrSmall
       ? `<span class="font-locked" title="Body and small text always use the Primary font">Primary</span>`
       : `<select class="font-select ${r.font}" onchange="onFontChange(${idx}, this.value)" aria-label="Font for ${r.tag}">
             <option value="primary" ${r.font === 'primary' ? 'selected' : ''}>Primary</option>
             <option value="secondary" ${r.font === 'secondary' ? 'selected' : ''}>Secondary</option>
           </select>`;
+
+    const caseVal = r.case || 'title';
+    const caseControl = isHeading
+      ? `<span class="ctrl-sep" aria-hidden="true"></span>
+         <span class="case-cell">
+           <select class="case-select" onchange="onCaseChange(${idx}, this.value)" aria-label="Case for ${r.tag}">
+             <option value="title" ${caseVal === 'title' ? 'selected' : ''}>Title Case</option>
+             <option value="upper" ${caseVal === 'upper' ? 'selected' : ''}>UPPERCASE</option>
+             <option value="lower" ${caseVal === 'lower' ? 'selected' : ''}>lowercase</option>
+           </select>
+         </span>`
+      : '';
+
+    const sampleStyle = `font-family:'${fontName}', system-ui, sans-serif; font-size:${r.size}px; font-weight:${r.weight}; text-transform:${caseToCSS(caseVal)};`;
+
     return `
       <div class="type-row">
-        <span class="tag">${r.tag.toUpperCase()}</span>
-        <span class="font-cell">
-          ${fontControl}
-        </span>
-        <span class="weight-cell">
-          <select class="weight-select" onchange="onWeightChange(${idx}, this.value)" aria-label="Weight for ${r.tag}">${opts}</select>
-          <span class="weight-warn ${supported ? '' : 'show'}" aria-label="Weight ${r.weight} is not provided by ${fontName}; the browser will substitute the nearest available weight." tabindex="0">!<span class="tip-bubble">Weight ${r.weight} is not provided by ${fontName}; the browser will substitute the nearest available weight.</span></span>
-        </span>
-        <span class="sample" style="font-family:'${fontName}', system-ui, sans-serif; font-size:${r.size}px; font-weight:${r.weight};">${r.sample}</span>
+        <span class="sample" style="${sampleStyle}">${r.sample}</span>
+        <div class="type-controls">
+          <span class="tag">${r.tag.toUpperCase()}</span>
+          <span class="ctrl-sep" aria-hidden="true"></span>
+          <span class="font-cell">${fontControl}</span>
+          <span class="ctrl-sep" aria-hidden="true"></span>
+          <span class="weight-cell">
+            <select class="weight-select" onchange="onWeightChange(${idx}, this.value)" aria-label="Weight for ${r.tag}">${opts}</select>
+            <span class="weight-warn ${supported ? '' : 'show'}" aria-label="Weight ${r.weight} is not provided by ${fontName}; the browser will substitute the nearest available weight." tabindex="0">!<span class="tip-bubble">Weight ${r.weight} is not provided by ${fontName}; the browser will substitute the nearest available weight.</span></span>
+          </span>
+          ${caseControl}
+        </div>
       </div>
     `;
   }).join('');
@@ -2397,6 +2638,14 @@ function onFontChange(idx, val) {
   // Body and Small Text are locked to primary; ignore stray events
   if (r.tag === 'Body' || r.tag === 'Small Text') return;
   r.font = val;
+  renderTypography();
+  renderButtons();  // button preview follows Body font, but font-source change in any heading is harmless re-render
+}
+function onCaseChange(idx, val) {
+  if (val !== 'title' && val !== 'upper' && val !== 'lower') return;
+  const r = S.typeRows[idx];
+  if (r.tag === 'Body' || r.tag === 'Small Text') return;
+  r.case = val;
   renderTypography();
 }
 function isWeightSupported(fontName, weight) {
@@ -2433,9 +2682,13 @@ function renderButtons() {
       `--btn-hover-text:${hoverText}`,
       `font-family:'${bodyFontName}', system-ui, sans-serif`,
     ].join(';');
+    const baseHex = base.hex.toUpperCase();
+    const hoverHexU = hoverHex.toUpperCase();
+    const baseInline  = `<span class="hex-inline">${baseHex} ${copyHexButton(baseHex)}</span>`;
+    const hoverInline = `<span class="hex-inline">${hoverHexU} ${copyHexButton(hoverHexU)}</span>`;
     const meta = hover
-      ? `BASE ${base.hex.toUpperCase()} → HOVER ${hover.hex.toUpperCase()}  ·  Δ ${contrast(base.hex, hover.hex).toFixed(2)}:1`
-      : `BASE ${base.hex.toUpperCase()}  ·  No hover defined`;
+      ? `BASE ${baseInline} → HOVER ${hoverInline}  ·  Δ ${contrast(base.hex, hover.hex).toFixed(2)}:1`
+      : `BASE ${baseInline}  ·  No hover defined`;
     return `
       <div class="btn-pair">
         <div class="label">${label}</div>
@@ -2483,7 +2736,7 @@ function evaluateRules() {
     }
     rules.push({
       id: 1,
-      title: 'Brand contrast vs calendar background',
+      title: 'Link contrast vs calendar background',
       detail: 'Primary' + (S.hasSecondary ? ' and Secondary' : '') + ' must meet WCAG AA (4.5:1) against #EFEFEF.',
       parts, pass,
     });
@@ -2513,16 +2766,20 @@ function evaluateRules() {
     });
   }
 
-  // R3 — Primary vs Secondary distinguishable
+  // R3 — Primary vs Secondary distinguishable under colorblindness
   if (S.hasSecondary && primary && secondary) {
-    const r = contrast(primary.hex, secondary.hex);
-    const ok = r >= 1.5;
+    const result = pairCBDistinguishable(primary.hex, secondary.hex);
+    const parts = result.pass
+      ? [{ label: 'Distinguishable in all four CB modes', pass: true }]
+      : result.failingModes.map(fm => ({
+          label: `Fails in ${fm.label}`, ratio: fm.ratio, pass: false
+        }));
     rules.push({
       id: 3,
       title: 'Primary distinguishable from Secondary',
-      detail: 'Patrons with color-vision impairments should be able to tell Primary and Secondary apart.',
-      parts: [{ label: 'Primary vs Secondary', ratio: r, pass: ok }],
-      pass: ok,
+      detail: `Patrons with color-vision impairments must be able to tell Primary and Secondary apart. Tested under deuteranopia, protanopia, tritanopia, and achromatopsia simulation; pair must keep ≥ ${CB_DISTINGUISH_THRESHOLD}:1 contrast in each.`,
+      parts,
+      pass: result.pass,
     });
   } else {
     rules.push({
@@ -2549,14 +2806,47 @@ function evaluateRules() {
     });
   }
 
-  // R5 — Reminder rule (always pass — documentation)
-  rules.push({
-    id: 5,
-    title: 'Brand color used for links and navigation',
-    detail: 'Primary or Secondary must be used for all non-text links (buttons, navigation) and text links. Confirm in production design.',
-    parts: [{ label: 'Manual confirmation required', pass: true }],
-    pass: true,
-  });
+  // R5 — Taxonomy colors distinguishable from each other under colorblindness
+  // Each pair of calendar taxonomy colors must remain distinguishable under
+  // each of the four CB simulations. Skipped if fewer than two taxonomy
+  // colors exist (nothing to test).
+  if (ageColors.length < 2) {
+    rules.push({
+      id: 5,
+      title: 'Taxonomy colors distinguishable under colorblindness',
+      detail: 'Skipped: at least two taxonomy colors are needed to test pairwise distinguishability.',
+      parts: [],
+      pass: null,
+    });
+  } else {
+    const failingPairs = [];
+    let pairCount = 0;
+    for (let i = 0; i < ageColors.length; i++) {
+      for (let j = i + 1; j < ageColors.length; j++) {
+        pairCount++;
+        const a = ageColors[i], b = ageColors[j];
+        const result = pairCBDistinguishable(a.hex, b.hex);
+        if (!result.pass) {
+          failingPairs.push({
+            a, b,
+            modes: result.failingModes.map(fm => fm.label).join(', '),
+          });
+        }
+      }
+    }
+    rules.push({
+      id: 5,
+      title: 'Taxonomy colors distinguishable under colorblindness',
+      detail: `Each pair of taxonomy colors must keep ≥ ${CB_DISTINGUISH_THRESHOLD}:1 contrast under deuteranopia, protanopia, tritanopia, and achromatopsia simulation. Tests every pair (${pairCount} for ${ageColors.length} colors).`,
+      parts: failingPairs.length
+        ? failingPairs.map(fp => ({
+            label: `${fp.a.label} ↔ ${fp.b.label} fails in ${fp.modes}`,
+            pass: false,
+          }))
+        : [{ label: `All ${pairCount} pairs distinguishable in every CB mode`, pass: true }],
+      pass: failingPairs.length === 0,
+    });
+  }
 
   return rules;
 }
@@ -2609,6 +2899,7 @@ function renderMatrix() {
   const bgs = [
     { label: '#EFEFEF', hex: '#EFEFEF' },
     { label: '#FFFFFF', hex: '#FFFFFF' },
+    { label: '#333333', hex: '#333333' },
     { label: '#000000', hex: '#000000' },
   ];
   const head = `
@@ -2627,7 +2918,7 @@ function renderMatrix() {
           const r = contrast(c.hex, b.hex);
           const badge = ratingBadge(r);
           return `
-            <span class="ratio-cell ${badge.cls}">
+            <span class="ratio-cell ${badge.cls}" data-bg="${b.label}">
               ${r.toFixed(2)}<span class="badge">${badge.label}</span>
             </span>`;
         }).join('')}
@@ -3163,6 +3454,22 @@ function renderAll() {
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────
+// Track whether the user has touched anything in this session — beforeunload
+// only prompts if they have, so a fresh load + immediate close is silent.
+let _userTouched = false;
+function _markTouched() { _userTouched = true; }
+document.addEventListener('input',  _markTouched, { capture: true });
+document.addEventListener('change', _markTouched, { capture: true });
+window.addEventListener('beforeunload', (e) => {
+  // Don't warn the client viewing a read-only share link.
+  if (document.body.classList.contains('ro')) return;
+  if (!_userTouched) return;
+  // Browsers ignore custom messages; setting returnValue is enough to trigger
+  // the generic "Reload site?" / "Leave site?" confirmation dialog.
+  e.preventDefault();
+  e.returnValue = '';
+});
+
 document.addEventListener('DOMContentLoaded', async () => {
   initPickerPointer();
   const restored = await tryRestoreFromUrl();
