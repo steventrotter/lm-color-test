@@ -1,0 +1,3170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LM Color Accessibility Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --lm-teal: #00A8AA;
+  --lm-teal-2: #00B9AE;
+  --lm-teal-dark: #007A7C;
+  --lm-orange: #F05223;
+  --lm-ink: #1a1a1a;
+  --lm-mute: #5a574e;
+  --lm-quiet: #8a857c;
+  --paper: #fafaf7;
+  --paper-2: #ffffff;
+  --hair: #e8e6e0;
+  --hair-light: #f0ede6;
+  --calendar-bg: #EFEFEF;
+  --pass: #2F855A;
+  --warn: #B7791F;
+  --fail: #C53030;
+  --chrome: #26282E;
+  --chrome-2: #2E3138;
+  --gutter: #373A40;
+  --lm-teal-deep: #005F60;  /* AAA-compliant with white text (7.4:1) */
+  --lm-purple: #463287;       /* LM button purple - 10.16:1 on white (AAA) */
+  --lm-purple-hover: #2F2160;  /* darker hover - 13.93:1 on white */
+  --poppins: 'Poppins', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  --primary-font: 'Poppins', system-ui, sans-serif;
+  --secondary-font: 'Poppins', system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--poppins);
+  background: var(--gutter);
+  color: var(--lm-ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+input, button, textarea, select { font-family: inherit; font-size: inherit; color: inherit; }
+button { cursor: pointer; }
+
+/* ─────────────────────────────────────────── */
+/* TOOLBAR (chrome, no-print)                 */
+/* ─────────────────────────────────────────── */
+.toolbar {
+  background: var(--chrome);
+  color: #fff;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-wrap: wrap;
+}
+.toolbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.toolbar-logo svg { width: 28px; height: 28px; flex-shrink: 0; }
+.toolbar-brand {
+  font-family: var(--poppins);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+}
+.toolbar-brand .tl { color: var(--lm-teal); }
+.toolbar-brand .or { color: var(--lm-orange); }
+.toolbar-brand .lbl { color: rgba(255,255,255,0.45); font-weight: 500; margin-left: 6px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; font-family: var(--mono); }
+
+.toolbar-sep {
+  width: 1px; height: 24px;
+  background: rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+
+.tb-group { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.tb-group label {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.45);
+  text-transform: uppercase;
+}
+
+.tb-input {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12.5px;
+  min-width: 160px;
+  font-family: var(--poppins);
+  transition: border-color 0.15s, background 0.15s;
+}
+.tb-input:focus { outline: none; border-color: var(--lm-teal); background: rgba(255,255,255,0.08); }
+.tb-input::placeholder { color: rgba(255,255,255,0.3); }
+
+.tb-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: background 0.15s, border-color 0.15s;
+}
+.tb-btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.2); }
+.tb-btn.active { background: var(--lm-purple); border-color: var(--lm-purple); color: #fff; }
+.tb-btn.primary { background: var(--lm-purple); border-color: var(--lm-purple); color: #fff; }
+.tb-btn.primary:hover { background: var(--lm-purple-hover); border-color: var(--lm-purple-hover); color: #fff; }
+
+.tb-version {
+  display: flex; align-items: center; gap: 6px;
+}
+.tb-version-btn {
+  width: 24px; height: 24px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+  border-radius: 4px;
+  font-size: 14px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+}
+.tb-version-btn:hover { background: rgba(255,255,255,0.14); }
+.tb-version-badge {
+  padding: 4px 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.92);
+  min-width: 36px;
+  text-align: center;
+}
+
+.tb-spacer { flex: 1; min-width: 8px; }
+
+/* ─────────────────────────────────────────── */
+/* FLOATING RULES INDICATOR                   */
+/* ─────────────────────────────────────────── */
+/* Fixed to the top-right of the viewport, sitting just below the sticky    */
+/* toolbar so it stays visible as the user scrolls. Lives outside the       */
+/* document flow (position: fixed) so it never affects layout.              */
+.rules-float {
+  position: fixed;
+  top: 64px;
+  right: 24px;
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  background: var(--chrome);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  color: rgba(255,255,255,0.92);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  pointer-events: none;  /* purely informational; not interactive */
+}
+.rules-float .dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--pass);
+  flex-shrink: 0;
+}
+.rules-float.has-fail .dot { background: var(--fail); }
+.rules-float .count {
+  color: rgba(255,255,255,0.95);
+  font-weight: 600;
+}
+.rules-float .label {
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+}
+@media (max-width: 1100px) {
+  /* On narrower viewports the doc gets close to the right edge; tuck the */
+  /* widget into the top-right corner with less padding so it doesn't     */
+  /* overlap the document column. */
+  .rules-float { top: 60px; right: 12px; padding: 7px 11px; font-size: 10.5px; }
+  .rules-float .dot { width: 8px; height: 8px; }
+}
+
+/* ─────────────────────────────────────────── */
+/* PAGE LAYOUT                                */
+/* ─────────────────────────────────────────── */
+.page {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px 80px;
+  min-height: calc(100vh - 56px);
+}
+.doc {
+  width: 880px;
+  max-width: 100%;
+  background: var(--paper);
+  color: var(--lm-ink);
+  font-family: var(--poppins);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35), 0 4px 16px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+/* Document cover */
+.doc-cover {
+  padding: 64px 72px 48px;
+  border-bottom: 1px solid var(--hair);
+}
+.doc-cover-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--lm-quiet);
+  margin-bottom: 22px;
+  text-transform: uppercase;
+}
+.doc-cover-title {
+  font-family: var(--poppins);
+  font-size: 42px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  margin-bottom: 14px;
+}
+.doc-cover-title .editable {
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed transparent;
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  width: 100%;
+  padding: 0;
+  transition: border-color 0.15s;
+}
+.doc-cover-title .editable:hover { border-bottom-color: var(--hair); }
+.doc-cover-title .editable:focus { outline: none; border-bottom-color: var(--lm-teal); }
+.doc-cover-intro {
+  font-size: 13.5px;
+  color: var(--lm-mute);
+  line-height: 1.55;
+}
+
+/* Section structure (Variation B layout) */
+.sec {
+  padding: 48px 72px;
+  border-bottom: 1px solid var(--hair);
+  position: relative;
+}
+.sec-header {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  gap: 24px;
+  margin-bottom: 28px;
+  align-items: start;
+}
+.sec-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--lm-quiet);
+  padding-top: 10px;
+  letter-spacing: 0.05em;
+}
+.sec-titlewrap {
+  min-width: 0;
+}
+.sec-title {
+  font-family: var(--poppins);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  margin-bottom: 6px;
+  color: var(--lm-ink);
+}
+.sec-intro {
+  font-size: 12.5px;
+  color: var(--lm-mute);
+  max-width: 580px;
+  line-height: 1.55;
+}
+.sec-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.sec-body { padding-left: 84px; }
+
+/* Mini-button (in-doc, no-print) */
+.mini-btn {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--hair);
+  color: var(--lm-mute);
+  padding: 5px 10px;
+  border-radius: 3px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.mini-btn:hover { border-color: var(--lm-ink); color: var(--lm-ink); }
+.mini-btn.danger:hover { border-color: var(--fail); color: var(--fail); }
+
+/* ─────────────────────────────────────────── */
+/* SEC 01 - LOGO LOCKUP                       */
+/* ─────────────────────────────────────────── */
+.logo-single { width: 100%; }
+.logo-single .canvas {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  border: 1px solid var(--hair);
+  position: relative;
+  overflow: hidden;
+  transition: background 0.15s;
+}
+.logo-single .canvas img,
+.logo-single .canvas svg {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.logo-single .canvas .placeholder {
+  color: var(--lm-quiet);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.logo-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--lm-quiet);
+  text-transform: uppercase;
+}
+.logo-meta .lbl { font-weight: 500; }
+.logo-bg-chip {
+  width: 14px; height: 14px;
+  border: 1px solid var(--hair);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.logo-bg-input {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  background: transparent;
+  border: 1px solid var(--hair);
+  border-radius: 3px;
+  padding: 4px 8px;
+  color: var(--lm-ink);
+  width: 86px;
+  text-transform: uppercase;
+}
+.logo-bg-input:focus { outline: none; border-color: var(--lm-teal); }
+.logo-bg-input.invalid { border-color: var(--fail); color: var(--fail); }
+
+.logo-uploadrow {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.logo-input { display: none; }
+.logo-uploadlabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--lm-ink);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.logo-uploadlabel:hover { background: #000; }
+
+/* ─────────────────────────────────────────── */
+/* SEC 02 - PALETTE URL                       */
+/* ─────────────────────────────────────────── */
+.url-block {
+  background: var(--paper-2);
+  border: 1px solid var(--hair);
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.url-block .url {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: #2C5282;
+  word-break: break-all;
+  flex: 1;
+  min-width: 200px;
+  line-height: 1.5;
+}
+.url-actions { display: flex; gap: 6px; }
+
+/* ─────────────────────────────────────────── */
+/* SEC 03 - COLOR PALETTE                     */
+/* ─────────────────────────────────────────── */
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--hair);
+  padding-bottom: 7px;
+}
+.group-header .name {
+  font-family: var(--poppins);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--lm-mute);
+}
+.group-header .count {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--lm-quiet);
+  letter-spacing: 0.08em;
+}
+.group-header .actions {
+  display: flex; gap: 6px;
+}
+
+.swatch-row {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 32px;
+}
+.swatch-row.col-2 { grid-template-columns: repeat(2, 1fr); }
+.swatch-row.col-3 { grid-template-columns: repeat(3, 1fr); }
+.swatch-row.col-4 { grid-template-columns: repeat(4, 1fr); }
+
+.swatch {
+  display: flex;
+  flex-direction: column;
+}
+.swatch .chip {
+  height: 110px;
+  border: 1px solid rgba(0,0,0,0.05);
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.swatch .chip:hover { transform: translateY(-1px); }
+.swatch .chip input[type="color"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+.swatch .role {
+  font-family: var(--poppins);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  margin-top: 10px;
+  color: var(--lm-ink);
+}
+.swatch .role .role-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed transparent;
+  font: inherit;
+  color: inherit;
+  width: 100%;
+  padding: 0;
+}
+.swatch .role .role-input:hover { border-bottom-color: var(--hair); }
+.swatch .role .role-input:focus { outline: none; border-bottom-color: var(--lm-teal); }
+.swatch .meta {
+  display: flex;
+  flex-direction: column;
+  margin-top: 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--lm-mute);
+  align-items: stretch;
+  gap: 3px;
+}
+.swatch .meta .hex-input {
+  background: transparent;
+  border: none;
+  font: inherit;
+  color: inherit;
+  width: 78px;
+  padding: 0;
+  letter-spacing: 0.02em;
+}
+.swatch .meta .hex-input:focus { outline: none; color: var(--lm-teal); }
+.swatch .meta .hex-input.invalid { color: var(--fail); }
+.swatch .meta .ratio.pass { color: var(--pass); font-weight: 600; }
+.swatch .meta .ratio.warn { color: var(--warn); font-weight: 600; }
+.swatch .meta .ratio.fail { color: var(--fail); font-weight: 600; }
+
+.swatch .remove-x {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 22px; height: 22px;
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  border: none;
+  border-radius: 11px;
+  font-size: 14px;
+  line-height: 1;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  z-index: 2;
+  cursor: pointer;
+}
+.swatch:hover .remove-x { display: flex; }
+.swatch .collision-warn {
+  position: absolute;
+  top: 6px; left: 6px;
+  width: 22px; height: 22px;
+  background: var(--warn);
+  color: #1a1a1a;
+  border: 1.5px solid #fff;
+  border-radius: 11px;
+  font-family: var(--poppins);
+  font-weight: 800;
+  font-size: 13px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  z-index: 2;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+
+.add-color-card {
+  height: 110px;
+  border: 1px dashed var(--hair);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  color: var(--lm-quiet);
+}
+.add-color-card:hover { border-color: var(--lm-teal); color: var(--lm-teal); }
+.add-color-card .plus { font-size: 22px; line-height: 1; font-family: var(--mono); }
+.add-color-card .lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* ─────────────────────────────────────────── */
+/* SEC 04 - STATUS COLORS                     */
+/* ─────────────────────────────────────────── */
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.status-cell { }
+.status-cell .pad {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: var(--poppins);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  position: relative;
+  cursor: pointer;
+}
+.status-cell .pad input[type="color"] {
+  position: absolute; inset: 0;
+  opacity: 0; cursor: pointer; border: none;
+}
+.status-cell .meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--lm-mute);
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  letter-spacing: 0.02em;
+  gap: 3px;
+}
+
+/* ─────────────────────────────────────────── */
+/* SEC 05 - TYPOGRAPHY                        */
+/* ─────────────────────────────────────────── */
+.font-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 18px;
+}
+.font-control {
+  display: flex; flex-direction: column; gap: 5px;
+}
+.font-control label {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lm-quiet);
+}
+.font-control input {
+  background: var(--paper-2);
+  border: 1px solid var(--hair);
+  padding: 8px 12px;
+  font-family: var(--poppins);
+  font-size: 13px;
+  color: var(--lm-ink);
+}
+.font-control input:focus { outline: none; border-color: var(--lm-teal); }
+
+.type-block {
+  background: var(--paper-2);
+  border: 1px solid var(--hair);
+}
+.type-row {
+  display: grid;
+  grid-template-columns: 60px 110px 1fr;
+  border-top: 1px solid var(--hair-light);
+  padding: 14px 18px;
+  align-items: baseline;
+  gap: 16px;
+}
+.type-row:first-child { border-top: none; }
+.type-row .tag {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--lm-quiet);
+  letter-spacing: 0.1em;
+}
+.type-row .role {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.type-row .role.primary { color: #2C5282; }
+.type-row .role.secondary { color: var(--lm-quiet); }
+.type-row .sample { line-height: 1.25; color: var(--lm-ink); }
+
+/* ─────────────────────────────────────────── */
+/* SEC 06 - BUTTON STATES                     */
+/* ─────────────────────────────────────────── */
+.btn-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.btn-pair {
+  background: var(--calendar-bg);
+  padding: 28px 22px;
+}
+.btn-pair .label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--lm-mute);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+.btn-pair .row {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+}
+.btn-pair .pill {
+  padding: 11px 22px;
+  font-weight: 700;
+  font-size: 13.5px;
+  border: none;
+  background: var(--btn-base);
+  color: var(--btn-base-text);
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.btn-pair .pill:hover {
+  background: var(--btn-hover);
+  color: var(--btn-hover-text);
+}
+.btn-pair .pill:focus-visible {
+  outline: 2px solid var(--lm-teal);
+  outline-offset: 2px;
+}
+.btn-pair .delta {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--lm-mute);
+  margin-top: 14px;
+  letter-spacing: 0.05em;
+}
+.btn-pair .hover-hint {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--lm-quiet);
+  margin-top: 4px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ─────────────────────────────────────────── */
+/* SEC 07 - TEST RESULTS (rules + matrix)     */
+/* ─────────────────────────────────────────── */
+.rules-panel {
+  background: var(--paper-2);
+  border: 1px solid var(--hair);
+  margin-bottom: 24px;
+}
+.rule-row {
+  display: grid;
+  grid-template-columns: 24px 1fr 70px;
+  gap: 16px;
+  padding: 18px 22px;
+  border-top: 1px solid var(--hair-light);
+  align-items: flex-start;
+}
+.rule-row:first-child { border-top: none; }
+.rule-dot {
+  width: 20px; height: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  margin-top: 1px;
+  font-family: var(--poppins);
+}
+.rule-dot.pass { background: var(--pass); }
+.rule-dot.fail { background: var(--fail); }
+.rule-dot.skip { background: var(--lm-quiet); }
+.rule-title {
+  font-family: var(--poppins);
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.rule-detail {
+  font-family: var(--poppins);
+  font-size: 11.5px;
+  color: var(--lm-mute);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+.rule-parts {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  color: var(--lm-mute);
+}
+.rule-parts .part.pass { color: var(--pass); }
+.rule-parts .part.fail { color: var(--fail); }
+.rule-status {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-align: right;
+  letter-spacing: 0.12em;
+}
+.rule-status.pass { color: var(--pass); }
+.rule-status.fail { color: var(--fail); }
+.rule-status.skip { color: var(--lm-quiet); }
+
+/* Contrast Matrix */
+.matrix-title {
+  font-family: var(--poppins);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--lm-mute);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+.matrix {
+  background: var(--paper-2);
+  border: 1px solid var(--hair);
+}
+.matrix-row {
+  display: grid;
+  grid-template-columns: 200px repeat(3, 1fr);
+  padding: 12px 16px;
+  align-items: center;
+  border-top: 1px solid var(--hair-light);
+}
+.matrix-row.head {
+  border-top: none;
+  border-bottom: 1px solid var(--hair);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--lm-quiet);
+  text-transform: uppercase;
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+.matrix-row.head span:not(:first-child) { text-align: center; }
+.matrix-row .name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--poppins);
+  font-weight: 500;
+  font-size: 12px;
+}
+.matrix-row .swatch-mini {
+  width: 16px; height: 16px;
+  border: 1px solid rgba(0,0,0,0.1);
+  flex-shrink: 0;
+}
+.matrix-row .ratio-cell {
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.matrix-row .ratio-cell .badge {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 5px;
+  font-size: 9px;
+  border-radius: 2px;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  vertical-align: 1px;
+}
+.matrix-row .ratio-cell.pass { color: var(--pass); }
+.matrix-row .ratio-cell.warn { color: var(--warn); }
+.matrix-row .ratio-cell.fail { color: var(--fail); }
+.matrix-row .ratio-cell.pass .badge { background: rgba(47,133,90,0.12); color: var(--pass); }
+.matrix-row .ratio-cell.warn .badge { background: rgba(183,121,31,0.12); color: var(--warn); }
+.matrix-row .ratio-cell.fail .badge { background: rgba(197,48,48,0.1); color: var(--fail); }
+
+/* Revision notes */
+.rev-block {
+  margin-top: 0;
+}
+.rev-block textarea {
+  width: 100%;
+  min-height: 90px;
+  padding: 14px 18px;
+  background: var(--paper-2);
+  border: 1px solid var(--hair);
+  font-family: var(--poppins);
+  font-size: 13px;
+  color: var(--lm-ink);
+  line-height: 1.5;
+  resize: vertical;
+}
+.rev-block textarea:focus { outline: none; border-color: var(--lm-teal); }
+
+/* Footer */
+.doc-footer {
+  padding: 28px 72px 40px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--lm-quiet);
+  border-top: 1px solid var(--hair);
+  display: flex;
+  justify-content: space-between;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  align-items: center;
+}
+.doc-footer .sig { font-family: var(--poppins); font-size: 12px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--lm-mute); }
+.doc-footer .sig .tl { color: var(--lm-teal); font-weight: 700; }
+.doc-footer .sig .or { color: var(--lm-orange); font-weight: 700; }
+
+/* ─────────────────────────────────────────── */
+/* EXPORT MENU                                */
+/* ─────────────────────────────────────────── */
+.export-wrap { position: relative; flex-shrink: 0; }
+.export-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--hair);
+  border-radius: 6px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  min-width: 280px;
+  z-index: 300;
+  display: none;
+  overflow: hidden;
+}
+.export-menu.open { display: block; }
+.export-menu button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--hair-light);
+  text-align: left;
+  cursor: pointer;
+  color: var(--lm-ink);
+  transition: background 0.12s;
+}
+.export-menu button:last-child { border-bottom: none; }
+.export-menu button:hover { background: var(--paper); }
+.export-menu .ico {
+  font-size: 18px;
+  color: var(--lm-purple);
+  width: 22px;
+  text-align: center;
+  font-family: var(--mono);
+}
+.export-menu .lbl {
+  font-family: var(--poppins);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--lm-ink);
+}
+.export-menu .hint {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--lm-quiet);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+
+/* Colorblind dropdown (collapses 5 mode buttons into a single trigger) */
+.cb-wrap { position: relative; flex-shrink: 0; }
+.cb-trigger { white-space: nowrap; }
+.cb-trigger .caret { margin-left: 6px; opacity: 0.6; }
+.cb-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: #fff;
+  border: 1px solid var(--hair);
+  border-radius: 6px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  min-width: 200px;
+  z-index: 300;
+  display: none;
+  overflow: hidden;
+}
+.cb-menu.open { display: block; }
+.cb-menu button {
+  width: 100%;
+  display: block;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--hair-light);
+  text-align: left;
+  cursor: pointer;
+  color: var(--lm-ink);
+  font-family: var(--poppins);
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.12s;
+}
+.cb-menu button:last-child { border-bottom: none; }
+.cb-menu button:hover { background: var(--paper); }
+.cb-menu button.active {
+  background: var(--lm-purple);
+  color: #fff;
+}
+.cb-menu button.active:hover { background: var(--lm-purple-hover); }
+
+/* ─────────────────────────────────────────── */
+/* VESPER-STYLE COLOR PICKER                  */
+/* ─────────────────────────────────────────── */
+.vc-picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 8500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s;
+}
+.vc-picker-overlay.open { opacity: 1; pointer-events: all; }
+.vc-picker-sheet {
+  background: #fff;
+  border-radius: 12px;
+  padding: 22px 22px 18px;
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  border: 1px solid var(--hair);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.16);
+  transform: scale(0.97) translateY(8px);
+  transition: transform 0.18s;
+}
+.vc-picker-overlay.open .vc-picker-sheet { transform: scale(1) translateY(0); }
+.vc-picker-title-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.vc-picker-title {
+  font-family: var(--poppins);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--lm-ink);
+}
+.vc-picker-preview {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--hair);
+  flex-shrink: 0;
+}
+.vc-hsv-wrap {
+  width: 100%;
+  height: 180px;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 14px;
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+}
+.vc-hsv-canvas { display: block; width: 100%; height: 100%; }
+.vc-hsv-thumb {
+  position: absolute;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 2.5px solid #fff;
+  box-shadow: 0 0 0 1.5px rgba(0,0,0,0.4);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+.vc-slider-wrap { margin-bottom: 12px; }
+.vc-slider-label {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lm-quiet);
+  margin-bottom: 6px;
+}
+.vc-hue-track {
+  width: 100%;
+  height: 20px;
+  border-radius: 10px;
+  background: linear-gradient(to right,
+    hsl(0,100%,50%), hsl(60,100%,50%), hsl(120,100%,50%),
+    hsl(180,100%,50%), hsl(240,100%,50%), hsl(300,100%,50%),
+    hsl(360,100%,50%));
+  position: relative;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+.vc-hue-thumb {
+  position: absolute;
+  top: 50%;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 2.5px solid #fff;
+  box-shadow: 0 0 0 1.5px rgba(0,0,0,0.35);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.vc-shades-wrap { margin-bottom: 14px; }
+.vc-shades-row { display: flex; gap: 5px; }
+.vc-shade-chip {
+  flex: 1; height: 28px;
+  border-radius: 5px;
+  border: 1px solid var(--hair);
+  cursor: pointer;
+  background: none;
+  padding: 0;
+  transition: transform 0.1s;
+}
+.vc-shade-chip:hover { transform: scaleY(1.08); }
+.vc-shade-chip--active { border: 2.5px solid var(--lm-teal) !important; }
+.vc-hex-row {
+  display: flex;
+  align-items: center;
+  background: var(--paper);
+  border: 1px solid var(--hair);
+  border-radius: 6px;
+  padding: 0 12px;
+  height: 40px;
+  margin-bottom: 14px;
+  transition: border-color 0.15s;
+}
+.vc-hex-row:focus-within { border-color: var(--lm-teal); }
+.vc-hex-hash {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--lm-quiet);
+  margin-right: 4px;
+  user-select: none;
+}
+.vc-hex-input {
+  flex: 1;
+  background: none; border: none; outline: none;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--lm-ink);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.vc-picker-actions { display: flex; gap: 8px; }
+.vc-picker-cancel {
+  flex: 1;
+  background: var(--paper);
+  border: 1px solid var(--hair);
+  border-radius: 6px;
+  padding: 10px;
+  font-family: var(--poppins);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--lm-mute);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.vc-picker-cancel:hover { color: var(--lm-ink); border-color: var(--lm-mute); }
+.vc-picker-done {
+  flex: 1;
+  background: var(--lm-purple);
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  font-family: var(--poppins);
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.vc-picker-done:hover { background: var(--lm-purple-hover); }
+
+/* ─────────────────────────────────────────── */
+/* ANNOUNCEMENT COLORS                        */
+/* ─────────────────────────────────────────── */
+.ann-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.ann-item { }
+.ann-card {
+  padding: 18px 22px;
+  border-radius: 4px;
+  position: relative;
+  transition: background 0.15s;
+}
+.ann-body {
+  font-family: var(--poppins);
+  font-size: 14px;
+  line-height: 1.55;
+  color: #333;
+  margin-bottom: 8px;
+  white-space: pre-wrap;
+}
+.ann-read {
+  font-family: var(--poppins);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  display: inline-block;
+  cursor: pointer;
+}
+.ann-remove-link {
+  background: none;
+  border: none;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--lm-quiet);
+  cursor: pointer;
+  text-decoration: underline;
+  letter-spacing: 0.06em;
+  padding: 6px 0;
+  margin-top: 6px;
+  text-transform: uppercase;
+  display: inline-block;
+}
+.ann-remove-link:hover { color: var(--fail); }
+
+.ann-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--lm-mute);
+  letter-spacing: 0.05em;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.ann-tint-picker {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.ann-tint-picker .lbl {
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  color: var(--lm-quiet);
+  margin-right: 4px;
+  text-transform: uppercase;
+}
+.ann-tint-chip {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,0.15);
+  cursor: pointer;
+  padding: 0;
+  background: transparent;
+  transition: transform 0.1s;
+}
+.ann-tint-chip:hover { transform: scale(1.1); }
+.ann-tint-chip.selected {
+  border: 2.5px solid var(--lm-ink);
+  transform: scale(1.05);
+}
+.ann-tint-label {
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+}
+.ann-empty {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--lm-quiet);
+  letter-spacing: 0.05em;
+  padding: 28px 0;
+  text-align: center;
+  border: 1px dashed var(--hair);
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+/* ─────────────────────────────────────────── */
+/* TYPOGRAPHY WEIGHT SELECTOR + WARNING       */
+/* ─────────────────────────────────────────── */
+.type-row {
+  grid-template-columns: 50px 110px 80px 1fr !important;
+}
+.type-row .font-cell {
+  display: flex;
+  align-items: center;
+}
+.type-row .font-select {
+  background: transparent;
+  border: 1px solid transparent;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--lm-mute);
+  letter-spacing: 0.05em;
+  padding: 2px 4px;
+  border-radius: 3px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.type-row .font-select:hover { border-color: var(--hair); }
+.type-row .font-select:focus { outline: none; border-color: var(--lm-teal); }
+.type-row .font-select.primary { color: #2C5282; }
+.type-row .font-select.secondary { color: var(--lm-quiet); }
+.type-row .font-locked {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--lm-quiet);
+  letter-spacing: 0.05em;
+  padding: 2px 4px;
+  text-transform: uppercase;
+  cursor: default;
+}
+.type-row .weight-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.type-row .weight-select {
+  background: transparent;
+  border: 1px solid transparent;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--lm-mute);
+  letter-spacing: 0.05em;
+  padding: 2px 4px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.type-row .weight-select:hover { border-color: var(--hair); }
+.type-row .weight-select:focus { outline: none; border-color: var(--lm-teal); }
+.type-row .weight-warn {
+  display: none;
+  position: relative;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--warn);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  cursor: help;
+}
+.type-row .weight-warn.show { display: inline-flex; }
+
+/* Warning tooltip bubble - shared by collision-warn (Rule 4) and weight-warn */
+.tip-bubble {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(2px);
+  background: var(--lm-ink);
+  color: #fff;
+  padding: 9px 12px;
+  border-radius: 6px;
+  font-family: var(--poppins);
+  font-size: 11.5px;
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: normal;
+  width: max-content;
+  max-width: 240px;
+  text-align: left;
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+}
+.tip-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--lm-ink);
+}
+.collision-warn:hover > .tip-bubble,
+.collision-warn:focus-within > .tip-bubble,
+.weight-warn:hover > .tip-bubble,
+.weight-warn:focus-within > .tip-bubble {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ─────────────────────────────────────────── */
+/* READ-ONLY MODE                             */
+/* ─────────────────────────────────────────── */
+body.ro .toolbar > * { display: none; }
+body.ro .toolbar .toolbar-logo,
+body.ro .toolbar .toolbar-sep,
+body.ro .toolbar .ro-pill { display: flex; }
+body.ro .ro-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+body.ro .ro-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--lm-orange); }
+body:not(.ro) .ro-pill { display: none; }
+
+body.ro .sec-controls,
+body.ro .add-color-card,
+body.ro .swatch .remove-x,
+body.ro .font-controls,
+body.ro .group-header .actions,
+body.ro .url-actions,
+body.ro .ann-remove-link,
+body.ro .ann-tint-picker,
+body.ro .rules-float,
+body.ro .rev-block { display: none !important; }
+body.ro .ann-controls { justify-content: flex-end; }
+body.ro .logo-bg-input,
+body.ro .logo-bg-chip { display: none; }
+body.ro .logo-meta .lbl { display: none; }
+body.ro .rev-block.has-content {
+  display: block !important;
+}
+body.ro .rev-block.has-content textarea {
+  pointer-events: none;
+  background: transparent;
+  border-color: var(--hair-light);
+}
+body.ro .editable, body.ro .role-input, body.ro .hex-input,
+body.ro .weight-select, body.ro .font-select {
+  pointer-events: none;
+  user-select: text;
+}
+body.ro .swatch .chip { cursor: default !important; }
+body.ro .swatch .chip:hover { transform: none !important; }
+body.ro .status-cell .pad,
+body.ro .ann-card { cursor: default !important; }
+
+
+/* ─────────────────────────────────────────── */
+/* MOBILE BLOCK                               */
+/* ─────────────────────────────────────────── */
+.mobile-msg { display: none; }
+@media (max-width: 760px) {
+  body > .toolbar,
+  body > .page,
+  body > .rules-float,
+  body > .vc-picker-overlay { display: none !important; }
+  .mobile-msg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 56px 28px;
+    min-height: 100vh;
+    background: var(--gutter);
+    color: #fff;
+  }
+  .mobile-msg .mark { width: 72px; margin-bottom: 28px; opacity: 0.95; }
+  .mobile-msg .mark svg { width: 100%; height: auto; display: block; }
+  .mobile-msg .brand {
+    font-family: var(--poppins);
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .mobile-msg .brand .tl { color: var(--lm-teal); }
+  .mobile-msg .brand .or { color: var(--lm-orange); }
+  .mobile-msg .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .mobile-msg h1 {
+    font-family: var(--poppins);
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-bottom: 12px;
+    max-width: 320px;
+    letter-spacing: -0.015em;
+  }
+  .mobile-msg p {
+    font-family: var(--poppins);
+    font-size: 14px;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.7);
+    max-width: 320px;
+  }
+}
+
+
+@media print {
+  body { background: #fff; }
+  .toolbar, .rules-float, .no-print, .mini-btn, .add-color-card,
+  .logo-uploadrow, .url-actions, .swatch .remove-x,
+  .sec-controls { display: none !important; }
+  .page { padding: 0; }
+  .doc { box-shadow: none; width: 100%; max-width: none; }
+  .sec { padding: 32px 48px; page-break-inside: avoid; }
+  .doc-cover { padding: 48px 48px 32px; }
+  .doc-footer { padding: 20px 48px 28px; }
+  .swatch .chip input { pointer-events: none; }
+}
+
+/* SVG colorblind filters live below — invisible */
+.cb-host { position: absolute; width: 0; height: 0; overflow: hidden; }
+</style>
+</head>
+<body>
+
+<!-- Mobile-only block -->
+<div class="mobile-msg" aria-hidden="false">
+  <div class="mark" aria-hidden="true">
+    <svg viewBox="0 0 410.23 417.01" xmlns="http://www.w3.org/2000/svg">
+      <g>
+        <path fill="#00a8aa" d="M330.35,12.84c-1.37-1.16-3.37-1.16-4.73-.02-18.02,15.02-52.46,21.58-60.22,22.9-14.25-6.23-33.41-10.77-59.04-10.77s-46.41,4.69-61.27,10.98c-3.88-.61-42.11-6.97-61.47-23.11-1.37-1.14-3.37-1.14-4.73.02-1.36,1.16-1.7,3.12-.8,4.67.24.42,22,37.79,26.86,61.16v169.31c0,3.05,2.47,5.52,5.52,5.52h187.87c1.46,0,2.87-.58,3.9-1.62,1.04-1.04,1.62-2.44,1.62-3.9V81.04c3.77-23.11,27.04-63.1,27.3-63.53.9-1.54.57-3.51-.8-4.67ZM292.81,242.47H115.98V83.22c0-11.82,24.6-47.23,90.38-47.23,61.72,0,86.45,35.76,86.45,46.77v159.7Z"/>
+        <polygon fill="#00a8aa" points="204.64 193.9 188.95 156.08 204.64 129.86 220.33 156.08 204.64 193.9"/>
+        <circle fill="#00a8aa" cx="158.87" cy="144.63" r="11.77"/>
+        <path fill="#00a8aa" d="M205.08,129.86c0,24.8-20.1,44.9-44.9,44.9s-44.9-20.1-44.9-44.9,20.1-44.9,44.9-44.9,44.9,20.1,44.9,44.9ZM160.18,98.04c-17.57,0-31.82,14.25-31.82,31.82s14.25,31.82,31.82,31.82,31.82-14.25,31.82-31.82-14.25-31.82-31.82-31.82Z"/>
+        <circle fill="#00a8aa" cx="247.79" cy="144.63" r="11.77"/>
+        <path fill="#00a8aa" d="M294,129.86c0,24.8-20.1,44.9-44.9,44.9s-44.9-20.1-44.9-44.9,20.1-44.9,44.9-44.9,44.9,20.1,44.9,44.9ZM249.1,98.04c-17.57,0-31.82,14.25-31.82,31.82s14.25,31.82,31.82,31.82,31.82-14.25,31.82-31.82-14.25-31.82-31.82-31.82Z"/>
+      </g>
+      <path fill="#00b9ae" d="M402.02,152.83l-197.01,69.16-.19-.04v182.73l.19.36s25.72-37.78,54.03-48.14c28.3-10.37,77.19-2.59,92.63-47.77,15.44-45.18,50.36-156.29,50.36-156.29Z"/>
+      <path fill="#00a8aa" d="M7.98,152.83l197.02,69.16v183.05s-25.73-37.78-54.03-48.14c-28.3-10.37-77.19-2.59-92.63-47.77C42.9,263.93,7.98,152.83,7.98,152.83Z"/>
+    </svg>
+  </div>
+  <div class="brand"><span class="tl">Library</span><span class="or">Market</span></div>
+  <div class="label">Color Test</div>
+  <h1>Optimized for desktop</h1>
+  <p>This tool needs more screen real estate than a phone can offer. Open the link on a desktop or tablet (760px wide or larger) to view the color test.</p>
+</div>
+
+<!-- Colorblind simulation filters -->
+<svg class="cb-host" aria-hidden="true">
+  <defs>
+    <filter id="f-deut">
+      <feColorMatrix type="matrix" values="
+        0.625 0.375 0     0 0
+        0.7   0.3   0     0 0
+        0     0.3   0.7   0 0
+        0     0     0     1 0"/>
+    </filter>
+    <filter id="f-prot">
+      <feColorMatrix type="matrix" values="
+        0.567 0.433 0     0 0
+        0.558 0.442 0     0 0
+        0     0.242 0.758 0 0
+        0     0     0     1 0"/>
+    </filter>
+    <filter id="f-trit">
+      <feColorMatrix type="matrix" values="
+        0.95  0.05  0     0 0
+        0     0.433 0.567 0 0
+        0     0.475 0.525 0 0
+        0     0     0     1 0"/>
+    </filter>
+    <filter id="f-achr">
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+  </defs>
+</svg>
+
+<!-- Toolbar -->
+<div class="toolbar no-print">
+  <div class="toolbar-logo">
+    <svg viewBox="0 0 410.23 417.01" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g>
+        <path fill="#00a8aa" d="M330.35,12.84c-1.37-1.16-3.37-1.16-4.73-.02-18.02,15.02-52.46,21.58-60.22,22.9-14.25-6.23-33.41-10.77-59.04-10.77s-46.41,4.69-61.27,10.98c-3.88-.61-42.11-6.97-61.47-23.11-1.37-1.14-3.37-1.14-4.73.02-1.36,1.16-1.7,3.12-.8,4.67.24.42,22,37.79,26.86,61.16v169.31c0,3.05,2.47,5.52,5.52,5.52h187.87c1.46,0,2.87-.58,3.9-1.62,1.04-1.04,1.62-2.44,1.62-3.9V81.04c3.77-23.11,27.04-63.1,27.3-63.53.9-1.54.57-3.51-.8-4.67ZM292.81,242.47H115.98V83.22c0-11.82,24.6-47.23,90.38-47.23,61.72,0,86.45,35.76,86.45,46.77v159.7Z"/>
+        <polygon fill="#00a8aa" points="204.64 193.9 188.95 156.08 204.64 129.86 220.33 156.08 204.64 193.9"/>
+        <circle fill="#00a8aa" cx="158.87" cy="144.63" r="11.77"/>
+        <path fill="#00a8aa" d="M205.08,129.86c0,24.8-20.1,44.9-44.9,44.9s-44.9-20.1-44.9-44.9,20.1-44.9,44.9-44.9,44.9,20.1,44.9,44.9ZM160.18,98.04c-17.57,0-31.82,14.25-31.82,31.82s14.25,31.82,31.82,31.82,31.82-14.25,31.82-31.82-14.25-31.82-31.82-31.82Z"/>
+        <circle fill="#00a8aa" cx="247.79" cy="144.63" r="11.77"/>
+        <path fill="#00a8aa" d="M294,129.86c0,24.8-20.1,44.9-44.9,44.9s-44.9-20.1-44.9-44.9,20.1-44.9,44.9-44.9,44.9,20.1,44.9,44.9ZM249.1,98.04c-17.57,0-31.82,14.25-31.82,31.82s14.25,31.82,31.82,31.82,31.82-14.25,31.82-31.82-14.25-31.82-31.82-31.82Z"/>
+      </g>
+      <path fill="#00b9ae" d="M402.02,152.83l-197.01,69.16-.19-.04v182.73l.19.36s25.72-37.78,54.03-48.14c28.3-10.37,77.19-2.59,92.63-47.77,15.44-45.18,50.36-156.29,50.36-156.29Z"/>
+      <path fill="#00a8aa" d="M7.98,152.83l197.02,69.16v183.05s-25.73-37.78-54.03-48.14c-28.3-10.37-77.19-2.59-92.63-47.77C42.9,263.93,7.98,152.83,7.98,152.83Z"/>
+    </svg>
+    <span class="toolbar-brand"><span class="tl">Library</span><span class="or">Market</span><span class="lbl">Color Test</span></span>
+  </div>
+
+  <span class="ro-pill"><span class="dot"></span>Read-only · Sent by Library Market</span>
+
+  <div class="toolbar-sep"></div>
+
+  <div class="tb-group">
+    <label>Version</label>
+    <div class="tb-version">
+      <button class="tb-version-btn" onclick="changeVersion(-1)" title="Previous version">−</button>
+      <span class="tb-version-badge" id="versionBadge">v1</span>
+      <button class="tb-version-btn" onclick="changeVersion(1)" title="Next version">+</button>
+    </div>
+  </div>
+
+  <div class="tb-group">
+    <label>Secondary</label>
+    <button class="tb-btn active" id="secondaryToggle" onclick="toggleSecondary()">ON</button>
+  </div>
+
+  <div class="tb-group">
+    <label>Colorblind</label>
+    <div class="cb-wrap">
+      <button class="tb-btn cb-trigger" id="cbTrigger" onclick="toggleCBMenu()" aria-haspopup="true" aria-expanded="false">
+        <span id="cbTriggerLabel">Normal</span><span class="caret">▾</span>
+      </button>
+      <div class="cb-menu" id="cbMenu" role="menu">
+        <button class="active" data-cb="none" onclick="setCBMode('none')">Normal</button>
+        <button data-cb="deut" onclick="setCBMode('deut')">Deuteranopia</button>
+        <button data-cb="prot" onclick="setCBMode('prot')">Protanopia</button>
+        <button data-cb="trit" onclick="setCBMode('trit')">Tritanopia</button>
+        <button data-cb="achr" onclick="setCBMode('achr')">Achromatopsia</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tb-spacer"></div>
+
+  <input type="file" id="loadJsonInput" accept=".json" style="display:none" onchange="handleLoadJson(event)">
+  <button class="tb-btn" onclick="document.getElementById('loadJsonInput').click()">Open</button>
+
+  <div class="export-wrap">
+    <button class="tb-btn primary" onclick="toggleExportMenu()">Export ▾</button>
+    <div class="export-menu" id="exportMenu" role="menu">
+      <button role="menuitem" onclick="exportShare(false)">
+        <span class="ico">⤴</span>
+        <div>
+          <div class="lbl">Share</div>
+          <div class="hint">Editable URL for internal review</div>
+        </div>
+      </button>
+      <button role="menuitem" onclick="exportShare(true)">
+        <span class="ico">⤴</span>
+        <div>
+          <div class="lbl">Share read only (client)</div>
+          <div class="hint">Locked URL for client review</div>
+        </div>
+      </button>
+      <button role="menuitem" onclick="exportSave()">
+        <span class="ico">⤓</span>
+        <div>
+          <div class="lbl">Save</div>
+          <div class="hint">Download JSON for revisions</div>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Floating rules indicator: stays visible as the user scrolls. Hidden in print + read-only mode. -->
+<div class="rules-float" id="tbValidation" role="status" aria-live="polite" aria-label="Live LM color rule validation">
+  <span class="dot" aria-hidden="true"></span>
+  <span class="count" id="tbValCount">5/5</span>
+  <span class="label">Rules</span>
+</div>
+
+<!-- Document -->
+<div class="page">
+  <div class="doc" id="doc">
+    <!-- Cover -->
+    <div class="doc-cover">
+      <div>
+        <div class="doc-cover-meta" id="coverMeta">COLOR TEST · ROUND 01 · APR 2026</div>
+        <div class="doc-cover-title">
+          <input class="editable" id="coverTitle" placeholder="Client Name" oninput="updateClient(this.value)">
+        </div>
+        <div class="doc-cover-intro">
+          Accessibility review of your selected color palette, typography, and interactive elements against WCAG 2.1 AA standards. Prepared by Library Market for client approval.
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 01 — LOGO LOCKUP -->
+    <section class="sec">
+      <div class="sec-header">
+        <div class="sec-num">01</div>
+        <div class="sec-titlewrap">
+          <div class="sec-title">Logo Lockup</div>
+          <div class="sec-intro">Confirm the approved wordmark treatment. Default background is white (most library headers); change the hex below if the logo will sit on a colored header.</div>
+        </div>
+        <div class="sec-controls no-print">
+          <label class="logo-uploadlabel" for="logoInput">Upload SVG/PNG</label>
+          <input type="file" id="logoInput" class="logo-input" accept=".svg,.png,image/*" onchange="handleLogoUpload(event)">
+          <button class="mini-btn danger" id="logoRemove" onclick="removeLogo()" style="display:none">Remove</button>
+        </div>
+      </div>
+      <div class="sec-body">
+        <div class="logo-single">
+          <div class="canvas" id="logoCanvas" style="background:#FFFFFF">
+            <span class="placeholder">No logo uploaded</span>
+          </div>
+          <div class="logo-meta">
+            <span class="lbl">Background</span>
+            <span class="logo-bg-chip" id="logoBgChip" style="background:#FFFFFF"></span>
+            <input class="logo-bg-input" id="logoBgInput" value="#FFFFFF" maxlength="7" oninput="onLogoBgChange(this.value)" aria-label="Logo background hex">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 02 — PALETTE URL -->
+    <section class="sec">
+      <div class="sec-header">
+        <div class="sec-num">02</div>
+        <div class="sec-titlewrap">
+          <div class="sec-title">Palette URL</div>
+          <div class="sec-intro">Open this link to make visual edits to the palette. The URL auto-updates whenever you change a color below.</div>
+        </div>
+        <div class="sec-controls no-print">
+          <button class="mini-btn" onclick="copyPaletteUrl()">Copy</button>
+          <button class="mini-btn" onclick="openPaletteUrl()">Open</button>
+        </div>
+      </div>
+      <div class="sec-body">
+        <div class="url-block">
+          <a id="paletteUrl" class="url" href="#" target="_blank" rel="noopener"></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 03 — COLOR PALETTE -->
+    <section class="sec">
+      <div class="sec-header">
+        <div class="sec-num">03</div>
+        <div class="sec-titlewrap">
+          <div class="sec-title">Color Palette</div>
+          <div class="sec-intro" id="paletteIntro">Brand and calendar taxonomy colors. Contrast ratios shown beneath each swatch are measured against #EFEFEF (calendar background).</div>
+        </div>
+        <div class="sec-controls no-print"></div>
+      </div>
+      <div class="sec-body" id="colorsWrapper">
+        <!-- Brand subgroup -->
+        <div class="group-header">
+          <span class="name">Brand</span>
+          <span class="count" id="brandCount">2 colors</span>
+        </div>
+        <div id="brandRow"></div>
+
+        <!-- Calendar Taxonomy subgroup -->
+        <div class="group-header">
+          <span class="name">Calendar Taxonomy</span>
+          <span class="count" id="ageCount">4 colors</span>
+          <span class="actions no-print">
+            <button class="mini-btn" onclick="addAgeColor()">+ Add Color</button>
+          </span>
+        </div>
+        <div id="ageRow"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 04 — STATUS COLORS -->
+    <section class="sec">
+      <div class="sec-header">
+        <div class="sec-num">04</div>
+        <div class="sec-titlewrap">
+          <div class="sec-title">Status Colors</div>
+          <div class="sec-intro">Calibrated success, danger, warning, and info indicators. Contrast measured against white text.</div>
+        </div>
+      </div>
+      <div class="sec-body">
+        <div class="status-grid" id="statusGrid"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 05 — ANNOUNCEMENT COLORS -->
+    <section class="sec">
+      <div class="sec-header">
+        <div class="sec-num">05</div>
+        <div class="sec-titlewrap">
+          <div class="sec-title">Announcement Colors</div>
+          <div class="sec-intro">Preview of leveled announcements using the status palette at 20% opacity. Body text is editable per row; "Read more" link uses Primary. Add as many as the client uses.</div>
+        </div>
+        <div class="sec-controls no-print">
+          <button class="mini-btn" onclick="addAnnouncement()">+ Add Announcement</button>
+        </div>
+      </div>
+      <div class="sec-body">
+        <div class="ann-list" id="annList"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 06 — TYPOGRAPHY -->
+    <section class="sec">
+      <div class="sec-header">
+        <div class="sec-num">06</div>
+        <div class="sec-titlewrap">
+          <div class="sec-title">Typography</div>
+          <div class="sec-intro" id="typographyIntro">Secondary font drives all headings (H1-H6) by default; primary font is locked for body and small text. Use the dropdown on any heading row to override that row to primary. Base size is 18px; the heading scale steps up by 1.25x, 1.5x, 1.75x, 2x, and 2.5x.</div>
+        </div>
+      </div>
+      <div class="sec-body">
+        <div class="font-controls no-print">
+          <div class="font-control">
+            <label>Primary (Google Font)</label>
+            <input id="primaryFontInput" value="Poppins" placeholder="Poppins">
+          </div>
+          <div class="font-control">
+            <label>Secondary (Google Font)</label>
+            <input id="secondaryFontInput" value="Lato" placeholder="Lato">
+          </div>
+          <button class="mini-btn" onclick="applyFonts()">Apply Fonts</button>
+        </div>
+        <div class="type-block" id="typeBlock"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 07 — BUTTON STATES -->
+    <section class="sec">
+      <div class="sec-header">
+        <div class="sec-num">07</div>
+        <div class="sec-titlewrap">
+          <div class="sec-title">Button States</div>
+          <div class="sec-intro">Buttons displayed on the calendar background (#EFEFEF) to show real in-context contrast at base and hover.</div>
+        </div>
+      </div>
+      <div class="sec-body">
+        <div class="btn-grid" id="btnGrid"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 08 — TEST RESULTS -->
+    <section class="sec">
+      <div class="sec-header">
+        <div class="sec-num">08</div>
+        <div class="sec-titlewrap">
+          <div class="sec-title">Accessibility Test Results</div>
+          <div class="sec-intro">The five Library Market color rules evaluated against the current palette, plus a full contrast matrix for staff documentation.</div>
+        </div>
+      </div>
+      <div class="sec-body">
+        <div class="rules-panel" id="rulesPanel"></div>
+
+        <div class="matrix-title">Full Contrast Matrix</div>
+        <div class="matrix" id="matrix"></div>
+      </div>
+    </section>
+
+    <!-- REVISION NOTES -->
+    <section class="sec no-print">
+      <div class="sec-header">
+        <div class="sec-num">↺</div>
+        <div class="sec-titlewrap">
+          <div class="sec-title">Revision Notes</div>
+          <div class="sec-intro">Internal notes for this round (not shared with client). Does not appear in printed output.</div>
+        </div>
+      </div>
+      <div class="sec-body">
+        <div class="rev-block">
+          <textarea id="revNotes" oninput="S.notes = this.value" placeholder="e.g. Round 02: Client requested deeper teal for primary; pushed Age Group 3 toward warmer brown."></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <div class="doc-footer">
+      <span class="sig">Prepared by <span class="tl">Library</span><span class="or">Market</span></span>
+      <span id="footerMeta">v1 · April 30, 2026 · ROUND 01</span>
+    </div>
+  </div>
+</div>
+
+<!-- Vesper-style Color Picker -->
+<div class="vc-picker-overlay" id="vcPickerOverlay" role="dialog" aria-modal="true" aria-labelledby="vcPickerTitle" aria-hidden="true"
+     onclick="if(event.target===this) closePicker()">
+  <div class="vc-picker-sheet" role="document">
+    <div class="vc-picker-title-row">
+      <span class="vc-picker-title" id="vcPickerTitle">Color</span>
+      <div class="vc-picker-preview" id="vcPickerPreview"></div>
+    </div>
+    <div class="vc-hsv-wrap" id="vcHsvWrap" role="slider" aria-label="Color field - drag to select">
+      <canvas id="vcHsvCanvas" aria-hidden="true"></canvas>
+      <div class="vc-hsv-thumb" id="vcHsvThumb" aria-hidden="true"></div>
+    </div>
+    <div class="vc-slider-wrap">
+      <div class="vc-slider-label">Hue</div>
+      <div class="vc-hue-track" id="vcHueTrack" role="slider" aria-label="Hue">
+        <div class="vc-hue-thumb" id="vcHueThumb" aria-hidden="true"></div>
+      </div>
+    </div>
+    <div class="vc-shades-wrap">
+      <div class="vc-slider-label">Shades</div>
+      <div class="vc-shades-row" id="vcShadesRow" role="group" aria-label="Brightness presets"></div>
+    </div>
+    <div class="vc-hex-row">
+      <span class="vc-hex-hash">#</span>
+      <input class="vc-hex-input" id="vcHexInput" type="text" maxlength="6"
+             autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+             aria-label="Hex value, 6 characters" oninput="onPickerHexInput(this.value)">
+    </div>
+    <div class="vc-picker-actions">
+      <button class="vc-picker-cancel" onclick="closePicker()">Cancel</button>
+      <button class="vc-picker-done" onclick="confirmPicker()">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ─────────────────────────────────────────────────────────────────
+const S = {
+  clientName: '',
+  version: 1,
+  date: new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }),
+  hasSecondary: true,
+  primaryFont: 'Poppins',
+  secondaryFont: 'Lato',
+  cbMode: 'none',
+  logoData: null,        // base64 data URL of full-quality logo (for save)
+  logoMime: null,
+  logoBg: '#FFFFFF',     // logo preview background hex
+  logoSmallPng: null,    // small PNG data URL for share URL
+  notes: '',
+  readOnly: false,
+  colors: [
+    { id:'primary',   label:'Primary',          hex:'#D53175', role:'primary',          group:'brand', removable:false },
+    { id:'p-hover',   label:'Primary Hover',    hex:'#4E0D32', role:'primary-hover',    group:'brand', removable:false },
+    { id:'secondary', label:'Secondary',        hex:'#813B96', role:'secondary',        group:'brand', removable:false },
+    { id:'s-hover',   label:'Secondary Hover',  hex:'#3F194F', role:'secondary-hover',  group:'brand', removable:false },
+    { id:'age-1',     label:'Age Group 1',      hex:'#CDB540', role:'age',              group:'age',   removable:true  },
+    { id:'age-2',     label:'Age Group 2',      hex:'#CF4750', role:'age',              group:'age',   removable:true  },
+    { id:'age-3',     label:'Age Group 3',      hex:'#848080', role:'age',              group:'age',   removable:true  },
+    { id:'age-4',     label:'Age Group 4',      hex:'#D0631A', role:'age',              group:'age',   removable:true  },
+  ],
+  status: {
+    Success: '#63A05A',
+    Danger:  '#D33B3B',
+    Warning: '#E7D155',
+    Info:    '#76ADE8',
+  },
+  // Announcement preview rows — dynamic; tint = which status color to apply at 20% opacity
+  announcements: [
+    { id: 'ann-1', tint: 'Danger',      body: 'The library is experiencing a power outage. All locations closed until further notice.' },
+    { id: 'ann-2', tint: 'Warning',     body: 'The printer is down at the main library.' },
+    { id: 'ann-3', tint: 'Info',        body: 'Don\u2019t forget to bring your food drive donations today when you visit to receive a free sticker pack.' },
+  ],
+  // Typography rows with per-row weights
+  typeRows: [
+    { tag: 'H1',         font: 'secondary', size: 45,   weight: 600, sample: 'Find your next favorite book' },
+    { tag: 'H2',         font: 'secondary', size: 36,   weight: 600, sample: 'Upcoming events this week' },
+    { tag: 'H3',         font: 'secondary', size: 31.5, weight: 500, sample: 'Children\u2019s Storytime' },
+    { tag: 'H4',         font: 'secondary', size: 27,   weight: 500, sample: 'Registration required' },
+    { tag: 'H5',         font: 'secondary', size: 22.5, weight: 600, sample: 'Ages 3-5 · 30 minutes' },
+    { tag: 'H6',         font: 'secondary', size: 18,   weight: 600, sample: 'Tuesday · 10:00am' },
+    { tag: 'Body',       font: 'primary',   size: 18,   weight: 400, sample: 'Join us for stories, songs, and rhymes designed to build early literacy skills in a fun, welcoming environment.' },
+    { tag: 'Small Text', font: 'primary',   size: 16,   weight: 400, sample: 'Sponsored by the Friends of the Library' },
+  ],
+  // Cache of available weights per font (parsed from Google Fonts CSS)
+  fontWeights: { Poppins: [], Lato: [] },
+};
+let ageCtr = 5;
+
+// ─── WCAG ──────────────────────────────────────────────────────────────────
+function hexToRgb(h) {
+  h = h.replace(/^#/,'');
+  if (h.length === 3) h = h.split('').map(c=>c+c).join('');
+  return { r: parseInt(h.slice(0,2),16), g: parseInt(h.slice(2,4),16), b: parseInt(h.slice(4,6),16) };
+}
+function lin(c) { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+function lum(hex) { const {r,g,b} = hexToRgb(hex); return 0.2126*lin(r) + 0.7152*lin(g) + 0.0722*lin(b); }
+function contrast(a, b) {
+  const l1 = lum(a), l2 = lum(b);
+  const hi = Math.max(l1,l2), lo = Math.min(l1,l2);
+  return +((hi + 0.05) / (lo + 0.05)).toFixed(2);
+}
+function ratingBadge(r) {
+  if (r >= 7.0) return { label:'AAA', cls:'pass' };
+  if (r >= 4.5) return { label:'AA',  cls:'pass' };
+  if (r >= 3.0) return { label:'AA+', cls:'warn' };
+  return { label:'Fail', cls:'fail' };
+}
+function isValidHex(h) { return /^#[0-9A-Fa-f]{6}$/.test(h); }
+function normHex(h) {
+  h = h.trim();
+  if (!h.startsWith('#')) h = '#' + h;
+  if (h.length === 4) h = '#' + h[1]+h[1]+h[2]+h[2]+h[3]+h[3];
+  return h.toUpperCase();
+}
+function readableOn(bg) { return lum(bg) > 0.179 ? '#1a1a1a' : '#ffffff'; }
+
+// ─── COLORBLIND ────────────────────────────────────────────────────────────
+const CB_MODES = {
+  none: { filter: '',                 label: 'Normal'         },
+  deut: { filter: 'url(#f-deut)',     label: 'Deuteranopia'   },
+  prot: { filter: 'url(#f-prot)',     label: 'Protanopia'     },
+  trit: { filter: 'url(#f-trit)',     label: 'Tritanopia'     },
+  achr: { filter: 'url(#f-achr)',     label: 'Achromatopsia'  },
+};
+function setCBMode(mode) {
+  S.cbMode = mode;
+  const wrap = document.getElementById('colorsWrapper');
+  const cfg = CB_MODES[mode] || CB_MODES.none;
+  wrap.style.filter = cfg.filter;
+  // Update trigger label
+  const lbl = document.getElementById('cbTriggerLabel');
+  if (lbl) lbl.textContent = cfg.label;
+  // Update active state in menu
+  document.querySelectorAll('#cbMenu button').forEach(b => {
+    b.classList.toggle('active', b.dataset.cb === mode);
+  });
+  // Mark trigger as "non-default" by adding active styling when not Normal
+  const trigger = document.getElementById('cbTrigger');
+  if (trigger) trigger.classList.toggle('active', mode !== 'none');
+  // Close the menu
+  closeCBMenu();
+}
+function toggleCBMenu() {
+  const menu = document.getElementById('cbMenu');
+  const trigger = document.getElementById('cbTrigger');
+  const isOpen = menu.classList.toggle('open');
+  trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+}
+function closeCBMenu() {
+  const menu = document.getElementById('cbMenu');
+  const trigger = document.getElementById('cbTrigger');
+  if (menu) menu.classList.remove('open');
+  if (trigger) trigger.setAttribute('aria-expanded', 'false');
+}
+// Close colorblind menu on outside click
+document.addEventListener('click', (e) => {
+  const wrap = document.querySelector('.cb-wrap');
+  if (wrap && !wrap.contains(e.target)) closeCBMenu();
+});
+
+// ─── VERSION + CLIENT ──────────────────────────────────────────────────────
+function changeVersion(d) {
+  S.version = Math.max(1, S.version + d);
+  renderMeta();
+}
+function updateClient(v) {
+  S.clientName = v;
+  const cn = document.getElementById('clientName');
+  const ct = document.getElementById('coverTitle');
+  if (cn && cn.value !== v) cn.value = v;
+  if (ct && ct.value !== v) ct.value = v;
+}
+
+// ─── SECONDARY ─────────────────────────────────────────────────────────────
+function toggleSecondary() {
+  S.hasSecondary = !S.hasSecondary;
+  const btn = document.getElementById('secondaryToggle');
+  btn.textContent = S.hasSecondary ? 'ON' : 'OFF';
+  btn.classList.toggle('active', S.hasSecondary);
+  renderAll();
+}
+function visibleColors() {
+  return S.colors.filter(c => {
+    if (!S.hasSecondary && (c.role === 'secondary' || c.role === 'secondary-hover')) return false;
+    return true;
+  });
+}
+
+// ─── LOGO ──────────────────────────────────────────────────────────────────
+function handleLogoUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    S.logoData = ev.target.result;
+    S.logoMime = file.type || 'image/png';
+    setLogoPreview(ev.target.result);
+    document.getElementById('logoRemove').style.display = 'inline-block';
+  };
+  reader.readAsDataURL(file);
+}
+function setLogoPreview(src) {
+  const c = document.getElementById('logoCanvas');
+  if (!c) return;
+  c.innerHTML = `<img src="${src}" alt="Client logo">`;
+  const rm = document.getElementById('logoRemove');
+  if (rm) rm.style.display = 'inline-block';
+}
+function removeLogo() {
+  S.logoData = null;
+  S.logoMime = null;
+  const c = document.getElementById('logoCanvas');
+  if (c) c.innerHTML = `<span class="placeholder">No logo uploaded</span>`;
+  const rm = document.getElementById('logoRemove');
+  if (rm) rm.style.display = 'none';
+  const inp = document.getElementById('logoInput');
+  if (inp) inp.value = '';
+}
+function onLogoBgChange(val) {
+  const inp = document.getElementById('logoBgInput');
+  let h = String(val || '').trim();
+  if (!h.startsWith('#')) h = '#' + h;
+  // Expand 3-char shorthand (#fff → #ffffff)
+  if (h.length === 4) h = '#' + h[1]+h[1]+h[2]+h[2]+h[3]+h[3];
+  if (isValidHex(h)) {
+    h = h.toUpperCase();
+    S.logoBg = h;
+    const canvas = document.getElementById('logoCanvas');
+    const chip = document.getElementById('logoBgChip');
+    if (canvas) canvas.style.background = h;
+    if (chip) chip.style.background = h;
+    if (inp) inp.classList.remove('invalid');
+  } else {
+    if (inp) inp.classList.add('invalid');
+  }
+}
+function applyLogoBg() {
+  // Apply current S.logoBg to UI (used after restore)
+  const canvas = document.getElementById('logoCanvas');
+  const chip = document.getElementById('logoBgChip');
+  const inp = document.getElementById('logoBgInput');
+  if (canvas) canvas.style.background = S.logoBg;
+  if (chip) chip.style.background = S.logoBg;
+  if (inp) inp.value = S.logoBg;
+}
+
+// ─── PALETTE URL (auto-generated Vesper Colors) ────────────────────────────
+function buildPaletteUrl() {
+  const hexes = visibleColors().map(c => c.hex.replace('#','').toLowerCase()).join('-');
+  return `https://vesperapps.com/colors/view/${hexes}`;
+}
+function renderPaletteUrl() {
+  const url = buildPaletteUrl();
+  const a = document.getElementById('paletteUrl');
+  a.textContent = url;
+  a.href = url;
+}
+function copyPaletteUrl() {
+  navigator.clipboard.writeText(buildPaletteUrl()).then(() => {
+    flashToolbar('Copied');
+  });
+}
+function openPaletteUrl() {
+  window.open(buildPaletteUrl(), '_blank', 'noopener');
+}
+let _flashTimer;
+function flashToolbar(msg) {
+  const v = document.getElementById('tbValidation');
+  const orig = v.innerHTML;
+  v.innerHTML = `<span class="dot" style="background:var(--lm-teal)"></span><span class="count">${msg}</span><span class="label">·</span>`;
+  clearTimeout(_flashTimer);
+  _flashTimer = setTimeout(() => { renderValidation(); }, 1200);
+}
+
+// ─── FONTS ─────────────────────────────────────────────────────────────────
+function loadGoogleFont(name) {
+  const id = 'gf-' + name.replace(/\s+/g,'-').toLowerCase();
+  if (document.getElementById(id)) return;
+  const link = document.createElement('link');
+  link.id = id;
+  link.rel = 'stylesheet';
+  // Request the full standard weight range; Google serves only the weights it has.
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(name)}:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap`;
+  document.head.appendChild(link);
+}
+async function fetchAvailableWeights(name) {
+  // Query Google Fonts CSS and read which weights it actually returns.
+  // If fetch fails (offline, blocked), assume all weights supported.
+  const url = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(name)}:wght@100;200;300;400;500;600;700;800;900&display=swap`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('css fetch failed');
+    const css = await res.text();
+    const weights = new Set();
+    const re = /font-weight:\s*(\d+)/g;
+    let m;
+    while ((m = re.exec(css)) !== null) weights.add(parseInt(m[1], 10));
+    const list = Array.from(weights).sort((a,b) => a-b);
+    S.fontWeights[name] = list.length ? list : [400];
+  } catch (e) {
+    S.fontWeights[name] = [];  // unknown — treat all as supported
+  }
+}
+async function applyFonts() {
+  const pf = (document.getElementById('primaryFontInput').value || '').trim() || 'Poppins';
+  const sf = (document.getElementById('secondaryFontInput').value || '').trim() || 'Lato';
+  S.primaryFont = pf;
+  S.secondaryFont = sf;
+  loadGoogleFont(pf);
+  if (sf !== pf) loadGoogleFont(sf);
+  document.documentElement.style.setProperty('--primary-font', `'${pf}', system-ui, sans-serif`);
+  document.documentElement.style.setProperty('--secondary-font', `'${sf}', system-ui, sans-serif`);
+  document.getElementById('typographyIntro').textContent =
+    `Primary: ${pf}  ·  Secondary: ${sf}. Secondary drives headings (H1-H6) by default; primary is locked for body and small text. Override any heading row via its dropdown.`;
+  // Render once with current cache (may flag warnings briefly)
+  renderTypography();
+  renderButtons();
+  // Refresh weight cache then re-render to update warnings
+  await Promise.all([fetchAvailableWeights(pf), pf !== sf ? fetchAvailableWeights(sf) : Promise.resolve()]);
+  renderTypography();
+}
+
+// ─── COLOR EDITING ─────────────────────────────────────────────────────────
+function onPickerChange(id, val) {
+  const c = S.colors.find(x => x.id === id);
+  if (!c) return;
+  c.hex = val.toUpperCase();
+  renderAll();
+}
+function onHexInput(id, val, inputEl) {
+  if (!val) return;
+  let h = val.trim();
+  if (!h.startsWith('#')) h = '#' + h;
+  if (isValidHex(h)) {
+    const c = S.colors.find(x => x.id === id);
+    if (c) {
+      c.hex = h.toUpperCase();
+      inputEl.classList.remove('invalid');
+      renderAll();
+    }
+  } else {
+    inputEl.classList.add('invalid');
+  }
+}
+function onLabelChange(id, val) {
+  const c = S.colors.find(x => x.id === id);
+  if (c) c.label = val;
+}
+function addAgeColor() {
+  const palette = ['#3D8AC6','#7AA13E','#B47B47','#7E5BAE','#D88A55','#5B8C8E'];
+  const used = S.colors.map(c => c.hex.toUpperCase());
+  const candidate = palette.find(h => !used.includes(h.toUpperCase())) || '#888888';
+  S.colors.push({
+    id: 'age-' + (ageCtr++),
+    label: 'Age Group ' + (S.colors.filter(c => c.group === 'age').length + 1),
+    hex: candidate,
+    role: 'age',
+    group: 'age',
+    removable: true,
+  });
+  renderAll();
+}
+function removeColor(id) {
+  S.colors = S.colors.filter(c => c.id !== id);
+  // Re-label age groups in order
+  let n = 1;
+  S.colors.forEach(c => { if (c.group === 'age' && /^Age Group \d+$/.test(c.label)) c.label = 'Age Group ' + (n++); });
+  renderAll();
+}
+function onStatusChange(name, val) {
+  S.status[name] = val.toUpperCase();
+  renderStatus();
+}
+
+// ─── RENDER: META + COVER ─────────────────────────────────────────────────
+function renderMeta() {
+  const round = String(S.version).padStart(2,'0');
+  const month = new Date().toLocaleDateString('en-US', { month:'short' }).toUpperCase();
+  const year = new Date().getFullYear();
+  document.getElementById('versionBadge').textContent = 'v' + S.version;
+  document.getElementById('coverMeta').textContent = `COLOR TEST · ROUND ${round} · ${month} ${year}`;
+  document.getElementById('footerMeta').textContent = `v${S.version} · ${S.date} · ROUND ${round}`;
+}
+
+// ─── RENDER: SWATCHES ─────────────────────────────────────────────────────
+function brandCollision(c) {
+  if (c.group !== 'age') return null;
+  const brandSlots = [];
+  const p = S.colors.find(x => x.role === 'primary');
+  if (p) brandSlots.push({ role: 'Primary', hex: p.hex });
+  if (S.hasSecondary) {
+    const s = S.colors.find(x => x.role === 'secondary');
+    if (s) brandSlots.push({ role: 'Secondary', hex: s.hex });
+  }
+  const target = c.hex.toUpperCase();
+  const hit = brandSlots.find(b => b.hex.toUpperCase() === target);
+  return hit ? hit.role : null;
+}
+function swatchHTML(c) {
+  const r = contrast(c.hex, '#EFEFEF');
+  const b = ratingBadge(r);
+  const removable = c.removable;
+  const collidesWith = brandCollision(c);
+  const warnHTML = collidesWith
+    ? `<span class="collision-warn no-print" aria-label="Rule 4 violation: this color is also used as ${collidesWith}. Brand colors cannot be reused for taxonomy." tabindex="0">!<span class="tip-bubble">Rule 4 violation: this color is also used as ${collidesWith}. Brand colors cannot be reused for taxonomy.</span></span>`
+    : '';
+  return `
+    <div class="swatch">
+      <div class="chip" style="background:${c.hex}" onclick="openPicker('color','${c.id}')" title="Click to edit">
+        ${warnHTML}
+        ${removable ? `<button class="remove-x no-print" onclick="event.stopPropagation(); removeColor('${c.id}')" title="Remove">×</button>` : ''}
+      </div>
+      <div class="role">
+        ${removable
+          ? `<input class="role-input" value="${c.label}" oninput="onLabelChange('${c.id}', this.value)">`
+          : `${c.label}`}
+      </div>
+      <div class="meta">
+        <input class="hex-input" value="${c.hex}" oninput="onHexInput('${c.id}', this.value, this)" maxlength="7">
+        <span class="ratio ${b.cls}">${r.toFixed(2)}:1 · ${b.label}</span>
+      </div>
+    </div>
+  `;
+}
+function colCount(n) {
+  if (n <= 2) return 2;
+  if (n === 3) return 3;
+  return 4;
+}
+function renderColors() {
+  const visible = visibleColors();
+  const brand = visible.filter(c => c.group === 'brand');
+  const age = visible.filter(c => c.group === 'age');
+
+  // Brand row
+  const brandRow = document.getElementById('brandRow');
+  brandRow.className = 'swatch-row col-' + colCount(brand.length);
+  brandRow.innerHTML = brand.map(swatchHTML).join('');
+  document.getElementById('brandCount').textContent = `${brand.length} ${brand.length === 1 ? 'color' : 'colors'}`;
+
+  // Age row (Calendar Taxonomy)
+  const ageRow = document.getElementById('ageRow');
+  ageRow.className = 'swatch-row col-' + colCount(Math.max(age.length, 1));
+  ageRow.innerHTML = age.length
+    ? age.map(swatchHTML).join('')
+    : `<div class="ann-empty" style="grid-column:1/-1">No colors yet · use "+ Add Color" above</div>`;
+  document.getElementById('ageCount').textContent = `${age.length} ${age.length === 1 ? 'color' : 'colors'}`;
+}
+
+// ─── RENDER: STATUS ───────────────────────────────────────────────────────
+function renderStatus() {
+  const grid = document.getElementById('statusGrid');
+  grid.innerHTML = Object.entries(S.status).map(([name, hex]) => {
+    const r = contrast(hex, '#FFFFFF');
+    const b = ratingBadge(r);
+    return `
+      <div class="status-cell">
+        <div class="pad" style="background:${hex}" onclick="openPicker('status','${name}')" title="Click to edit">
+          ${name.toUpperCase()}
+        </div>
+        <div class="meta">
+          <span>${hex.toUpperCase()}</span>
+          <span style="color:var(--${b.cls === 'pass' ? 'pass' : b.cls === 'warn' ? 'warn' : 'fail'})">${r.toFixed(2)}:1</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ─── RENDER: TYPOGRAPHY ───────────────────────────────────────────────────
+function renderTypography() {
+  const pf = S.primaryFont;
+  const sf = S.secondaryFont;
+  const weightOptions = [300, 400, 500, 600, 700, 800];
+  document.getElementById('typeBlock').innerHTML = S.typeRows.map((r, idx) => {
+    const fontName = r.font === 'primary' ? pf : sf;
+    const supported = isWeightSupported(fontName, r.weight);
+    const opts = weightOptions.map(w => `<option value="${w}" ${w === r.weight ? 'selected' : ''}>${w}</option>`).join('');
+    const isLocked = r.tag === 'Body' || r.tag === 'Small Text';
+    const fontControl = isLocked
+      ? `<span class="font-locked" title="Body and small text always use the Primary font">Primary</span>`
+      : `<select class="font-select ${r.font}" onchange="onFontChange(${idx}, this.value)" aria-label="Font for ${r.tag}">
+            <option value="primary" ${r.font === 'primary' ? 'selected' : ''}>Primary</option>
+            <option value="secondary" ${r.font === 'secondary' ? 'selected' : ''}>Secondary</option>
+          </select>`;
+    return `
+      <div class="type-row">
+        <span class="tag">${r.tag.toUpperCase()}</span>
+        <span class="font-cell">
+          ${fontControl}
+        </span>
+        <span class="weight-cell">
+          <select class="weight-select" onchange="onWeightChange(${idx}, this.value)" aria-label="Weight for ${r.tag}">${opts}</select>
+          <span class="weight-warn ${supported ? '' : 'show'}" aria-label="Weight ${r.weight} is not provided by ${fontName}; the browser will substitute the nearest available weight." tabindex="0">!<span class="tip-bubble">Weight ${r.weight} is not provided by ${fontName}; the browser will substitute the nearest available weight.</span></span>
+        </span>
+        <span class="sample" style="font-family:'${fontName}', system-ui, sans-serif; font-size:${r.size}px; font-weight:${r.weight};">${r.sample}</span>
+      </div>
+    `;
+  }).join('');
+}
+function onWeightChange(idx, val) {
+  S.typeRows[idx].weight = parseInt(val, 10);
+  renderTypography();
+}
+function onFontChange(idx, val) {
+  if (val !== 'primary' && val !== 'secondary') return;
+  const r = S.typeRows[idx];
+  // Body and Small Text are locked to primary; ignore stray events
+  if (r.tag === 'Body' || r.tag === 'Small Text') return;
+  r.font = val;
+  renderTypography();
+}
+function isWeightSupported(fontName, weight) {
+  const list = S.fontWeights[fontName];
+  if (!list || list.length === 0) return true;  // unknown — assume yes until parsed
+  return list.includes(weight);
+}
+
+// ─── RENDER: BUTTONS ──────────────────────────────────────────────────────
+function renderButtons() {
+  const primary = S.colors.find(c => c.role === 'primary');
+  const primaryH = S.colors.find(c => c.role === 'primary-hover');
+  const secondary = S.colors.find(c => c.role === 'secondary');
+  const secondaryH = S.colors.find(c => c.role === 'secondary-hover');
+
+  // Button preview always uses the bold version of body text — i.e. whatever
+  // font the Body row resolves to. Body is locked to primary in the default
+  // rules but JSON loads could in theory carry a stale 'secondary'; respect
+  // whatever the Body row says.
+  const bodyRow = S.typeRows.find(r => r.tag === 'Body');
+  const bodyFontKey = bodyRow ? bodyRow.font : 'primary';
+  const bodyFontName = bodyFontKey === 'primary' ? S.primaryFont : S.secondaryFont;
+
+  const grid = document.getElementById('btnGrid');
+  const pairHTML = (label, base, hover) => {
+    if (!base) return '';
+    const baseText = readableOn(base.hex);
+    const hoverHex = hover ? hover.hex : base.hex;
+    const hoverText = readableOn(hoverHex);
+    const style = [
+      `--btn-base:${base.hex}`,
+      `--btn-hover:${hoverHex}`,
+      `--btn-base-text:${baseText}`,
+      `--btn-hover-text:${hoverText}`,
+      `font-family:'${bodyFontName}', system-ui, sans-serif`,
+    ].join(';');
+    const meta = hover
+      ? `BASE ${base.hex.toUpperCase()} → HOVER ${hover.hex.toUpperCase()}  ·  Δ ${contrast(base.hex, hover.hex).toFixed(2)}:1`
+      : `BASE ${base.hex.toUpperCase()}  ·  No hover defined`;
+    return `
+      <div class="btn-pair">
+        <div class="label">${label}</div>
+        <div class="row">
+          <button class="pill" style="${style}">Register Now</button>
+        </div>
+        <div class="delta">${meta}</div>
+        ${hover ? `<div class="hover-hint no-print">Hover to preview</div>` : ''}
+      </div>
+    `;
+  };
+
+  let html = pairHTML('Primary', primary, primaryH);
+  if (S.hasSecondary && secondary) html += pairHTML('Secondary', secondary, secondaryH);
+  grid.style.gridTemplateColumns = (S.hasSecondary && secondary) ? 'repeat(2, 1fr)' : '1fr';
+  grid.innerHTML = html;
+}
+
+// ─── VALIDATION RULES ─────────────────────────────────────────────────────
+function evaluateRules() {
+  const visible = visibleColors();
+  const primary = visible.find(c => c.role === 'primary');
+  const primaryH = visible.find(c => c.role === 'primary-hover');
+  const secondary = visible.find(c => c.role === 'secondary');
+  const secondaryH = visible.find(c => c.role === 'secondary-hover');
+  const ageColors = visible.filter(c => c.group === 'age');
+
+  const rules = [];
+
+  // R1 — Primary/Secondary contrast vs #EFEFEF >= 4.5:1
+  {
+    const parts = [];
+    let pass = true;
+    if (primary) {
+      const r = contrast(primary.hex, '#EFEFEF');
+      const ok = r >= 4.5;
+      parts.push({ label: 'Primary', ratio: r, pass: ok });
+      pass = pass && ok;
+    }
+    if (S.hasSecondary && secondary) {
+      const r = contrast(secondary.hex, '#EFEFEF');
+      const ok = r >= 4.5;
+      parts.push({ label: 'Secondary', ratio: r, pass: ok });
+      pass = pass && ok;
+    }
+    rules.push({
+      id: 1,
+      title: 'Brand contrast vs calendar background',
+      detail: 'Primary' + (S.hasSecondary ? ' and Secondary' : '') + ' must meet WCAG AA (4.5:1) against #EFEFEF.',
+      parts, pass,
+    });
+  }
+
+  // R2 — Hover contrast (~3:1 from base)
+  {
+    const parts = [];
+    let pass = true;
+    if (primary && primaryH) {
+      const r = contrast(primary.hex, primaryH.hex);
+      const ok = r >= 1.8 && r <= 4.5;  // soft target around 3:1
+      parts.push({ label: 'Primary → Hover', ratio: r, pass: ok });
+      pass = pass && ok;
+    }
+    if (S.hasSecondary && secondary && secondaryH) {
+      const r = contrast(secondary.hex, secondaryH.hex);
+      const ok = r >= 1.8 && r <= 4.5;
+      parts.push({ label: 'Secondary → Hover', ratio: r, pass: ok });
+      pass = pass && ok;
+    }
+    rules.push({
+      id: 2,
+      title: 'Hover state contrast',
+      detail: 'Hovers should be close to 3:1 from the base color so they are visibly distinct without being jarring.',
+      parts, pass,
+    });
+  }
+
+  // R3 — Primary vs Secondary distinguishable
+  if (S.hasSecondary && primary && secondary) {
+    const r = contrast(primary.hex, secondary.hex);
+    const ok = r >= 1.5;
+    rules.push({
+      id: 3,
+      title: 'Primary distinguishable from Secondary',
+      detail: 'Patrons with color-vision impairments should be able to tell Primary and Secondary apart.',
+      parts: [{ label: 'Primary vs Secondary', ratio: r, pass: ok }],
+      pass: ok,
+    });
+  } else {
+    rules.push({
+      id: 3,
+      title: 'Primary distinguishable from Secondary',
+      detail: 'Skipped: no secondary color in use.',
+      parts: [],
+      pass: null,
+    });
+  }
+
+  // R4 — Brand colors not duplicated in age groups
+  {
+    const brandHexes = [primary, secondary].filter(Boolean).map(c => c.hex.toUpperCase());
+    const collisions = ageColors.filter(c => brandHexes.includes(c.hex.toUpperCase()));
+    rules.push({
+      id: 4,
+      title: 'No collision with age-group colors',
+      detail: 'Primary/Secondary cannot be reused as age-group / taxonomy colors.',
+      parts: collisions.length
+        ? collisions.map(c => ({ label: `Conflict: ${c.label} (${c.hex})`, pass: false }))
+        : [{ label: 'No conflicts', pass: true }],
+      pass: collisions.length === 0,
+    });
+  }
+
+  // R5 — Reminder rule (always pass — documentation)
+  rules.push({
+    id: 5,
+    title: 'Brand color used for links and navigation',
+    detail: 'Primary or Secondary must be used for all non-text links (buttons, navigation) and text links. Confirm in production design.',
+    parts: [{ label: 'Manual confirmation required', pass: true }],
+    pass: true,
+  });
+
+  return rules;
+}
+
+function renderRules() {
+  const rules = evaluateRules();
+  const html = rules.map(rule => {
+    const cls = rule.pass === null ? 'skip' : (rule.pass ? 'pass' : 'fail');
+    const label = rule.pass === null ? '—' : (rule.pass ? 'PASS' : 'FAIL');
+    const icon = rule.pass === null ? '–' : (rule.pass ? '✓' : '×');
+    const partsHTML = rule.parts.length
+      ? `<div class="rule-parts">${rule.parts.map(p => `
+            <span class="part ${p.pass === false ? 'fail' : (p.pass === true ? 'pass' : '')}">
+              · ${p.label}${p.ratio !== undefined ? ` (${p.ratio.toFixed(2)}:1)` : ''}
+            </span>`).join('')}</div>`
+      : '';
+    return `
+      <div class="rule-row">
+        <div class="rule-dot ${cls}">${icon}</div>
+        <div>
+          <div class="rule-title">Rule ${rule.id} · ${rule.title}</div>
+          <div class="rule-detail">${rule.detail}</div>
+          ${partsHTML}
+        </div>
+        <div class="rule-status ${cls}">${label}</div>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('rulesPanel').innerHTML = html;
+  return rules;
+}
+function renderValidation(rules) {
+  if (!rules) rules = evaluateRules();
+  const tested = rules.filter(r => r.pass !== null);
+  const passed = tested.filter(r => r.pass).length;
+  const total = tested.length;
+  const failing = total - passed;
+  const v = document.getElementById('tbValidation');
+  v.innerHTML = `
+    <span class="dot"></span>
+    <span class="count">${passed}/${total}</span>
+    <span class="label">Rules ${failing ? '· ' + failing + ' fail' : 'pass'}</span>
+  `;
+  v.classList.toggle('has-fail', failing > 0);
+}
+
+// ─── RENDER: MATRIX ───────────────────────────────────────────────────────
+function renderMatrix() {
+  const visible = visibleColors();
+  const bgs = [
+    { label: '#EFEFEF', hex: '#EFEFEF' },
+    { label: '#FFFFFF', hex: '#FFFFFF' },
+    { label: '#000000', hex: '#000000' },
+  ];
+  const head = `
+    <div class="matrix-row head">
+      <span>Color</span>
+      ${bgs.map(b => `<span>${b.label}</span>`).join('')}
+    </div>`;
+  const rows = visible.map(c => {
+    return `
+      <div class="matrix-row">
+        <span class="name-cell">
+          <span class="swatch-mini" style="background:${c.hex}"></span>
+          ${c.label}
+        </span>
+        ${bgs.map(b => {
+          const r = contrast(c.hex, b.hex);
+          const badge = ratingBadge(r);
+          return `
+            <span class="ratio-cell ${badge.cls}">
+              ${r.toFixed(2)}<span class="badge">${badge.label}</span>
+            </span>`;
+        }).join('')}
+      </div>
+    `;
+  }).join('');
+  document.getElementById('matrix').innerHTML = head + rows;
+}
+
+// ─── RENDER: ANNOUNCEMENTS ────────────────────────────────────────────────
+function hexToRgba(hex, a) {
+  const { r, g, b } = hexToRgb(hex);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[<>&"']/g, c => ({
+    '<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+// Default body copy per tint — used when adding or re-tinting
+const DEFAULT_ANN_TEXT = {
+  Danger:  'The library is experiencing a power outage. All locations closed until further notice.',
+  Warning: 'The printer is down at the main library.',
+  Info:    'Don\u2019t forget to bring your food drive donations today when you visit to receive a free sticker pack.',
+  Success: 'The summer reading program is now open for registration!',
+};
+function renderAnnouncements() {
+  const list = document.getElementById('annList');
+  if (!list) return;
+  const primary = S.colors.find(c => c.role === 'primary');
+  const primaryHex = primary ? primary.hex : '#000';
+  const tintKeys = Object.keys(S.status); // [Success, Danger, Warning, Info]
+
+  if (S.announcements.length === 0) {
+    list.innerHTML = `<div class="ann-empty">No announcements · use "+ Add Announcement" above</div>`;
+    return;
+  }
+
+  const html = S.announcements.map(ann => {
+    const tintHex = S.status[ann.tint] || '#888';
+    const bg = hexToRgba(tintHex, 0.20);
+    const tintChips = tintKeys.map(t => `
+      <button class="ann-tint-chip${t === ann.tint ? ' selected' : ''}"
+              style="background:${S.status[t]}"
+              onclick="setAnnTint('${ann.id}','${t}')"
+              title="${t}" aria-label="Tint: ${t}"></button>
+    `).join('');
+    return `
+      <div class="ann-item" data-id="${ann.id}">
+        <div class="ann-card" style="background:${bg}">
+          <div class="ann-body">${escapeHtml(ann.body)}</div>
+          <a class="ann-read" href="#" onclick="event.preventDefault()" style="color:${primaryHex}">Read more</a>
+        </div>
+        <div class="ann-controls">
+          <span class="ann-tint-picker">
+            <span class="lbl">Tint</span>
+            ${tintChips}
+          </span>
+          <span class="ann-tint-label">${ann.tint} · ${tintHex.toUpperCase()}</span>
+        </div>
+        <button class="ann-remove-link no-print" onclick="removeAnnouncement('${ann.id}')">Remove this announcement</button>
+      </div>
+    `;
+  }).join('');
+  list.innerHTML = html;
+}
+
+function addAnnouncement() {
+  const id = 'ann-' + Date.now();
+  const used = S.announcements.map(a => a.tint);
+  const cycle = ['Info', 'Warning', 'Danger', 'Success'];
+  const next = cycle.find(t => !used.includes(t)) || 'Info';
+  S.announcements.push({ id, tint: next, body: DEFAULT_ANN_TEXT[next] || DEFAULT_ANN_TEXT.Info });
+  renderAnnouncements();
+}
+function removeAnnouncement(id) {
+  S.announcements = S.announcements.filter(a => a.id !== id);
+  renderAnnouncements();
+}
+function setAnnTint(id, tint) {
+  const a = S.announcements.find(x => x.id === id);
+  if (!a) return;
+  // If body matches the previous tint's default, swap to the new tint's default.
+  // Otherwise leave it alone (someone restored a custom value from JSON).
+  const prevDefault = DEFAULT_ANN_TEXT[a.tint];
+  if (a.body === prevDefault && DEFAULT_ANN_TEXT[tint]) {
+    a.body = DEFAULT_ANN_TEXT[tint];
+  }
+  a.tint = tint;
+  renderAnnouncements();
+}
+
+// ─── COLOR PICKER (Vesper-style) ──────────────────────────────────────────
+const SHADE_VALS = [0.95, 0.80, 0.65, 0.50, 0.35, 0.20, 0.10];
+const PK = {
+  open: false,
+  target: null,    // { kind: 'color' | 'status', id }
+  h: 0, s: 0, v: 0,
+  hex: '000000',
+  dragField: false,
+  dragHue: false,
+};
+
+function rgbToHsv(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r,g,b), min = Math.min(r,g,b);
+  let h = 0;
+  const v = max;
+  const d = max - min;
+  const s = max === 0 ? 0 : d / max;
+  if (d !== 0) {
+    if (max === r) h = ((g - b) / d) % 6;
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60;
+    if (h < 0) h += 360;
+  }
+  return { h, s, v };
+}
+function hsvToRgb(h, s, v) {
+  const c = v * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = v - c;
+  let r, g, b;
+  if (h < 60)        { r=c; g=x; b=0; }
+  else if (h < 120)  { r=x; g=c; b=0; }
+  else if (h < 180)  { r=0; g=c; b=x; }
+  else if (h < 240)  { r=0; g=x; b=c; }
+  else if (h < 300)  { r=x; g=0; b=c; }
+  else               { r=c; g=0; b=x; }
+  return {
+    r: Math.round((r + m) * 255),
+    g: Math.round((g + m) * 255),
+    b: Math.round((b + m) * 255),
+  };
+}
+function rgbToHex(r, g, b) {
+  return [r,g,b].map(n => n.toString(16).padStart(2,'0').toUpperCase()).join('');
+}
+
+function openPicker(kind, id) {
+  if (S.readOnly) return;
+  PK.target = { kind, id };
+  let currentHex = '#000000';
+  let title = 'Color';
+  if (kind === 'color') {
+    const c = S.colors.find(x => x.id === id);
+    if (c) { currentHex = c.hex; title = c.label; }
+  } else if (kind === 'status') {
+    currentHex = S.status[id] || '#000000';
+    title = id;
+  }
+  const { r, g, b } = hexToRgb(currentHex);
+  const hsv = rgbToHsv(r, g, b);
+  PK.h = hsv.h; PK.s = hsv.s; PK.v = hsv.v;
+  PK.hex = currentHex.replace('#','').toUpperCase();
+  document.getElementById('vcPickerTitle').textContent = title;
+  const ov = document.getElementById('vcPickerOverlay');
+  ov.classList.add('open');
+  ov.removeAttribute('aria-hidden');
+  PK.open = true;
+  requestAnimationFrame(() => requestAnimationFrame(syncPicker));
+}
+function closePicker() {
+  PK.open = false;
+  const ov = document.getElementById('vcPickerOverlay');
+  ov.classList.remove('open');
+  ov.setAttribute('aria-hidden', 'true');
+}
+function confirmPicker() {
+  if (!PK.target) return closePicker();
+  const hex = '#' + PK.hex.toUpperCase();
+  if (PK.target.kind === 'color') {
+    const c = S.colors.find(x => x.id === PK.target.id);
+    if (c) c.hex = hex;
+  } else if (PK.target.kind === 'status') {
+    S.status[PK.target.id] = hex;
+  }
+  closePicker();
+  renderAll();
+}
+function drawPickerField() {
+  const cv = document.getElementById('vcHsvCanvas');
+  const wrap = document.getElementById('vcHsvWrap');
+  const w = wrap.clientWidth || 276;
+  const h = 180;
+  cv.width = w; cv.height = h;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = `hsl(${Math.round(PK.h)},100%,50%)`;
+  ctx.fillRect(0, 0, w, h);
+  const gS = ctx.createLinearGradient(0,0,w,0);
+  gS.addColorStop(0, 'rgba(255,255,255,1)'); gS.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = gS; ctx.fillRect(0, 0, w, h);
+  const gV = ctx.createLinearGradient(0,0,0,h);
+  gV.addColorStop(0, 'rgba(0,0,0,0)'); gV.addColorStop(1, 'rgba(0,0,0,1)');
+  ctx.fillStyle = gV; ctx.fillRect(0, 0, w, h);
+}
+function setFieldThumb() {
+  const wrap = document.getElementById('vcHsvWrap');
+  const t = document.getElementById('vcHsvThumb');
+  const rgb = hsvToRgb(PK.h, PK.s, PK.v);
+  t.style.left = (PK.s * wrap.clientWidth) + 'px';
+  t.style.top = ((1 - PK.v) * 180) + 'px';
+  t.style.background = '#' + rgbToHex(rgb.r, rgb.g, rgb.b);
+}
+function setHueThumb() {
+  const t = document.getElementById('vcHueThumb');
+  t.style.left = (PK.h / 360 * 100) + '%';
+  t.style.background = `hsl(${Math.round(PK.h)},100%,50%)`;
+}
+function renderShades() {
+  const row = document.getElementById('vcShadesRow');
+  const ci = SHADE_VALS.reduce((b, v, i) => Math.abs(v - PK.v) < Math.abs(SHADE_VALS[b] - PK.v) ? i : b, 0);
+  row.innerHTML = SHADE_VALS.map((sv, i) => {
+    const rgb = hsvToRgb(PK.h, PK.s, sv);
+    const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+    return `<button class="vc-shade-chip${i === ci ? ' vc-shade-chip--active' : ''}"
+              style="background:#${hex}" onclick="pickShade(${sv})"
+              aria-label="Brightness ${Math.round(sv*100)}%"></button>`;
+  }).join('');
+}
+function pickShade(v) {
+  PK.v = v;
+  syncPicker();
+}
+function syncPicker() {
+  drawPickerField();
+  setFieldThumb();
+  setHueThumb();
+  renderShades();
+  const rgb = hsvToRgb(PK.h, PK.s, PK.v);
+  PK.hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+  document.getElementById('vcPickerPreview').style.background = '#' + PK.hex;
+  document.getElementById('vcHexInput').value = PK.hex;
+}
+function onPickerHexInput(raw) {
+  const clean = raw.replace(/[^0-9a-fA-F]/g, '').toUpperCase().slice(0, 6);
+  document.getElementById('vcHexInput').value = clean;
+  if (clean.length === 6) {
+    const { r, g, b } = hexToRgb(clean);
+    const hsv = rgbToHsv(r, g, b);
+    PK.h = hsv.h; PK.s = hsv.s; PK.v = hsv.v; PK.hex = clean;
+    drawPickerField(); setFieldThumb(); setHueThumb(); renderShades();
+    document.getElementById('vcPickerPreview').style.background = '#' + clean;
+  }
+}
+
+// Picker pointer events (set up once at init)
+function initPickerPointer() {
+  const wrap = document.getElementById('vcHsvWrap');
+  const hue  = document.getElementById('vcHueTrack');
+  let rect = null;
+  function fld(cx, cy) {
+    if (!rect) rect = wrap.getBoundingClientRect();
+    PK.s = Math.max(0, Math.min(1, (cx - rect.left) / rect.width));
+    PK.v = Math.max(0, Math.min(1, 1 - (cy - rect.top) / 180));
+    setFieldThumb(); renderShades();
+    const rgb = hsvToRgb(PK.h, PK.s, PK.v);
+    PK.hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+    document.getElementById('vcPickerPreview').style.background = '#' + PK.hex;
+    document.getElementById('vcHexInput').value = PK.hex;
+  }
+  function hu(cx) {
+    const r2 = hue.getBoundingClientRect();
+    PK.h = Math.max(0, Math.min(360, (cx - r2.left) / r2.width * 360));
+    drawPickerField(); setFieldThumb(); setHueThumb(); renderShades();
+    const rgb = hsvToRgb(PK.h, PK.s, PK.v);
+    PK.hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+    document.getElementById('vcPickerPreview').style.background = '#' + PK.hex;
+    document.getElementById('vcHexInput').value = PK.hex;
+  }
+  wrap.addEventListener('mousedown', e => { PK.dragField = true; rect = wrap.getBoundingClientRect(); fld(e.clientX, e.clientY); e.preventDefault(); });
+  hue .addEventListener('mousedown', e => { PK.dragHue = true; hu(e.clientX); e.preventDefault(); });
+  document.addEventListener('mousemove', e => { if (PK.dragField) fld(e.clientX, e.clientY); if (PK.dragHue) hu(e.clientX); });
+  document.addEventListener('mouseup',   () => { PK.dragField = false; PK.dragHue = false; rect = null; });
+  wrap.addEventListener('touchstart', e => { rect = wrap.getBoundingClientRect(); fld(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+  wrap.addEventListener('touchmove',  e => { fld(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
+  hue .addEventListener('touchstart', e => { hu(e.touches[0].clientX); }, { passive: true });
+  hue .addEventListener('touchmove',  e => { hu(e.touches[0].clientX); e.preventDefault(); }, { passive: false });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && PK.open) closePicker(); });
+}
+
+// ─── EXPORT MENU ──────────────────────────────────────────────────────────
+function toggleExportMenu() {
+  const m = document.getElementById('exportMenu');
+  m.classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  const m = document.getElementById('exportMenu');
+  if (!m) return;
+  const wrap = m.parentElement;
+  if (!wrap.contains(e.target)) m.classList.remove('open');
+});
+
+// ─── STATE SERIALIZATION ──────────────────────────────────────────────────
+function captureState() {
+  // Read latest notes / client name from the live UI
+  const notesEl = document.getElementById('revNotes');
+  S.notes = notesEl ? notesEl.value : (S.notes || '');
+  return {
+    v: 2,  // schema version (bumped: announcements use {id, tint}, added logoBg)
+    clientName: S.clientName,
+    version: S.version,
+    hasSecondary: S.hasSecondary,
+    primaryFont: S.primaryFont,
+    secondaryFont: S.secondaryFont,
+    cbMode: S.cbMode,
+    colors: S.colors,
+    status: S.status,
+    announcements: S.announcements,
+    typeRows: S.typeRows,
+    notes: S.notes,
+    logoData: S.logoData,
+    logoMime: S.logoMime,
+    logoBg: S.logoBg,
+  };
+}
+function restoreState(obj) {
+  if (!obj || typeof obj !== 'object') return false;
+  if (obj.clientName !== undefined) S.clientName = obj.clientName;
+  if (obj.version !== undefined) S.version = obj.version;
+  if (obj.hasSecondary !== undefined) S.hasSecondary = obj.hasSecondary;
+  if (obj.primaryFont) S.primaryFont = obj.primaryFont;
+  if (obj.secondaryFont) S.secondaryFont = obj.secondaryFont;
+  if (obj.cbMode) S.cbMode = obj.cbMode;
+  if (Array.isArray(obj.colors)) S.colors = obj.colors;
+  if (obj.status) S.status = obj.status;
+  if (Array.isArray(obj.announcements)) {
+    // Migrate v1 → v2: key (Danger/Warning/Information) → tint (with Info, not Information). Add id.
+    S.announcements = obj.announcements.map((a, i) => {
+      let tint = a.tint || a.key || 'Info';
+      if (tint === 'Information') tint = 'Info';
+      return {
+        id: a.id || ('ann-' + (i + 1) + '-' + Date.now()),
+        tint,
+        body: a.body || '',
+      };
+    });
+  }
+  if (Array.isArray(obj.typeRows)) S.typeRows = obj.typeRows;
+  if (obj.notes !== undefined) S.notes = obj.notes;
+  if (obj.logoData) { S.logoData = obj.logoData; S.logoMime = obj.logoMime; }
+  if (obj.logoBg) S.logoBg = obj.logoBg;
+  // Refresh UI inputs
+  const cn = document.getElementById('clientName');
+  const ct = document.getElementById('coverTitle');
+  if (cn) cn.value = S.clientName;
+  if (ct) ct.value = S.clientName;
+  const pi = document.getElementById('primaryFontInput');
+  const si = document.getElementById('secondaryFontInput');
+  if (pi) pi.value = S.primaryFont;
+  if (si) si.value = S.secondaryFont;
+  const tb = document.getElementById('secondaryToggle');
+  if (tb) { tb.textContent = S.hasSecondary ? 'ON' : 'OFF'; tb.classList.toggle('active', S.hasSecondary); }
+  const rn = document.getElementById('revNotes');
+  if (rn) rn.value = S.notes || '';
+  if (S.logoData) setLogoPreview(S.logoData);
+  applyLogoBg();
+  return true;
+}
+
+// ─── COMPRESSION HELPERS (gzip via CompressionStream) ──────────────────────
+async function gzipBase64Url(str) {
+  const cs = new CompressionStream('gzip');
+  const w = cs.writable.getWriter();
+  w.write(new TextEncoder().encode(str));
+  w.close();
+  const buf = await new Response(cs.readable).arrayBuffer();
+  const bytes = new Uint8Array(buf);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+async function gunzipFromBase64Url(b64u) {
+  const pad = '='.repeat((4 - b64u.length % 4) % 4);
+  const std = b64u.replace(/-/g, '+').replace(/_/g, '/') + pad;
+  const bin = atob(std);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  const ds = new DecompressionStream('gzip');
+  const w = ds.writable.getWriter();
+  w.write(bytes); w.close();
+  const buf = await new Response(ds.readable).arrayBuffer();
+  return new TextDecoder().decode(buf);
+}
+
+// ─── LOGO RASTERIZATION FOR SHARE URL ─────────────────────────────────────
+async function rasterizeLogoForShare(dataUrl, maxW, maxH) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const ratio = Math.min(maxW / img.width, maxH / img.height, 1);
+      const w = Math.max(1, Math.round(img.width  * ratio));
+      const h = Math.max(1, Math.round(img.height * ratio));
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      try {
+        resolve(canvas.toDataURL('image/png'));
+      } catch (e) {
+        resolve(null);
+      }
+    };
+    img.onerror = () => resolve(null);
+    img.src = dataUrl;
+  });
+}
+
+// ─── EXPORT: SAVE JSON ────────────────────────────────────────────────────
+function exportSave() {
+  document.getElementById('exportMenu').classList.remove('open');
+  const state = captureState();
+  const json = JSON.stringify(state, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const safeName = (state.clientName || 'Client').replace(/[^A-Za-z0-9]+/g, '');
+  a.download = `LM-ColorTest-${safeName}-v${state.version}.json`;
+  a.href = url;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// ─── EXPORT: SHARE URL ────────────────────────────────────────────────────
+const SHARE_URL_BUDGET = 7000;       // max total URL length we'll emit
+const LOGO_BUDGET_STEPS = [          // progressively smaller logos until it fits
+  [240, 96], [180, 72], [120, 48], [80, 32], [0, 0]  // last = drop logo
+];
+
+async function buildShareUrl(readOnly) {
+  const baseState = captureState();
+  // Try with progressively smaller logos
+  for (const [maxW, maxH] of LOGO_BUDGET_STEPS) {
+    const s = JSON.parse(JSON.stringify(baseState));
+    if (S.logoData && maxW > 0) {
+      const small = await rasterizeLogoForShare(S.logoData, maxW, maxH);
+      s.logoData = small;
+      s.logoMime = 'image/png';
+    } else {
+      s.logoData = null;
+      s.logoMime = null;
+    }
+    const token = await gzipBase64Url(JSON.stringify(s));
+    const origin = location.origin && location.origin !== 'null' ? location.origin : 'https://lm-color-test';
+    const path = location.pathname || '/';
+    const q = readOnly ? '?ro=1' : '';
+    const url = `${origin}${path}${q}#s=${token}`;
+    if (url.length <= SHARE_URL_BUDGET || maxW === 0) {
+      return { url, droppedLogo: !s.logoData && !!S.logoData, length: url.length };
+    }
+  }
+  return null;
+}
+async function exportShare(readOnly) {
+  document.getElementById('exportMenu').classList.remove('open');
+  const result = await buildShareUrl(!!readOnly);
+  if (!result) return;
+  try {
+    await navigator.clipboard.writeText(result.url);
+    const kind = readOnly ? 'Read-only link copied' : 'Editable link copied';
+    const msg = result.droppedLogo
+      ? `${kind} (logo too large — dropped)`
+      : kind;
+    flashToolbar(msg);
+  } catch (e) {
+    window.prompt('Copy this share link:', result.url);
+  }
+}
+
+// ─── LOAD JSON ────────────────────────────────────────────────────────────
+function handleLoadJson(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const obj = JSON.parse(ev.target.result);
+      if (restoreState(obj)) {
+        applyFonts();
+        renderMeta();
+        renderAll();
+        setCBMode(S.cbMode);
+        flashToolbar('Loaded ' + file.name);
+      } else {
+        flashToolbar('Could not load file');
+      }
+    } catch (err) {
+      flashToolbar('Invalid JSON file');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';  // allow re-loading the same file
+}
+
+// ─── READ-ONLY MODE ───────────────────────────────────────────────────────
+async function tryRestoreFromUrl() {
+  const params = new URLSearchParams(location.search);
+  const isRo = params.get('ro') === '1';
+  const hash = location.hash || '';
+  let token = null;
+  const m = hash.match(/[#&]s=([^&]+)/);
+  if (m) token = m[1];
+  if (!token) return false;
+  try {
+    const json = await gunzipFromBase64Url(token);
+    const obj = JSON.parse(json);
+    restoreState(obj);
+    if (isRo) {
+      S.readOnly = true;
+      document.body.classList.add('ro');
+      // Hide notes block if no content
+      const rev = document.querySelector('.rev-block');
+      if (rev) rev.parentElement.parentElement.classList.toggle('has-content', !!(S.notes && S.notes.trim()));
+    }
+    return true;
+  } catch (e) {
+    console.warn('Failed to decode share URL:', e);
+    return false;
+  }
+}
+function renderAll() {
+  renderColors();
+  renderStatus();
+  renderAnnouncements();
+  renderTypography();
+  renderButtons();
+  const rules = renderRules();
+  renderValidation(rules);
+  renderMatrix();
+  renderPaletteUrl();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  initPickerPointer();
+  const restored = await tryRestoreFromUrl();
+  if (!restored) loadGoogleFont('Lato');
+  applyLogoBg();
+  await applyFonts();
+  renderMeta();
+  renderAll();
+  if (S.cbMode && S.cbMode !== 'none') setCBMode(S.cbMode);
+});
+</script>
+</body>
+</html>
