@@ -563,7 +563,7 @@ button { cursor: pointer; }
 .hex-copy.copied { color: var(--pass); background: rgba(47,133,90,0.10); }
 .hex-copy.copied .ic-clip { display: none; }
 .hex-copy.copied .ic-check { display: block; }
-/* Inline variant for the button preview meta strip — flows with mono text */
+/* Inline variant for the button preview meta strip - flows with mono text */
 .hex-inline {
   display: inline-flex;
   align-items: center;
@@ -639,21 +639,20 @@ button { cursor: pointer; }
 .status-cell { }
 .status-cell .pad {
   height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-family: var(--poppins);
-  font-weight: 600;
-  font-size: 12px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
   position: relative;
   cursor: pointer;
 }
 .status-cell .pad input[type="color"] {
   position: absolute; inset: 0;
   opacity: 0; cursor: pointer; border: none;
+}
+.status-cell .role {
+  font-family: var(--poppins);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  margin-top: 10px;
+  color: var(--lm-ink);
 }
 .status-cell .meta {
   font-family: var(--mono);
@@ -948,7 +947,7 @@ button { cursor: pointer; }
 .matrix-row .ratio-cell.fail .badge { background: rgba(197,48,48,0.1);  color: var(--fail); }
 
 /* ─────────────────────────────────────────── */
-/* MATRIX — narrow viewport stacked layout    */
+/* MATRIX - narrow viewport stacked layout    */
 /* ─────────────────────────────────────────── */
 /* At narrow viewports (tablet) the 5-column grid runs out of room and the */
 /* ratio + badge columns get crushed. Switch each row to a stacked card:   */
@@ -1314,9 +1313,9 @@ button { cursor: pointer; }
   font-family: var(--poppins);
   font-size: 14px;
   line-height: 1.55;
-  color: #333;
   margin-bottom: 8px;
   white-space: pre-wrap;
+  /* color is set inline per row: '#333333' for tinted, readableOn(bg) for full. */
 }
 .ann-read {
   font-family: var(--poppins);
@@ -1382,11 +1381,104 @@ button { cursor: pointer; }
   border: 2.5px solid var(--lm-ink);
   transform: scale(1.05);
 }
+/* Custom chip: always last in the picker. When the announcement has no   */
+/* customHex yet, render a dashed outline + "+" so it reads as a slot to  */
+/* fill. Once filled it shows the color like the other chips, but its    */
+/* selected state still gates on tint === 'Custom'.                       */
+.ann-tint-chip-custom {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--lm-mute);
+}
+.ann-tint-chip-custom.unset {
+  border-style: dashed;
+  border-color: var(--lm-mute);
+  background: transparent;
+}
+.ann-tint-chip-custom.unset:hover { color: var(--lm-ink); border-color: var(--lm-ink); }
 .ann-tint-label {
   text-transform: uppercase;
   font-size: 10.5px;
   letter-spacing: 0.06em;
 }
+/* Mode toggle: segmented Tinted / Full control. Sits in the controls row */
+/* alongside the tint picker. Visually compact mono pill, matching the rest */
+/* of the meta strip. */
+.ann-mode-wrap {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.ann-mode-wrap .lbl {
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  color: var(--lm-quiet);
+  text-transform: uppercase;
+}
+.ann-mode-toggle {
+  display: inline-flex;
+  border: 1px solid var(--hair);
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--paper-2);
+}
+.ann-mode-toggle button {
+  background: transparent;
+  border: 0;
+  padding: 4px 10px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lm-quiet);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.ann-mode-toggle button:hover { color: var(--lm-ink); }
+.ann-mode-toggle button.active {
+  background: var(--lm-ink);
+  color: #fff;
+}
+.ann-mode-toggle button.active:hover { color: #fff; }
+/* Warning row: shown only when mode=full, bg is light enough that body text */
+/* auto-flips to dark, and Primary (which still drives the link in that      */
+/* branch) drops below WCAG AA contrast vs the background.                   */
+.ann-warn-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 9px 12px;
+  background: rgba(183, 121, 31, 0.08);
+  border-left: 3px solid var(--warn);
+  border-radius: 0 4px 4px 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  color: var(--lm-ink);
+}
+.ann-warn-row .ico {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--warn);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.ann-warn-row .msg { flex: 1; }
 .ann-empty {
   font-family: var(--mono);
   font-size: 11px;
@@ -1533,6 +1625,7 @@ body.ro .group-header .actions,
 body.ro .url-actions,
 body.ro .ann-remove-link,
 body.ro .ann-tint-picker,
+body.ro .ann-mode-wrap,
 body.ro .rules-float,
 body.ro .rev-block { display: none !important; }
 body.ro .ann-controls { justify-content: flex-end; }
@@ -1628,7 +1721,7 @@ body.ro .ann-card { cursor: default !important; }
   .swatch .chip input { pointer-events: none; }
 }
 
-/* SVG colorblind filters live below — invisible */
+/* SVG colorblind filters live below - invisible */
 .cb-host { position: absolute; width: 0; height: 0; overflow: hidden; }
 </style>
 </head>
@@ -1794,7 +1887,7 @@ body.ro .ann-card { cursor: default !important; }
       </div>
     </div>
 
-    <!-- SECTION 01 — LOGO LOCKUP -->
+    <!-- SECTION 01 - LOGO LOCKUP -->
     <section class="sec">
       <div class="sec-header">
         <div class="sec-num">01</div>
@@ -1822,7 +1915,7 @@ body.ro .ann-card { cursor: default !important; }
       </div>
     </section>
 
-    <!-- SECTION 02 — PALETTE URL -->
+    <!-- SECTION 02 - PALETTE URL -->
     <section class="sec">
       <div class="sec-header">
         <div class="sec-num">02</div>
@@ -1842,7 +1935,7 @@ body.ro .ann-card { cursor: default !important; }
       </div>
     </section>
 
-    <!-- SECTION 03 — COLOR PALETTE -->
+    <!-- SECTION 03 - COLOR PALETTE -->
     <section class="sec">
       <div class="sec-header">
         <div class="sec-num">03</div>
@@ -1872,13 +1965,13 @@ body.ro .ann-card { cursor: default !important; }
       </div>
     </section>
 
-    <!-- SECTION 04 — STATUS COLORS -->
+    <!-- SECTION 04 - STATUS COLORS -->
     <section class="sec">
       <div class="sec-header">
         <div class="sec-num">04</div>
         <div class="sec-titlewrap">
           <div class="sec-title">Status Colors</div>
-          <div class="sec-intro">Calibrated success, danger, warning, and info indicators. Contrast measured against white text.</div>
+          <div class="sec-intro">Calibrated success, danger, warning, and info indicators. Body text auto-flips to #1A1A1A or #FFFFFF based on background luminance, so each color is guaranteed readable without manual contrast tuning.</div>
         </div>
       </div>
       <div class="sec-body">
@@ -1886,13 +1979,13 @@ body.ro .ann-card { cursor: default !important; }
       </div>
     </section>
 
-    <!-- SECTION 05 — ANNOUNCEMENT COLORS -->
+    <!-- SECTION 05 - ANNOUNCEMENT COLORS -->
     <section class="sec">
       <div class="sec-header">
         <div class="sec-num">05</div>
         <div class="sec-titlewrap">
           <div class="sec-title">Announcement Colors</div>
-          <div class="sec-intro">Preview of leveled announcements using the status palette at 20% opacity. Body text is editable per row; "Read more" link uses Primary. Add as many as the client uses.</div>
+          <div class="sec-intro">Preview of leveled announcements. Each row can be set to <strong>Tinted</strong> (status hex at 20% opacity, dark body, primary link) or <strong>Full</strong> (status hex at 100%, body auto-flips to dark or white based on background luminance). Add as many as the client uses.</div>
         </div>
         <div class="sec-controls no-print">
           <button class="mini-btn" onclick="addAnnouncement()">+ Add Announcement</button>
@@ -1903,7 +1996,7 @@ body.ro .ann-card { cursor: default !important; }
       </div>
     </section>
 
-    <!-- SECTION 06 — TYPOGRAPHY -->
+    <!-- SECTION 06 - TYPOGRAPHY -->
     <section class="sec">
       <div class="sec-header">
         <div class="sec-num">06</div>
@@ -1928,7 +2021,7 @@ body.ro .ann-card { cursor: default !important; }
       </div>
     </section>
 
-    <!-- SECTION 07 — BUTTON STATES -->
+    <!-- SECTION 07 - BUTTON STATES -->
     <section class="sec">
       <div class="sec-header">
         <div class="sec-num">07</div>
@@ -1942,7 +2035,7 @@ body.ro .ann-card { cursor: default !important; }
       </div>
     </section>
 
-    <!-- SECTION 08 — TEST RESULTS -->
+    <!-- SECTION 08 - TEST RESULTS -->
     <section class="sec">
       <div class="sec-header">
         <div class="sec-num">08</div>
@@ -2050,11 +2143,13 @@ const S = {
     Warning: '#E7D155',
     Info:    '#76ADE8',
   },
-  // Announcement preview rows — dynamic; tint = which status color to apply at 20% opacity
+  // Announcement preview rows - dynamic; tint = which status color to apply.
+  // mode = 'tinted' (status hex at 20% opacity, #333 body, primary link) or
+  // 'full' (status hex at 100%, body auto-flips via readableOn(), link follows).
   announcements: [
-    { id: 'ann-1', tint: 'Danger',      body: 'The library is experiencing a power outage. All locations closed until further notice.' },
-    { id: 'ann-2', tint: 'Warning',     body: 'The printer is down at the main library.' },
-    { id: 'ann-3', tint: 'Info',        body: 'Don\u2019t forget to bring your food drive donations today when you visit to receive a free sticker pack.' },
+    { id: 'ann-1', tint: 'Danger',      mode: 'tinted', body: 'The library is experiencing a power outage. All locations closed until further notice.' },
+    { id: 'ann-2', tint: 'Warning',     mode: 'tinted', body: 'The printer is down at the main library.' },
+    { id: 'ann-3', tint: 'Info',        mode: 'tinted', body: 'Don\u2019t forget to bring your food drive donations today when you visit to receive a free sticker pack.' },
   ],
   // Typography rows with per-row weights
   typeRows: [
@@ -2134,12 +2229,16 @@ function simulateCB(hex, mode) {
   const hx = v => clamp(v).toString(16).padStart(2, '0');
   return ('#' + hx(nr) + hx(ng) + hx(nb)).toUpperCase();
 }
-// Distinguishability threshold between two simulated colors. Matches the
-// existing Rule 3 lenience (1.5:1) so all CB-distinguishability rules use
-// the same bar. Tighten to 2.0 or 3.0 if real-world testing flags too few.
-const CB_DISTINGUISH_THRESHOLD = 1.5;
+// Distinguishability threshold between two simulated colors. Lowered from
+// 1.5 to 1.15 after real-world testing: realistic taxonomy palettes (e.g.
+// Babies/Children/Teens/Adults/Everyone with light-yellow/red/olive/teal/
+// sage at varied luminance) had pairs collapsing to ratios around 1.16-
+// 1.22 under tritanopia and achromatopsia that designers consider visually
+// distinct. 1.15 still flags pairs that genuinely map to near-identical
+// luminance under simulation. Tighten back if too lenient in production.
+const CB_DISTINGUISH_THRESHOLD = 1.15;
 // Returns { pass, failingModes: [{mode, label, ratio}] } for a color pair
-// across all four CB simulations. Normal vision is excluded — the question
+// across all four CB simulations. Normal vision is excluded - the question
 // is specifically "do they remain distinct under color blindness?"
 function pairCBDistinguishable(hex1, hex2, threshold = CB_DISTINGUISH_THRESHOLD) {
   const failingModes = [];
@@ -2226,7 +2325,7 @@ function visibleColors() {
 function handleLogoUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
-  // Enforce SVG-only at the handler too — the accept= filter on the input is
+  // Enforce SVG-only at the handler too - the accept= filter on the input is
   // a hint, not a guarantee (drag-and-drop or "All files" can bypass it).
   const isSvg = (file.type && file.type.includes('svg')) ||
                 /\.svg$/i.test(file.name);
@@ -2328,22 +2427,88 @@ function loadGoogleFont(name) {
   link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(name)}:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap`;
   document.head.appendChild(link);
 }
+// Static fallback table for environments where fetch() to Google Fonts is
+// blocked - typically file:// origins (Chrome/Firefox/Safari all block it).
+// Without this, fetch fails silently and S.fontWeights[name] = []  treats
+// all weights as supported, so the unsupported-weight warning never shows.
+// Lookup is name → array of available weights at standard 100-step values.
+// Not exhaustive; uncommon fonts fall through to "treat all as supported."
+const STATIC_FONT_WEIGHTS = {
+  'Inter':              [100, 200, 300, 400, 500, 600, 700, 800, 900],
+  'Roboto':             [100, 300, 400, 500, 700, 900],
+  'Roboto Flex':        [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000],
+  'Open Sans':          [300, 400, 500, 600, 700, 800],
+  'Lato':               [100, 300, 400, 700, 900],
+  'Montserrat':         [100, 200, 300, 400, 500, 600, 700, 800, 900],
+  'Poppins':            [100, 200, 300, 400, 500, 600, 700, 800, 900],
+  'Source Sans Pro':    [200, 300, 400, 600, 700, 900],
+  'Source Sans 3':      [200, 300, 400, 500, 600, 700, 800, 900],
+  'Raleway':            [100, 200, 300, 400, 500, 600, 700, 800, 900],
+  'PT Sans':            [400, 700],
+  'Work Sans':          [100, 200, 300, 400, 500, 600, 700, 800, 900],
+  'Nunito':             [200, 300, 400, 500, 600, 700, 800, 900, 1000],
+  'Nunito Sans':        [200, 300, 400, 600, 700, 800, 900],
+  'DM Sans':            [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000],
+  'Plus Jakarta Sans':  [200, 300, 400, 500, 600, 700, 800],
+  'Mulish':             [200, 300, 400, 500, 600, 700, 800, 900, 1000],
+  'Quicksand':          [300, 400, 500, 600, 700],
+  'Karla':              [200, 300, 400, 500, 600, 700, 800],
+  'Manrope':            [200, 300, 400, 500, 600, 700, 800],
+  'Outfit':             [100, 200, 300, 400, 500, 600, 700, 800, 900],
+  'Figtree':            [300, 400, 500, 600, 700, 800, 900],
+  'Merriweather':       [300, 400, 700, 900],
+  'Lora':               [400, 500, 600, 700],
+  'Playfair Display':   [400, 500, 600, 700, 800, 900],
+  'PT Serif':           [400, 700],
+  'Source Serif Pro':   [200, 300, 400, 600, 700, 900],
+  'Source Serif 4':     [200, 300, 400, 500, 600, 700, 800, 900],
+  'Crimson Text':       [400, 600, 700],
+  'Crimson Pro':        [200, 300, 400, 500, 600, 700, 800, 900],
+  'Cormorant Garamond': [300, 400, 500, 600, 700],
+  'EB Garamond':        [400, 500, 600, 700, 800],
+  'Bitter':             [100, 200, 300, 400, 500, 600, 700, 800, 900],
+  'JetBrains Mono':     [100, 200, 300, 400, 500, 600, 700, 800],
+  'IBM Plex Mono':      [100, 200, 300, 400, 500, 600, 700],
+  'Roboto Mono':        [100, 200, 300, 400, 500, 600, 700],
+  'Source Code Pro':    [200, 300, 400, 500, 600, 700, 800, 900],
+  'Fira Code':          [300, 400, 500, 600, 700],
+  'DM Mono':            [300, 400, 500],
+};
 async function fetchAvailableWeights(name) {
-  // Query Google Fonts CSS and read which weights it actually returns.
-  // If fetch fails (offline, blocked), assume all weights supported.
+  // Live path: query Google Fonts CSS and read which weights it actually
+  // serves. Handles both single weights ("font-weight: 400") and variable
+  // font ranges ("font-weight: 100 900"). Falls back to STATIC_FONT_WEIGHTS
+  // when fetch fails (file:// origin, offline, blocked) so warnings still
+  // work in local testing.
   const url = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(name)}:wght@100;200;300;400;500;600;700;800;900&display=swap`;
+  const STANDARD = [100, 200, 300, 400, 500, 600, 700, 800, 900];
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error('css fetch failed');
     const css = await res.text();
     const weights = new Set();
-    const re = /font-weight:\s*(\d+)/g;
+    // Match either "font-weight: 400" or "font-weight: 100 900" (variable).
+    const re = /font-weight:\s*(\d+)(?:\s+(\d+))?/g;
     let m;
-    while ((m = re.exec(css)) !== null) weights.add(parseInt(m[1], 10));
-    const list = Array.from(weights).sort((a,b) => a-b);
-    S.fontWeights[name] = list.length ? list : [400];
+    while ((m = re.exec(css)) !== null) {
+      const start = parseInt(m[1], 10);
+      const end = m[2] ? parseInt(m[2], 10) : start;
+      STANDARD.forEach(w => { if (w >= start && w <= end) weights.add(w); });
+    }
+    if (weights.size > 0) {
+      S.fontWeights[name] = Array.from(weights).sort((a, b) => a - b);
+      return;
+    }
+    // Response parsed but yielded nothing - try the static fallback.
+    throw new Error('no weights parsed');
   } catch (e) {
-    S.fontWeights[name] = [];  // unknown — treat all as supported
+    if (STATIC_FONT_WEIGHTS[name]) {
+      S.fontWeights[name] = STATIC_FONT_WEIGHTS[name].slice();
+    } else {
+      // Unknown font + no fetch - treat all weights as supported. Better
+      // than false-positive warnings for fonts we don't have data on.
+      S.fontWeights[name] = [];
+    }
   }
 }
 async function applyFonts() {
@@ -2552,20 +2717,15 @@ function renderColors() {
 function renderStatus() {
   const grid = document.getElementById('statusGrid');
   grid.innerHTML = Object.entries(S.status).map(([name, hex]) => {
-    const r = contrast(hex, '#FFFFFF');
-    const b = ratingBadge(r);
-    const ratioVar = b.cls === 'pass' ? 'pass' : b.cls === 'warn' ? 'warn' : 'fail';
     return `
       <div class="status-cell">
-        <div class="pad" style="background:${hex}" onclick="openPicker('status','${name}')" title="Click to edit">
-          ${name.toUpperCase()}
-        </div>
+        <div class="pad" style="background:${hex}" onclick="openPicker('status','${name}')" title="Click to edit"></div>
+        <div class="role">${name}</div>
         <div class="meta">
           <span class="hex-row">
             <input class="hex-input" value="${hex.toUpperCase()}" oninput="onStatusHexInput('${name}', this.value, this)" maxlength="7" aria-label="${name} hex">
             ${copyHexButton()}
           </span>
-          <span style="color:var(--${ratioVar})">${r.toFixed(2)}:1</span>
         </div>
       </div>
     `;
@@ -2650,7 +2810,7 @@ function onCaseChange(idx, val) {
 }
 function isWeightSupported(fontName, weight) {
   const list = S.fontWeights[fontName];
-  if (!list || list.length === 0) return true;  // unknown — assume yes until parsed
+  if (!list || list.length === 0) return true;  // unknown - assume yes until parsed
   return list.includes(weight);
 }
 
@@ -2661,7 +2821,7 @@ function renderButtons() {
   const secondary = S.colors.find(c => c.role === 'secondary');
   const secondaryH = S.colors.find(c => c.role === 'secondary-hover');
 
-  // Button preview always uses the bold version of body text — i.e. whatever
+  // Button preview always uses the bold version of body text - i.e. whatever
   // font the Body row resolves to. Body is locked to primary in the default
   // rules but JSON loads could in theory carry a stale 'secondary'; respect
   // whatever the Body row says.
@@ -2718,7 +2878,7 @@ function evaluateRules() {
 
   const rules = [];
 
-  // R1 — Primary/Secondary contrast vs #EFEFEF >= 4.5:1
+  // R1 - Primary/Secondary contrast vs #EFEFEF >= 4.5:1
   {
     const parts = [];
     let pass = true;
@@ -2742,7 +2902,7 @@ function evaluateRules() {
     });
   }
 
-  // R2 — Hover contrast (~3:1 from base)
+  // R2 - Hover contrast (~3:1 from base)
   {
     const parts = [];
     let pass = true;
@@ -2766,7 +2926,7 @@ function evaluateRules() {
     });
   }
 
-  // R3 — Primary vs Secondary distinguishable under colorblindness
+  // R3 - Primary vs Secondary distinguishable under colorblindness
   if (S.hasSecondary && primary && secondary) {
     const result = pairCBDistinguishable(primary.hex, secondary.hex);
     const parts = result.pass
@@ -2791,7 +2951,7 @@ function evaluateRules() {
     });
   }
 
-  // R4 — Brand colors not duplicated in age groups
+  // R4 - Brand colors not duplicated in age groups
   {
     const brandHexes = [primary, secondary].filter(Boolean).map(c => c.hex.toUpperCase());
     const collisions = ageColors.filter(c => brandHexes.includes(c.hex.toUpperCase()));
@@ -2806,7 +2966,7 @@ function evaluateRules() {
     });
   }
 
-  // R5 — Taxonomy colors distinguishable from each other under colorblindness
+  // R5 - Taxonomy colors distinguishable from each other under colorblindness
   // Each pair of calendar taxonomy colors must remain distinguishable under
   // each of the four CB simulations. Skipped if fewer than two taxonomy
   // colors exist (nothing to test).
@@ -2855,7 +3015,7 @@ function renderRules() {
   const rules = evaluateRules();
   const html = rules.map(rule => {
     const cls = rule.pass === null ? 'skip' : (rule.pass ? 'pass' : 'fail');
-    const label = rule.pass === null ? '—' : (rule.pass ? 'PASS' : 'FAIL');
+    const label = rule.pass === null ? '-' : (rule.pass ? 'PASS' : 'FAIL');
     const icon = rule.pass === null ? '–' : (rule.pass ? '✓' : '×');
     const partsHTML = rule.parts.length
       ? `<div class="rule-parts">${rule.parts.map(p => `
@@ -2938,7 +3098,7 @@ function escapeHtml(s) {
     '<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'
   }[c]));
 }
-// Default body copy per tint — used when adding or re-tinting
+// Default body copy per tint - used when adding or re-tinting
 const DEFAULT_ANN_TEXT = {
   Danger:  'The library is experiencing a power outage. All locations closed until further notice.',
   Warning: 'The printer is down at the main library.',
@@ -2953,31 +3113,104 @@ function renderAnnouncements() {
   const tintKeys = Object.keys(S.status); // [Success, Danger, Warning, Info]
 
   if (S.announcements.length === 0) {
-    list.innerHTML = `<div class="ann-empty">No announcements · use "+ Add Announcement" above</div>`;
+    list.innerHTML = `<div class="ann-empty">No announcements - use "+ Add Announcement" above</div>`;
     return;
   }
 
   const html = S.announcements.map(ann => {
-    const tintHex = S.status[ann.tint] || '#888';
-    const bg = hexToRgba(tintHex, 0.20);
-    const tintChips = tintKeys.map(t => `
+    // Resolve the actual hex used to color the announcement card. For
+    // 'Custom' tints, fall back to a neutral gray if no customHex has been
+    // picked yet (shouldn't happen in normal flow but guards JSON imports).
+    const isCustom = ann.tint === 'Custom';
+    const tintHex = isCustom
+      ? (ann.customHex || '#888888')
+      : (S.status[ann.tint] || '#888888');
+
+    // Mode branching: 'tinted' = 20% opacity bg, #333 body, primary link.
+    // 'full' = 100% bg, body auto-flips via readableOn(), link follows the
+    // body color when the bg is dark, or stays primary when the bg is light.
+    const isFullMode = ann.mode === 'full';
+    const cardBg = isFullMode ? tintHex : hexToRgba(tintHex, 0.20);
+    let bodyColor, linkColor;
+    if (isFullMode) {
+      const autoText = readableOn(tintHex); // '#1a1a1a' on light, '#ffffff' on dark
+      bodyColor = autoText;
+      // Dark bg gets white link; light bg keeps primary link (which is what
+      // the Rule 1 contrast test against #EFEFEF effectively guarantees).
+      linkColor = autoText === '#ffffff' ? '#ffffff' : primaryHex;
+    } else {
+      bodyColor = '#333333';
+      linkColor = primaryHex;
+    }
+
+    // Inline warning: only when mode=full + light bg (so link is primary, not
+    // auto-flipped white) + primary contrast vs that bg falls below WCAG AA.
+    // Tinted mode is covered by Rule 1 (primary vs #EFEFEF, similar luminance).
+    // Dark-bg full mode auto-flips link to white, so contrast is guaranteed.
+    let warnHTML = '';
+    if (isFullMode && readableOn(tintHex) === '#1a1a1a') {
+      const linkContrast = contrast(primaryHex, tintHex);
+      if (linkContrast < 4.5) {
+        warnHTML = `
+          <div class="ann-warn-row" role="alert">
+            <span class="ico" aria-hidden="true">!</span>
+            <span class="msg">Primary link contrast vs this background is ${linkContrast.toFixed(2)}:1 - below WCAG AA (4.5:1). Body text auto-flips, but the link may not be readable here.</span>
+          </div>`;
+      }
+    }
+
+    // Mode toggle: small segmented Tinted / Full control.
+    const modeToggle = `
+      <span class="ann-mode-toggle" role="group" aria-label="Announcement mode">
+        <button type="button" class="${ann.mode === 'tinted' ? 'active' : ''}" onclick="setAnnMode('${ann.id}','tinted')">Tinted</button>
+        <button type="button" class="${ann.mode === 'full'   ? 'active' : ''}" onclick="setAnnMode('${ann.id}','full')">Full</button>
+      </span>`;
+
+    // Four named status chips.
+    const statusChips = tintKeys.map(t => `
       <button class="ann-tint-chip${t === ann.tint ? ' selected' : ''}"
               style="background:${S.status[t]}"
               onclick="setAnnTint('${ann.id}','${t}')"
               title="${t}" aria-label="Tint: ${t}"></button>
     `).join('');
+    // Fifth chip: Custom. Always present, opens the color picker. Shows
+    // the saved custom hex if there is one; otherwise a dashed-outline
+    // placeholder with a "+" indicating "click to pick a color."
+    const customSet = !!ann.customHex;
+    const customSelected = isCustom;
+    const customClass = 'ann-tint-chip ann-tint-chip-custom'
+      + (customSelected ? ' selected' : '')
+      + (customSet ? '' : ' unset');
+    const customStyle = customSet ? `background:${ann.customHex}` : '';
+    const customTitle = customSet
+      ? `Custom: ${ann.customHex.toUpperCase()} (click to change)`
+      : 'Pick a custom color';
+    const customChip = `
+      <button class="${customClass}" style="${customStyle}"
+              onclick="openPicker('announcement','${ann.id}')"
+              title="${customTitle}" aria-label="Custom tint">${customSet ? '' : '+'}</button>
+    `;
+    // Label under the chips.
+    const labelText = isCustom
+      ? `Custom · ${(ann.customHex || '#888888').toUpperCase()}`
+      : `${ann.tint} · ${tintHex.toUpperCase()}`;
     return `
       <div class="ann-item" data-id="${ann.id}">
-        <div class="ann-card" style="background:${bg}">
-          <div class="ann-body">${escapeHtml(ann.body)}</div>
-          <a class="ann-read" href="#" onclick="event.preventDefault()" style="color:${primaryHex}">Read more</a>
+        <div class="ann-card" style="background:${cardBg}">
+          <div class="ann-body" style="color:${bodyColor}">${escapeHtml(ann.body)}</div>
+          <a class="ann-read" href="#" onclick="event.preventDefault()" style="color:${linkColor}">Read more</a>
         </div>
+        ${warnHTML}
         <div class="ann-controls">
+          <span class="ann-mode-wrap">
+            <span class="lbl">Mode</span>
+            ${modeToggle}
+          </span>
           <span class="ann-tint-picker">
             <span class="lbl">Tint</span>
-            ${tintChips}
+            ${statusChips}${customChip}
           </span>
-          <span class="ann-tint-label">${ann.tint} · ${tintHex.toUpperCase()}</span>
+          <span class="ann-tint-label">${labelText}</span>
         </div>
         <button class="ann-remove-link no-print" onclick="removeAnnouncement('${ann.id}')">Remove this announcement</button>
       </div>
@@ -2991,7 +3224,7 @@ function addAnnouncement() {
   const used = S.announcements.map(a => a.tint);
   const cycle = ['Info', 'Warning', 'Danger', 'Success'];
   const next = cycle.find(t => !used.includes(t)) || 'Info';
-  S.announcements.push({ id, tint: next, body: DEFAULT_ANN_TEXT[next] || DEFAULT_ANN_TEXT.Info });
+  S.announcements.push({ id, tint: next, mode: 'tinted', body: DEFAULT_ANN_TEXT[next] || DEFAULT_ANN_TEXT.Info });
   renderAnnouncements();
 }
 function removeAnnouncement(id) {
@@ -3008,6 +3241,14 @@ function setAnnTint(id, tint) {
     a.body = DEFAULT_ANN_TEXT[tint];
   }
   a.tint = tint;
+  renderAnnouncements();
+}
+function setAnnMode(id, mode) {
+  if (mode !== 'tinted' && mode !== 'full') return;
+  const a = S.announcements.find(x => x.id === id);
+  if (!a) return;
+  if (a.mode === mode) return;
+  a.mode = mode;
   renderAnnouncements();
 }
 
@@ -3070,6 +3311,15 @@ function openPicker(kind, id) {
   } else if (kind === 'status') {
     currentHex = S.status[id] || '#000000';
     title = id;
+  } else if (kind === 'announcement') {
+    // Custom announcement tint. Seed the picker with the announcement's
+    // existing custom hex if it has one, else the resolved named tint, so
+    // the first nudge starts from the visible color rather than black.
+    const ann = S.announcements.find(a => a.id === id);
+    if (ann) {
+      currentHex = ann.customHex || S.status[ann.tint] || '#888888';
+      title = 'Custom Announcement Color';
+    }
   }
   const { r, g, b } = hexToRgb(currentHex);
   const hsv = rgbToHsv(r, g, b);
@@ -3096,6 +3346,14 @@ function confirmPicker() {
     if (c) c.hex = hex;
   } else if (PK.target.kind === 'status') {
     S.status[PK.target.id] = hex;
+  } else if (PK.target.kind === 'announcement') {
+    // Custom-tint an announcement. Set tint to 'Custom' so the resolver
+    // and selected-state highlighting both pick up the new color.
+    const ann = S.announcements.find(a => a.id === PK.target.id);
+    if (ann) {
+      ann.tint = 'Custom';
+      ann.customHex = hex;
+    }
   }
   closePicker();
   renderAll();
@@ -3251,11 +3509,21 @@ function restoreState(obj) {
     S.announcements = obj.announcements.map((a, i) => {
       let tint = a.tint || a.key || 'Info';
       if (tint === 'Information') tint = 'Info';
-      return {
+      const out = {
         id: a.id || ('ann-' + (i + 1) + '-' + Date.now()),
         tint,
+        // Legacy JSONs (pre-v2.7) have no mode field; default to 'tinted' so
+        // their visual output matches what they originally rendered as.
+        mode: a.mode === 'full' ? 'full' : 'tinted',
         body: a.body || '',
       };
+      // Preserve a custom hex when tint === 'Custom' (or when a customHex was
+      // saved alongside a status tint; we leave it in case the user toggles
+      // back to Custom later).
+      if (a.customHex && /^#[0-9A-Fa-f]{6}$/.test(a.customHex)) {
+        out.customHex = a.customHex.toUpperCase();
+      }
+      return out;
     });
   }
   if (Array.isArray(obj.typeRows)) S.typeRows = obj.typeRows;
@@ -3454,7 +3722,7 @@ function renderAll() {
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────
-// Track whether the user has touched anything in this session — beforeunload
+// Track whether the user has touched anything in this session - beforeunload
 // only prompts if they have, so a fresh load + immediate close is silent.
 let _userTouched = false;
 function _markTouched() { _userTouched = true; }
