@@ -162,11 +162,18 @@ button { cursor: pointer; }
 /* Fixed to the top-right of the viewport, sitting just below the sticky    */
 /* toolbar so it stays visible as the user scrolls. Lives outside the       */
 /* document flow (position: fixed) so it never affects layout.              */
+/* The wrapper handles positioning only; .rules-float-pill carries the      */
+/* visible chrome and is the click target. .rules-float-panel hangs below   */
+/* the pill and is shown only when .rules-float.expanded is set.            */
 .rules-float {
   position: fixed;
   top: 64px;
   right: 24px;
   z-index: 150;
+}
+.rules-float-pill {
+  appearance: none;
+  -webkit-appearance: none;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -179,28 +186,109 @@ button { cursor: pointer; }
   letter-spacing: 0.05em;
   color: rgba(255,255,255,0.92);
   box-shadow: 0 6px 20px rgba(0,0,0,0.35);
-  pointer-events: none;  /* purely informational; not interactive */
+  cursor: default;  /* default state: passive status indicator */
+  text-align: left;
 }
-.rules-float .dot {
+/* Only failing state gets the click affordance. */
+.rules-float.has-fail .rules-float-pill { cursor: pointer; }
+.rules-float.has-fail .rules-float-pill:hover { border-color: rgba(255,255,255,0.22); }
+.rules-float-pill .dot {
   width: 9px; height: 9px; border-radius: 50%;
   background: var(--pass);
   flex-shrink: 0;
 }
-.rules-float.has-fail .dot { background: var(--fail); }
-.rules-float .count {
+.rules-float.has-fail .rules-float-pill .dot { background: var(--fail); }
+.rules-float-pill .count {
   color: rgba(255,255,255,0.95);
   font-weight: 600;
 }
-.rules-float .label {
+.rules-float-pill .label {
   color: rgba(255,255,255,0.5);
   text-transform: uppercase;
+}
+/* Caret: only present in failing state (added by JS); rotates 180° when expanded. */
+.rules-float-pill .caret {
+  display: inline-block;
+  margin-left: 2px;
+  font-size: 10px;
+  line-height: 1;
+  color: rgba(255,255,255,0.55);
+  transition: transform 0.18s ease;
+}
+.rules-float.expanded .rules-float-pill .caret { transform: rotate(180deg); }
+
+/* Failure panel: drops down from the pill when .rules-float.expanded.       */
+.rules-float-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 280px;
+  max-width: 360px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: var(--chrome);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+  padding: 6px 0;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.9);
+}
+.rules-float:not(.expanded) .rules-float-panel { display: none; }
+.rules-float-panel .rfp-rule {
+  display: block;
+  width: 100%;
+  text-align: left;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 10px 14px;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.rules-float-panel .rfp-rule:first-child { border-top: 0; }
+.rules-float-panel .rfp-rule:hover { background: rgba(255,255,255,0.06); }
+.rules-float-panel .rfp-rule:focus-visible {
+  outline: 2px solid var(--lm-teal);
+  outline-offset: -2px;
+}
+.rules-float-panel .rfp-title {
+  display: block;
+  font-weight: 600;
+  color: rgba(255,255,255,0.95);
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+.rules-float-panel .rfp-part {
+  display: block;
+  color: rgba(255,255,255,0.72);
+  font-size: 11px;
+  line-height: 1.45;
+  margin-top: 2px;
+}
+.rules-float-panel .rfp-part::before {
+  content: '· ';
+  color: var(--fail);
+  font-weight: 700;
 }
 @media (max-width: 1100px) {
   /* On narrower viewports the doc gets close to the right edge; tuck the */
   /* widget into the top-right corner with less padding so it doesn't     */
   /* overlap the document column. */
-  .rules-float { top: 60px; right: 12px; padding: 7px 11px; font-size: 10.5px; }
-  .rules-float .dot { width: 8px; height: 8px; }
+  .rules-float { top: 60px; right: 12px; }
+  .rules-float-pill { padding: 7px 11px; font-size: 10.5px; }
+  .rules-float-pill .dot { width: 8px; height: 8px; }
+  .rules-float-panel { min-width: 240px; max-width: 300px; }
 }
 
 /* ─────────────────────────────────────────── */
@@ -592,7 +680,12 @@ button { cursor: pointer; }
   cursor: pointer;
 }
 .swatch:hover .remove-x { display: flex; }
-.swatch .collision-warn {
+/* Per-chip rule-violation badge. One badge per chip aggregates every rule */
+/* this chip is implicated in (Rule 1 contrast, Rule 2 hover delta, Rule 3 */
+/* CB pair, Rule 4 brand collision, Rule 5 taxonomy CB pair). Lives in the */
+/* top-left corner so the top-right stays free for the remove-x affordance.*/
+/* Tooltip can carry multiple lines via <br> when more than one rule fails.*/
+.swatch .swatch-warn {
   position: absolute;
   top: 6px; left: 6px;
   width: 22px; height: 22px;
@@ -1446,39 +1539,6 @@ button { cursor: pointer; }
   color: #fff;
 }
 .ann-mode-toggle button.active:hover { color: #fff; }
-/* Warning row: shown only when mode=full, bg is light enough that body text */
-/* auto-flips to dark, and Primary (which still drives the link in that      */
-/* branch) drops below WCAG AA contrast vs the background.                   */
-.ann-warn-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-top: 8px;
-  padding: 9px 12px;
-  background: rgba(183, 121, 31, 0.08);
-  border-left: 3px solid var(--warn);
-  border-radius: 0 4px 4px 0;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  line-height: 1.45;
-  letter-spacing: 0.02em;
-  color: var(--lm-ink);
-}
-.ann-warn-row .ico {
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  background: var(--warn);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-.ann-warn-row .msg { flex: 1; }
 .ann-empty {
   font-family: var(--mono);
   font-size: 11px;
@@ -1550,7 +1610,7 @@ button { cursor: pointer; }
 }
 .type-row .weight-warn.show { display: inline-flex; }
 
-/* Warning tooltip bubble - shared by collision-warn (Rule 4) and weight-warn */
+/* Warning tooltip bubble - shared by swatch-warn (per-chip rule violations) and weight-warn */
 .tip-bubble {
   position: absolute;
   bottom: calc(100% + 10px);
@@ -1585,13 +1645,16 @@ button { cursor: pointer; }
   border: 6px solid transparent;
   border-top-color: var(--lm-ink);
 }
-.collision-warn:hover > .tip-bubble,
-.collision-warn:focus-within > .tip-bubble,
+.swatch-warn:hover > .tip-bubble,
+.swatch-warn:focus-within > .tip-bubble,
 .weight-warn:hover > .tip-bubble,
 .weight-warn:focus-within > .tip-bubble {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+/* When the tip-bubble inside .swatch-warn carries multiple lines (one per */
+/* failing rule), preserve them via white-space: pre-line on <br> markers. */
+.swatch-warn .tip-bubble { white-space: normal; }
 
 /* ─────────────────────────────────────────── */
 /* READ-ONLY MODE                             */
@@ -1865,10 +1928,15 @@ body.ro .ann-card { cursor: default !important; }
 </div>
 
 <!-- Floating rules indicator: stays visible as the user scrolls. Hidden in print + read-only mode. -->
+<!-- Wrapper holds positioning; .rules-float-pill carries the chrome and is the click target. -->
+<!-- .rules-float-panel is hidden until .rules-float.expanded; it lists every failing rule. -->
 <div class="rules-float" id="tbValidation" role="status" aria-live="polite" aria-label="Live LM color rule validation">
-  <span class="dot" aria-hidden="true"></span>
-  <span class="count" id="tbValCount">5/5</span>
-  <span class="label">Rules</span>
+  <button type="button" class="rules-float-pill" id="tbValPill" onclick="toggleRulesFloat()" aria-expanded="false" aria-controls="tbValPanel">
+    <span class="dot" aria-hidden="true"></span>
+    <span class="count" id="tbValCount">5/5</span>
+    <span class="label">Rules</span>
+  </button>
+  <div class="rules-float-panel" id="tbValPanel" role="region" aria-label="Failing rules" hidden></div>
 </div>
 
 <!-- Document -->
@@ -1985,7 +2053,7 @@ body.ro .ann-card { cursor: default !important; }
         <div class="sec-num">05</div>
         <div class="sec-titlewrap">
           <div class="sec-title">Announcement Colors</div>
-          <div class="sec-intro">Preview of leveled announcements. Each row can be set to <strong>Tinted</strong> (status hex at 20% opacity, dark body, primary link) or <strong>Full</strong> (status hex at 100%, body auto-flips to dark or white based on background luminance). Add as many as the client uses.</div>
+          <div class="sec-intro">Preview of leveled announcements. Each row can be set to <strong>Tinted</strong> (status hex at 20% opacity, dark body, primary link) or <strong>Full</strong> (status hex at 100%, body auto-flips to dark or white based on background luminance). On a light Full background the link tries Primary first and auto-flips to dark when Primary fails WCAG AA against that background. Add as many as the client uses.</div>
         </div>
         <div class="sec-controls no-print">
           <button class="mini-btn" onclick="addAnnouncement()">+ Add Announcement</button>
@@ -2410,8 +2478,11 @@ function openPaletteUrl() {
 let _flashTimer;
 function flashToolbar(msg) {
   const v = document.getElementById('tbValidation');
-  const orig = v.innerHTML;
-  v.innerHTML = `<span class="dot" style="background:var(--lm-teal)"></span><span class="count">${msg}</span><span class="label">·</span>`;
+  if (!v) return;
+  // Wrap the flash content in a .rules-float-pill div so the new wrapper
+  // structure (pill + panel) doesn't break visually during the 1.2s flash.
+  // The next renderValidation() after the timer rebuilds the proper structure.
+  v.innerHTML = `<div class="rules-float-pill"><span class="dot" style="background:var(--lm-teal)"></span><span class="count">${msg}</span><span class="label">·</span></div>`;
   clearTimeout(_flashTimer);
   _flashTimer = setTimeout(() => { renderValidation(); }, 1200);
 }
@@ -2659,14 +2730,131 @@ function brandCollision(c) {
   const hit = brandSlots.find(b => b.hex.toUpperCase() === target);
   return hit ? hit.role : null;
 }
+// Rule 5 per-chip diagnostic: returns every other taxonomy chip that this
+// chip fails the colorblind-distinguishability test against. Brand chips
+// return [] because Rule 5 is taxonomy-only (Rule 3 covers Primary vs
+// Secondary). Each entry is { partnerLabel, modes } where modes is a
+// comma-separated string of failing CB mode labels. Both halves of a
+// failing pair will see each other in their fails arrays, so fixing
+// either chip clears both badges automatically on the next render.
+function taxonomyCBFailures(c) {
+  if (!c || c.group !== 'age') return [];
+  const others = visibleColors().filter(x => x.group === 'age' && x.id !== c.id);
+  const fails = [];
+  for (const partner of others) {
+    const result = pairCBDistinguishable(c.hex, partner.hex);
+    if (!result.pass) {
+      fails.push({
+        partnerLabel: partner.label,
+        modes: result.failingModes.map(fm => fm.label).join(', '),
+      });
+    }
+  }
+  return fails;
+}
+// Unified per-chip rule-failure aggregator. Returns every rule that this
+// specific chip is implicated in failing, with a human-readable message
+// per rule. Brand chips can fail Rules 1, 2, and 3; taxonomy chips can
+// fail Rules 4 and 5. A single chip may fail multiple rules at once
+// (e.g. a low-contrast Primary that also collapses against Secondary
+// under colorblindness), in which case all of them appear in the tooltip.
+function chipRuleFailures(c) {
+  if (!c) return [];
+  const fails = [];
+  if (c.group === 'brand') {
+    // Rule 1: Primary / Secondary contrast vs the calendar background.
+    if (c.role === 'primary' || c.role === 'secondary') {
+      const r = contrast(c.hex, '#EFEFEF');
+      if (r < 4.5) {
+        fails.push({
+          rule: 1,
+          msg: `Rule 1: contrast vs calendar background (#EFEFEF) is ${r.toFixed(2)}:1, below WCAG AA (4.5:1).`,
+        });
+      }
+    }
+    // Rule 2: hover delta from base. Both halves of a failing pair get
+    // flagged so the user sees the issue from either chip.
+    const role2pair = {
+      'primary':         { partner: 'primary-hover', label: 'Primary → Hover' },
+      'primary-hover':   { partner: 'primary',       label: 'Primary → Hover' },
+      'secondary':       { partner: 'secondary-hover', label: 'Secondary → Hover' },
+      'secondary-hover': { partner: 'secondary',       label: 'Secondary → Hover' },
+    };
+    if (role2pair[c.role]) {
+      // Skip Secondary side of the pair when Secondary is toggled off.
+      const skipSecondary = !S.hasSecondary && (c.role === 'secondary' || c.role === 'secondary-hover');
+      if (!skipSecondary) {
+        const partner = S.colors.find(x => x.role === role2pair[c.role].partner);
+        if (partner) {
+          const r = contrast(c.hex, partner.hex);
+          if (r < 1.8 || r > 4.5) {
+            fails.push({
+              rule: 2,
+              msg: `Rule 2: ${role2pair[c.role].label} contrast is ${r.toFixed(2)}:1; should be roughly 3:1 (between 1.8 and 4.5).`,
+            });
+          }
+        }
+      }
+    }
+    // Rule 3: Primary vs Secondary distinguishable under colorblindness.
+    // Both chips get the badge when the pair fails.
+    if ((c.role === 'primary' || c.role === 'secondary') && S.hasSecondary) {
+      const primary = S.colors.find(x => x.role === 'primary');
+      const secondary = S.colors.find(x => x.role === 'secondary');
+      if (primary && secondary) {
+        const result = pairCBDistinguishable(primary.hex, secondary.hex);
+        if (!result.pass) {
+          const modes = result.failingModes.map(fm => fm.label).join(', ');
+          fails.push({
+            rule: 3,
+            msg: `Rule 3: Primary and Secondary indistinguishable under ${modes}.`,
+          });
+        }
+      }
+    }
+  }
+  if (c.group === 'age') {
+    // Rule 4: taxonomy chip duplicates a brand color.
+    const collidesWith = brandCollision(c);
+    if (collidesWith) {
+      fails.push({
+        rule: 4,
+        msg: `Rule 4: this color is also used as ${collidesWith}. Brand colors cannot be reused for taxonomy.`,
+      });
+    }
+    // Rule 5: taxonomy pair fails colorblindness distinguishability.
+    const cbFails = taxonomyCBFailures(c);
+    if (cbFails.length === 1) {
+      const f = cbFails[0];
+      fails.push({
+        rule: 5,
+        msg: `Rule 5: indistinguishable from ${f.partnerLabel} under ${f.modes}. Patrons with that form of color blindness will see these as the same color.`,
+      });
+    } else if (cbFails.length > 1) {
+      const list = cbFails.map(f => `${f.partnerLabel} (${f.modes})`).join('; ');
+      fails.push({
+        rule: 5,
+        msg: `Rule 5: indistinguishable under colorblindness from ${list}.`,
+      });
+    }
+  }
+  return fails;
+}
 function swatchHTML(c) {
   const r = contrast(c.hex, '#EFEFEF');
   const b = ratingBadge(r);
   const removable = c.removable;
-  const collidesWith = brandCollision(c);
-  const warnHTML = collidesWith
-    ? `<span class="collision-warn no-print" aria-label="Rule 4 violation: this color is also used as ${collidesWith}. Brand colors cannot be reused for taxonomy." tabindex="0">!<span class="tip-bubble">Rule 4 violation: this color is also used as ${collidesWith}. Brand colors cannot be reused for taxonomy.</span></span>`
-    : '';
+  // Aggregate every rule this chip is involved in failing into a single
+  // top-left badge. The tooltip lists each failing rule on its own line
+  // so the user can read all the issues at once. Top-right stays free
+  // for the .remove-x affordance on removable chips.
+  const fails = chipRuleFailures(c);
+  let warnHTML = '';
+  if (fails.length) {
+    const lines = fails.map(f => escapeHtml(f.msg));
+    const ariaLabel = fails.map(f => f.msg).join(' ');
+    warnHTML = `<span class="swatch-warn no-print" aria-label="${escapeHtml(ariaLabel)}" tabindex="0">!<span class="tip-bubble">${lines.join('<br>')}</span></span>`;
+  }
   return `
     <div class="swatch">
       <div class="chip" style="background:${c.hex}" onclick="openPicker('color','${c.id}')" title="Click to edit">
@@ -3045,13 +3233,78 @@ function renderValidation(rules) {
   const total = tested.length;
   const failing = total - passed;
   const v = document.getElementById('tbValidation');
-  v.innerHTML = `
-    <span class="dot"></span>
-    <span class="count">${passed}/${total}</span>
-    <span class="label">Rules ${failing ? '· ' + failing + ' fail' : 'pass'}</span>
-  `;
+  if (!v) return;
+  // Preserve any prior expanded state. If failing dropped to 0 we collapse
+  // automatically because there's nothing actionable to show. We also
+  // collapse when the wrapper has been clobbered by flashToolbar (no pill
+  // child means we're mid-flash; the next render after the flash restores
+  // the proper structure).
+  const wasExpanded = v.classList.contains('expanded') && v.querySelector('.rules-float-pill') !== null;
   v.classList.toggle('has-fail', failing > 0);
+  const shouldExpand = wasExpanded && failing > 0;
+  v.classList.toggle('expanded', shouldExpand);
+  // Pill content. Caret is rendered only when there's something to expand.
+  const caret = failing > 0 ? '<span class="caret" aria-hidden="true">▾</span>' : '';
+  // Build the failing-rules panel content. Only failing rules with non-empty
+  // parts are listed - passing rules and skipped ones aren't actionable here.
+  const failingRules = rules.filter(r => r.pass === false);
+  const panelHTML = failingRules.map(r => {
+    const failingParts = (r.parts || []).filter(p => p.pass === false);
+    const partsHTML = failingParts.map(p => `<span class="rfp-part">${escapeHtml(p.label)}</span>`).join('');
+    return `<button type="button" class="rfp-rule" onclick="jumpToRulesPanel()"><span class="rfp-title">Rule ${r.id}: ${escapeHtml(r.title)}</span>${partsHTML}</button>`;
+  }).join('');
+  v.innerHTML = `
+    <button type="button" class="rules-float-pill" id="tbValPill" onclick="toggleRulesFloat()" aria-expanded="${shouldExpand ? 'true' : 'false'}" aria-controls="tbValPanel">
+      <span class="dot" aria-hidden="true"></span>
+      <span class="count" id="tbValCount">${passed}/${total}</span>
+      <span class="label">Rules ${failing ? '· ' + failing + ' fail' : 'pass'}</span>
+      ${caret}
+    </button>
+    <div class="rules-float-panel" id="tbValPanel" role="region" aria-label="Failing rules"${shouldExpand ? '' : ' hidden'}>${panelHTML}</div>
+  `;
 }
+// Toggle the expanded state of the floating rules widget. No-op when the
+// pill is in pass state (no failures to show) so the widget stays a
+// passive status indicator in that branch.
+function toggleRulesFloat() {
+  const v = document.getElementById('tbValidation');
+  if (!v || !v.classList.contains('has-fail')) return;
+  const isExpanded = v.classList.toggle('expanded');
+  const pill = v.querySelector('.rules-float-pill');
+  const panel = v.querySelector('.rules-float-panel');
+  if (pill) pill.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+  if (panel) {
+    if (isExpanded) panel.removeAttribute('hidden');
+    else panel.setAttribute('hidden', '');
+  }
+}
+// Smooth-scroll to the full rules panel in Section 08 and collapse the
+// floating widget so it doesn't cover the destination.
+function jumpToRulesPanel() {
+  const target = document.getElementById('rulesPanel');
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const v = document.getElementById('tbValidation');
+  if (v) {
+    v.classList.remove('expanded');
+    const pill = v.querySelector('.rules-float-pill');
+    const panel = v.querySelector('.rules-float-panel');
+    if (pill) pill.setAttribute('aria-expanded', 'false');
+    if (panel) panel.setAttribute('hidden', '');
+  }
+}
+// Click-outside handler: close the panel when the user clicks anywhere
+// outside the floating widget. Mirrors the closeCBMenu pattern.
+document.addEventListener('click', (e) => {
+  const v = document.getElementById('tbValidation');
+  if (!v || !v.classList.contains('expanded')) return;
+  if (!v.contains(e.target)) {
+    v.classList.remove('expanded');
+    const pill = v.querySelector('.rules-float-pill');
+    const panel = v.querySelector('.rules-float-panel');
+    if (pill) pill.setAttribute('aria-expanded', 'false');
+    if (panel) panel.setAttribute('hidden', '');
+  }
+});
 
 // ─── RENDER: MATRIX ───────────────────────────────────────────────────────
 function renderMatrix() {
@@ -3127,36 +3380,28 @@ function renderAnnouncements() {
       : (S.status[ann.tint] || '#888888');
 
     // Mode branching: 'tinted' = 20% opacity bg, #333 body, primary link.
-    // 'full' = 100% bg, body auto-flips via readableOn(), link follows the
-    // body color when the bg is dark, or stays primary when the bg is light.
+    // 'full' = 100% bg, body auto-flips via readableOn(). Link routing:
+    //   dark bg  → white (matches body)
+    //   light bg → tries Primary first, auto-flips to readableOn(tintHex)
+    //              (i.e. dark text) when Primary fails WCAG AA against the bg.
+    // The auto-flip mirrors the body's auto-flip rule so the link is always
+    // readable; replaces the v2.7 inline `.ann-warn-row` warning.
     const isFullMode = ann.mode === 'full';
     const cardBg = isFullMode ? tintHex : hexToRgba(tintHex, 0.20);
     let bodyColor, linkColor;
     if (isFullMode) {
       const autoText = readableOn(tintHex); // '#1a1a1a' on light, '#ffffff' on dark
       bodyColor = autoText;
-      // Dark bg gets white link; light bg keeps primary link (which is what
-      // the Rule 1 contrast test against #EFEFEF effectively guarantees).
-      linkColor = autoText === '#ffffff' ? '#ffffff' : primaryHex;
+      if (autoText === '#ffffff') {
+        // Dark bg per spec: body and link both white.
+        linkColor = '#ffffff';
+      } else {
+        // Light bg: Primary first, fall back to dark when Primary fails AA.
+        linkColor = contrast(primaryHex, tintHex) >= 4.5 ? primaryHex : autoText;
+      }
     } else {
       bodyColor = '#333333';
       linkColor = primaryHex;
-    }
-
-    // Inline warning: only when mode=full + light bg (so link is primary, not
-    // auto-flipped white) + primary contrast vs that bg falls below WCAG AA.
-    // Tinted mode is covered by Rule 1 (primary vs #EFEFEF, similar luminance).
-    // Dark-bg full mode auto-flips link to white, so contrast is guaranteed.
-    let warnHTML = '';
-    if (isFullMode && readableOn(tintHex) === '#1a1a1a') {
-      const linkContrast = contrast(primaryHex, tintHex);
-      if (linkContrast < 4.5) {
-        warnHTML = `
-          <div class="ann-warn-row" role="alert">
-            <span class="ico" aria-hidden="true">!</span>
-            <span class="msg">Primary link contrast vs this background is ${linkContrast.toFixed(2)}:1 - below WCAG AA (4.5:1). Body text auto-flips, but the link may not be readable here.</span>
-          </div>`;
-      }
     }
 
     // Mode toggle: small segmented Tinted / Full control.
@@ -3200,7 +3445,6 @@ function renderAnnouncements() {
           <div class="ann-body" style="color:${bodyColor}">${escapeHtml(ann.body)}</div>
           <a class="ann-read" href="#" onclick="event.preventDefault()" style="color:${linkColor}">Read more</a>
         </div>
-        ${warnHTML}
         <div class="ann-controls">
           <span class="ann-mode-wrap">
             <span class="lbl">Mode</span>
