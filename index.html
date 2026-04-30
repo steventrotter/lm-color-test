@@ -1697,8 +1697,8 @@ body.ro .ann-card { cursor: default !important; }
           <div class="sec-intro">Confirm the approved wordmark treatment. Default background is white (most library headers); change the hex below if the logo will sit on a colored header.</div>
         </div>
         <div class="sec-controls no-print">
-          <label class="logo-uploadlabel" for="logoInput">Upload SVG/PNG</label>
-          <input type="file" id="logoInput" class="logo-input" accept=".svg,.png,image/*" onchange="handleLogoUpload(event)">
+          <label class="logo-uploadlabel" for="logoInput">Upload SVG</label>
+          <input type="file" id="logoInput" class="logo-input" accept=".svg,image/svg+xml" onchange="handleLogoUpload(event)">
           <button class="mini-btn danger" id="logoRemove" onclick="removeLogo()" style="display:none">Remove</button>
         </div>
       </div>
@@ -2070,10 +2070,19 @@ function visibleColors() {
 function handleLogoUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
+  // Enforce SVG-only at the handler too — the accept= filter on the input is
+  // a hint, not a guarantee (drag-and-drop or "All files" can bypass it).
+  const isSvg = (file.type && file.type.includes('svg')) ||
+                /\.svg$/i.test(file.name);
+  if (!isSvg) {
+    flashToolbar('Logo must be an SVG. Other formats are not supported.');
+    e.target.value = '';
+    return;
+  }
   const reader = new FileReader();
   reader.onload = ev => {
     S.logoData = ev.target.result;
-    S.logoMime = file.type || 'image/png';
+    S.logoMime = 'image/svg+xml';
     setLogoPreview(ev.target.result);
     document.getElementById('logoRemove').style.display = 'inline-block';
   };
@@ -3005,30 +3014,75 @@ async function gunzipFromBase64Url(b64u) {
   return new TextDecoder().decode(buf);
 }
 
-// ─── LOGO RASTERIZATION FOR SHARE URL ─────────────────────────────────────
-async function rasterizeLogoForShare(dataUrl, maxW, maxH) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      const ratio = Math.min(maxW / img.width, maxH / img.height, 1);
-      const w = Math.max(1, Math.round(img.width  * ratio));
-      const h = Math.max(1, Math.round(img.height * ratio));
-      const canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
-      try {
-        resolve(canvas.toDataURL('image/png'));
-      } catch (e) {
-        resolve(null);
-      }
-    };
-    img.onerror = () => resolve(null);
-    img.src = dataUrl;
-  });
-}
+// ─── EXPORT: SHARE URL ────────────────────────────────────────────────────
+// SVG-only logo policy (v2.6): logos are embedded as SVG, which scales
+// cleanly at any display size and gzips well inside the URL. If state was
+// loaded from a legacy JSON that contains a raster logo, the URL drops the
+// logo and tells the user to re-upload as SVG. Two budgets: editable URLs
+// (internal) get more headroom than read-only URLs (which travel via email).
+const SHARE_URL_BUDGET_EDITABLE = 30000;
+const SHARE_URL_BUDGET_RO       = 12000;
 
-// ─── EXPORT: SAVE JSON ────────────────────────────────────────────────────
+async function buildShareUrl(readOnly) {
+  const baseState = captureState();
+  const budget = readOnly ? SHARE_URL_BUDGET_RO : SHARE_URL_BUDGET_EDITABLE;
+  const origin = location.origin && location.origin !== 'null' ? location.origin : 'https://lm-color-test';
+  const path = location.pathname || '/';
+  const q = readOnly ? '?ro=1' : '';
+  const finalize = async (state) => {
+    const token = await gzipBase64Url(JSON.stringify(state));
+    return `${origin}${path}${q}#s=${token}`;
+  };
+
+  const isSvg = !!(S.logoMime && S.logoMime.includes('svg'));
+  const hadLegacyRaster = !!(S.logoData && !isSvg);
+
+  // Strip any non-SVG logo that snuck in via a legacy JSON load.
+  const s = JSON.parse(JSON.stringify(baseState));
+  if (s.logoData && !isSvg) {
+    s.logoData = null;
+    s.logoMime = null;
+  }
+  const url = await finalize(s);
+
+  // If the SVG (or no-logo) URL is over budget, drop the logo and try again.
+  if (url.length > budget && s.logoData) {
+    s.logoData = null;
+    s.logoMime = null;
+    const fallback = await finalize(s);
+    return {
+      url: fallback,
+      droppedLogo: true,
+      legacyRaster: false,
+      length: fallback.length
+    };
+  }
+
+  return {
+    url,
+    droppedLogo: hadLegacyRaster && !s.logoData,
+    legacyRaster: hadLegacyRaster,
+    length: url.length
+  };
+}
+async function exportShare(readOnly) {
+  document.getElementById('exportMenu').classList.remove('open');
+  const result = await buildShareUrl(!!readOnly);
+  if (!result) return;
+  try {
+    await navigator.clipboard.writeText(result.url);
+    const kind = readOnly ? 'Read-only link copied' : 'Editable link copied';
+    let msg = kind;
+    if (result.legacyRaster) {
+      msg = `${kind} - logo dropped (only SVG logos can be shared; please re-upload as SVG)`;
+    } else if (result.droppedLogo) {
+      msg = `${kind} - SVG logo too large to embed; use Save JSON to keep it`;
+    }
+    flashToolbar(msg);
+  } catch (e) {
+    window.prompt('Copy this share link:', result.url);
+  }
+}
 function exportSave() {
   document.getElementById('exportMenu').classList.remove('open');
   const state = captureState();
@@ -3043,52 +3097,6 @@ function exportSave() {
   a.click();
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-// ─── EXPORT: SHARE URL ────────────────────────────────────────────────────
-const SHARE_URL_BUDGET = 7000;       // max total URL length we'll emit
-const LOGO_BUDGET_STEPS = [          // progressively smaller logos until it fits
-  [240, 96], [180, 72], [120, 48], [80, 32], [0, 0]  // last = drop logo
-];
-
-async function buildShareUrl(readOnly) {
-  const baseState = captureState();
-  // Try with progressively smaller logos
-  for (const [maxW, maxH] of LOGO_BUDGET_STEPS) {
-    const s = JSON.parse(JSON.stringify(baseState));
-    if (S.logoData && maxW > 0) {
-      const small = await rasterizeLogoForShare(S.logoData, maxW, maxH);
-      s.logoData = small;
-      s.logoMime = 'image/png';
-    } else {
-      s.logoData = null;
-      s.logoMime = null;
-    }
-    const token = await gzipBase64Url(JSON.stringify(s));
-    const origin = location.origin && location.origin !== 'null' ? location.origin : 'https://lm-color-test';
-    const path = location.pathname || '/';
-    const q = readOnly ? '?ro=1' : '';
-    const url = `${origin}${path}${q}#s=${token}`;
-    if (url.length <= SHARE_URL_BUDGET || maxW === 0) {
-      return { url, droppedLogo: !s.logoData && !!S.logoData, length: url.length };
-    }
-  }
-  return null;
-}
-async function exportShare(readOnly) {
-  document.getElementById('exportMenu').classList.remove('open');
-  const result = await buildShareUrl(!!readOnly);
-  if (!result) return;
-  try {
-    await navigator.clipboard.writeText(result.url);
-    const kind = readOnly ? 'Read-only link copied' : 'Editable link copied';
-    const msg = result.droppedLogo
-      ? `${kind} (logo too large — dropped)`
-      : kind;
-    flashToolbar(msg);
-  } catch (e) {
-    window.prompt('Copy this share link:', result.url);
-  }
 }
 
 // ─── LOAD JSON ────────────────────────────────────────────────────────────
