@@ -4518,7 +4518,7 @@ function validateImportInput() {
   const result = paletteHasBrandLabels(raw);
   if (result === false) {
     inp.classList.add('invalid');
-    errEl.textContent = 'This palette has no brand labels. Re-export from Actions → Share Palette Editor so Primary, Primary Hover, Secondary, and Secondary Hover travel with the colors.';
+    errEl.textContent = 'This palette has no brand labels. Apply color labels on Vesper Colors and try the import again.';
     if (btn) btn.disabled = true;
   } else {
     // result === true (has brand labels) OR result === null (not yet a
@@ -4551,7 +4551,7 @@ function confirmImport() {
   // call could bypass the UI. Enforce labels-required at the action site
   // too so this never sneaks through.
   if (paletteHasBrandLabels(raw) === false) {
-    setImportError('This palette has no brand labels. Re-export from Actions → Share Palette Editor so Primary, Primary Hover, Secondary, and Secondary Hover travel with the colors.');
+    setImportError('This palette has no brand labels. Apply color labels on Vesper Colors and try the import again.');
     return;
   }
   applyImportedPalette(entries);
