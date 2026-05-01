@@ -2012,8 +2012,25 @@ body.ro .toolbar .tb-ro-right {
   gap: 8px;
   margin-left: auto; /* push the group to the far right */
 }
-/* Share and Palette Editor inherit .tb-btn look; no overrides needed.    */
-/* "Copied!" feedback is handled inline by roShareUrl(btn).               */
+/* All three client-view buttons are purple to match the brand CTA language. */
+body.ro .tb-ro-right .tb-btn {
+  background: var(--lm-purple);
+  border-color: var(--lm-purple);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+body.ro .tb-ro-right .tb-btn:hover {
+  background: var(--lm-purple-hover);
+  border-color: var(--lm-purple-hover);
+}
+/* Icon sits inline to the right of the label at 14px; inherits currentColor. */
+.tb-ro-ico {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
 
 body.ro .tb-feedback {
   display: inline-flex;
@@ -2267,10 +2284,8 @@ body.ro .ann-card { cursor: default !important; }
 
   <div class="tb-spacer"></div>
 
-  <button class="tb-btn" onclick="openPaletteUrl()" title="Open palette editor in a new tab">Palette &#8599;</button>
-
+  <!-- File input for Open JSON - triggered from the Actions menu item -->
   <input type="file" id="loadJsonInput" accept=".json" style="display:none" onchange="handleLoadJson(event)">
-  <button class="tb-btn" onclick="document.getElementById('loadJsonInput').click()">Open</button>
 
   <div class="export-wrap">
     <button class="tb-btn primary" onclick="toggleExportMenu()">Actions &#9662;</button>
@@ -2304,6 +2319,13 @@ body.ro .ann-card { cursor: default !important; }
           <div class="hint">Load colors from a Vesper palette URL</div>
         </div>
       </button>
+      <button role="menuitem" onclick="document.getElementById('loadJsonInput').click(); document.getElementById('exportMenu').classList.remove('open')">
+        <span class="ico">&#10549;</span>
+        <div>
+          <div class="lbl">Open</div>
+          <div class="hint">Load a saved JSON file</div>
+        </div>
+      </button>
       <hr class="menu-sep">
       <button role="menuitem" onclick="exportDeveloperMD()">
         <span class="ico">&#10515;</span>
@@ -2325,10 +2347,28 @@ body.ro .ann-card { cursor: default !important; }
   <!-- Client-view right-side buttons: Share + Palette Editor + Send Feedback.  -->
   <!-- Visible only in ?ro=1 client view; tb-ro-right is hidden in editor mode. -->
   <div class="tb-ro-right">
-    <button class="tb-btn" onclick="roShareUrl(this)" title="Copy this page's URL to the clipboard">Share</button>
-    <button class="tb-btn" onclick="openPaletteUrl()" title="Open the color palette in Vesper Colors">Palette Editor &#8599;</button>
+    <button class="tb-btn" onclick="roShareUrl(this)" title="Copy this page's URL to the clipboard">
+      <span class="tb-ro-label">Share</span>
+      <svg class="tb-ro-ico" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="3.5" r="1.5"/><circle cx="12" cy="12.5" r="1.5"/><circle cx="4" cy="8" r="1.5"/>
+        <line x1="5.5" y1="7.1" x2="10.5" y2="4.4"/><line x1="5.5" y1="8.9" x2="10.5" y2="11.6"/>
+      </svg>
+    </button>
+    <button class="tb-btn" onclick="openPaletteUrl()" title="Open the color palette in Vesper Colors">
+      <span class="tb-ro-label">Palette Editor</span>
+      <svg class="tb-ro-ico" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M2.5 10A5.5 5.5 0 1 1 13 12.5 2 2 0 0 0 11.2 14H9.5a1 1 0 0 1 0-2 1 1 0 0 0 .8-1.6"/>
+        <circle cx="5.5" cy="7" r="1" fill="currentColor" stroke="none"/>
+        <circle cx="8" cy="5" r="1" fill="currentColor" stroke="none"/>
+        <circle cx="10.5" cy="7" r="1" fill="currentColor" stroke="none"/>
+      </svg>
+    </button>
     <a id="tbFeedbackMailto" class="tb-feedback" href="#" rel="noopener" target="_blank" hidden>
       <span class="tb-feedback-label" id="tbFeedbackBtnLabel">Send feedback</span>
+      <svg class="tb-ro-ico" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="1.5" y="3.5" width="13" height="9" rx="1.5"/>
+        <path d="M1.5 5l6.5 4.5L14.5 5"/>
+      </svg>
     </a>
   </div>
 </div>
@@ -4330,16 +4370,18 @@ function exportSharePaletteEditor() {
 
 // ─── CLIENT-VIEW TOOLBAR: SHARE ────────────────────────────────────────────
 // Copies the current page URL (which in ?ro=1 client view IS the share URL)
-// to the clipboard and briefly changes the button label to "Copied!" as
-// confirmation. No URL rebuild needed - window.location.href is authoritative.
+// to the clipboard and briefly changes the button label span to "Copied!" as
+// confirmation. Targets .tb-ro-label so the SVG icon beside the text is
+// preserved (setting btn.textContent directly would wipe the SVG child).
 function roShareUrl(btn) {
   const url = window.location.href;
-  const orig = btn.textContent;
-  navigator.clipboard.writeText(url).then(() => {
-    btn.textContent = 'Copied!';
-    setTimeout(() => { btn.textContent = orig; }, 1500);
-  }).catch(() => {
-    // Fallback for browsers without async clipboard access.
+  const labelEl = btn.querySelector('.tb-ro-label') || btn;
+  const orig = labelEl.textContent;
+  function flash() {
+    labelEl.textContent = 'Copied!';
+    setTimeout(() => { labelEl.textContent = orig; }, 1500);
+  }
+  navigator.clipboard.writeText(url).then(flash).catch(() => {
     try {
       const ta = document.createElement('textarea');
       ta.value = url;
@@ -4349,8 +4391,7 @@ function roShareUrl(btn) {
       document.execCommand('copy');
       document.body.removeChild(ta);
     } catch (_) {}
-    btn.textContent = 'Copied!';
-    setTimeout(() => { btn.textContent = orig; }, 1500);
+    flash();
   });
 }
 
