@@ -1996,7 +1996,7 @@ button { cursor: pointer; }
 .rule-row.is-overridden .rule-dot { background: var(--lm-quiet); color: #fff; }
 .rule-row.is-overridden .rule-status { color: var(--lm-quiet); }
 .rule-row.is-overridden .rule-detail::after {
-  content: 'Overridden by PM - hidden in client share links.';
+  content: 'Overridden by LM Contact - hidden in client share links.';
   display: block;
   margin-top: 6px;
   color: var(--warn);
@@ -2430,9 +2430,9 @@ body.ro .ann-card { cursor: default !important; }
           <div class="editable" id="coverTitle" contenteditable="plaintext-only" data-placeholder="Client Name" oninput="updateClient(this.textContent)" role="textbox" aria-label="Client name" aria-multiline="true" spellcheck="false"></div>
         </div>
         <div class="doc-cover-pm" id="coverPmRow">
-          <span class="lbl">Project Manager</span>
-          <select class="pm-select no-print" id="pmSelect" onchange="onPMChange(this.value)" aria-label="Project Manager">
-            <option value="">(Select PM)</option>
+          <span class="lbl">LM Contact</span>
+          <select class="pm-select no-print" id="pmSelect" onchange="onPMChange(this.value)" aria-label="LM Contact">
+            <option value="">(Select LM Contact)</option>
             <option value="valerie">Valerie</option>
             <option value="lauren">Lauren</option>
             <option value="lindsay">Lindsay</option>
@@ -2460,7 +2460,7 @@ body.ro .ann-card { cursor: default !important; }
         <div class="sec-titlewrap">
           <div class="sec-num">SECTION 01</div>
           <div class="sec-title">Logo Lockup</div>
-          <div class="sec-intro">Confirm the approved wordmark treatment. Default background is white (most library headers); click the color chip below to change it if the logo will sit on a colored header.</div>
+          <div class="sec-intro">Confirm the approved logo to be used within your website header.</div>
         </div>
         <div class="sec-controls no-print">
           <label class="logo-uploadlabel" for="logoInput">Upload SVG</label>
@@ -2534,7 +2534,7 @@ body.ro .ann-card { cursor: default !important; }
         <div class="sec-titlewrap">
           <div class="sec-num">SECTION 04</div>
           <div class="sec-title">Announcement Colors</div>
-          <div class="sec-intro">Preview of leveled announcements. Each row can be set to <strong>Tinted</strong> (status hex at 20% opacity, dark body, primary link) or <strong>Full</strong> (status hex at 100%, body auto-flips to dark or white based on background luminance). On a light Full background the link tries Primary first and auto-flips to dark when Primary fails WCAG AA against that background. Add as many as the client uses.</div>
+          <div class="sec-intro">Preview of announcements. Each row can be set to <strong>Tinted</strong> (status hex at 20% opacity, dark body, primary link) or <strong>Full</strong> (status hex at 100%, body auto-flips to dark or white based on background luminance). On a light Full background the link tries Primary first and auto-flips to dark when Primary fails WCAG AA against that background.</div>
         </div>
         <div class="sec-controls no-print">
           <button class="mini-btn" onclick="addAnnouncement()">+ Add Announcement</button>
@@ -2608,13 +2608,13 @@ body.ro .ann-card { cursor: default !important; }
         <div class="sec-titlewrap">
           <div class="sec-num">SECTION 08</div>
           <div class="sec-title">Send Feedback</div>
-          <div class="sec-intro">When you have reviewed the colors, typography, and contrast above, send your decision back to your project manager. Approve as-is or request revisions; the email opens in your default mail program with the share link already attached.</div>
+          <div class="sec-intro">When you have reviewed the information above, you can approve as-is or request revisions. If you have color changes, you can use the Palette Editor to create a revised palette and attach it to your feedback.</div>
         </div>
       </div>
       <div class="sec-body">
         <div class="feedback-block" id="feedbackBlock">
           <a id="feedbackMailto" class="feedback-btn" href="#" rel="noopener" target="_blank">
-            <span class="feedback-btn-label" id="feedbackBtnLabel">Send feedback to your project manager</span>
+            <span class="feedback-btn-label" id="feedbackBtnLabel">Send feedback to your LM Contact</span>
           </a>
         </div>
       </div>
@@ -2640,7 +2640,7 @@ body.ro .ann-card { cursor: default !important; }
       <div class="sec-header">
         <div class="sec-titlewrap">
           <div class="sec-title">Client Notes</div>
-          <div class="sec-intro">Notes the client will see at the top of their share-link view, addressed from the project manager. Set the PM on the cover so the message can identify itself.</div>
+          <div class="sec-intro">Notes the client will see at the top of their share-link view, addressed from the LM Contact. Set the LM Contact on the cover so the message can identify itself.</div>
         </div>
       </div>
       <div class="sec-body">
@@ -2654,7 +2654,7 @@ body.ro .ann-card { cursor: default !important; }
     <div class="doc-footer">
       <span class="sig">Prepared by <span class="tl">Library</span><span class="or">Market</span></span>
       <span id="footerMeta">v1 · April 30, 2026</span>
-      <span class="build-badge">tool v2.18</span>
+      <span class="build-badge">tool v2.19</span>
     </div>
   </div>
 </div>
@@ -2746,7 +2746,7 @@ const S = {
   logoSmallPng: null,    // small PNG data URL for share URL
   notes: '',
   readOnly: false,
-  pm: '',                // Project Manager (one of the LM PM names, or empty)
+  pm: '',                // LM Contact (one of the LM contact names, or empty)
   rule4Override: false,  // PM-only override: suppresses Rule 4 from per-chip badges and from client-facing test results
   clientNotes: '',       // Free-form notes shown to the client at the top of their share-link view
   colors: [
@@ -3793,11 +3793,11 @@ function renderRules() {
     // visible to staff but not to clients, so guard with body:not(.ro) in CSS.
     let overrideBtnHTML = '';
     if (rule.id === 4 && (rule.pass === false || overridden)) {
-      const btnLabel = overridden ? 'Undo override' : 'Override Rule 4 (PM)';
+      const btnLabel = overridden ? 'Undo override' : 'Override Rule 4 (LM Contact)';
       const btnCls = overridden ? 'rule-override-btn is-active' : 'rule-override-btn';
       const note = overridden
         ? 'Rule 4 is currently overridden. Client share links will not show this rule.'
-        : 'If this rule is failing in an edge case the PM has reviewed and accepted, you can override it. Client share links will hide the rule.';
+        : 'If this rule is failing in an edge case the LM Contact has reviewed and accepted, you can override it. Client share links will hide the rule.';
       overrideBtnHTML = `
         <div class="rule-override-row no-print" data-pm-only>
           <button class="${btnCls}" type="button" onclick="toggleRule4Override()">${btnLabel}</button>
@@ -4959,7 +4959,7 @@ function renderAll() {
   renderFeedback();
 }
 
-// ─── PROJECT MANAGER + FEEDBACK SECTION ────────────────────────────
+// ─── LM CONTACT + FEEDBACK SECTION ────────────────────────────
 // PM dropdown lives on the doc cover. Selecting a PM enables the mailto
 // button at the bottom of the document so the client can email feedback
 // directly back to the right person at LM. State is serialized to JSON
@@ -5151,9 +5151,9 @@ async function exportDeveloperMD() {
   lines.push(`**Version:** v${S.version}`);
   lines.push(`**Exported:** ${today}`);
   if (S.pm) {
-    lines.push(`**Project Manager:** ${pmDisplayName(S.pm)} (${pmEmail(S.pm)})`);
+    lines.push(`**LM Contact:** ${pmDisplayName(S.pm)} (${pmEmail(S.pm)})`);
   } else {
-    lines.push(`**Project Manager:** (not set)`);
+    lines.push(`**LM Contact:** (not set)`);
   }
   const paletteUrl = buildPaletteUrl();
   lines.push(`**Palette URL:** ${paletteUrl}`);
