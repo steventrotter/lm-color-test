@@ -2481,6 +2481,23 @@ body.ro .ann-card { cursor: default !important; }
 
 <script>
 // ─── STATE ─────────────────────────────────────────────────────────────────
+// Typography defaults are hoisted so both the S initializer and restoreState
+// can reference the same source. Sample text is intentionally display-only:
+// there's no UI to edit it, and it gets stripped from saves in captureState
+// + reattached from these defaults in restoreState. That way any future
+// default copy tweak (e.g. the v2.13 H1 sample change) flows automatically
+// to old saves on load instead of getting locked to whatever string was
+// hardcoded when the JSON was originally written.
+const _DEFAULT_TYPE_ROWS = [
+  { tag: 'H1',         font: 'secondary', size: 45,   weight: 600, case: 'title', sample: 'Page Titles' },
+  { tag: 'H2',         font: 'secondary', size: 36,   weight: 600, case: 'title', sample: 'Upcoming events this week' },
+  { tag: 'H3',         font: 'secondary', size: 31.5, weight: 500, case: 'title', sample: 'Children\u2019s Storytime' },
+  { tag: 'H4',         font: 'secondary', size: 27,   weight: 500, case: 'title', sample: 'Registration required' },
+  { tag: 'H5',         font: 'secondary', size: 22.5, weight: 600, case: 'title', sample: 'Ages 3-5 · 30 minutes' },
+  { tag: 'H6',         font: 'secondary', size: 18,   weight: 600, case: 'title', sample: 'Tuesday · 10:00am' },
+  { tag: 'Body',       font: 'primary',   size: 18,   weight: 400, sample: 'Join us for stories, songs, and rhymes designed to build early literacy skills in a fun, welcoming environment.' },
+  { tag: 'Small Text', font: 'primary',   size: 16,   weight: 400, sample: 'Sponsored by the Friends of the Library' },
+];
 const S = {
   clientName: '',
   version: 1,
@@ -2518,17 +2535,10 @@ const S = {
     { id: 'ann-2', tint: 'Warning',     mode: 'tinted', body: 'The printer is down at the main library.' },
     { id: 'ann-3', tint: 'Info',        mode: 'tinted', body: 'Don\u2019t forget to bring your food drive donations today when you visit to receive a free sticker pack.' },
   ],
-  // Typography rows with per-row weights
-  typeRows: [
-    { tag: 'H1',         font: 'secondary', size: 45,   weight: 600, case: 'title', sample: 'Page Titles' },
-    { tag: 'H2',         font: 'secondary', size: 36,   weight: 600, case: 'title', sample: 'Upcoming events this week' },
-    { tag: 'H3',         font: 'secondary', size: 31.5, weight: 500, case: 'title', sample: 'Children\u2019s Storytime' },
-    { tag: 'H4',         font: 'secondary', size: 27,   weight: 500, case: 'title', sample: 'Registration required' },
-    { tag: 'H5',         font: 'secondary', size: 22.5, weight: 600, case: 'title', sample: 'Ages 3-5 · 30 minutes' },
-    { tag: 'H6',         font: 'secondary', size: 18,   weight: 600, case: 'title', sample: 'Tuesday · 10:00am' },
-    { tag: 'Body',       font: 'primary',   size: 18,   weight: 400, sample: 'Join us for stories, songs, and rhymes designed to build early literacy skills in a fun, welcoming environment.' },
-    { tag: 'Small Text', font: 'primary',   size: 16,   weight: 400, sample: 'Sponsored by the Friends of the Library' },
-  ],
+  // Typography rows with per-row weights. Pulled from _DEFAULT_TYPE_ROWS
+  // (hoisted above) so a user editing fonts/weights/case mutates a clone,
+  // never the source array.
+  typeRows: _DEFAULT_TYPE_ROWS.map(r => ({ ...r })),
   // Cache of available weights per font (parsed from Google Fonts CSS)
   fontWeights: { Poppins: [], Lato: [] },
 };
@@ -4132,7 +4142,10 @@ function captureState() {
     colors: S.colors,
     status: S.status,
     announcements: S.announcements,
-    typeRows: S.typeRows,
+    // Strip sample text from typeRows: it's display-only, has no UI to
+    // edit, and saving it would lock old saves to old default copy when
+    // we tweak a sample in a future build. Reattached on load.
+    typeRows: S.typeRows.map(({ sample, ...rest }) => rest),
     notes: S.notes,
     logoData: S.logoData,
     logoMime: S.logoMime,
@@ -4174,7 +4187,18 @@ function restoreState(obj) {
       return out;
     });
   }
-  if (Array.isArray(obj.typeRows)) S.typeRows = obj.typeRows;
+  if (Array.isArray(obj.typeRows)) {
+    // Sample text isn't saved (since v2.14) - reattach from current defaults
+    // by tag. Pre-v2.14 saves DO carry a sample field; we ignore it in favor
+    // of the current default so v2.13's H1 copy change ("Page Titles") flows
+    // to old saves automatically. Fallback to saved sample only when a tag
+    // somehow doesn't match a default (defensive; shouldn't happen).
+    S.typeRows = obj.typeRows.map(saved => {
+      const def = _DEFAULT_TYPE_ROWS.find(d => d.tag === saved.tag);
+      const sample = def ? def.sample : (saved.sample || '');
+      return { ...saved, sample };
+    });
+  }
   if (obj.notes !== undefined) S.notes = obj.notes;
   if (obj.logoData) { S.logoData = obj.logoData; S.logoMime = obj.logoMime; }
   if (obj.logoBg) S.logoBg = obj.logoBg;
