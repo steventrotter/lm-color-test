@@ -707,8 +707,8 @@ button { cursor: pointer; }
 }
 .swatch:hover .remove-x { display: flex; }
 /* Per-chip rule-violation badge. One badge per chip aggregates every rule */
-/* this chip is implicated in (Rule 1 contrast, Rule 2 hover delta, Rule 3 */
-/* CB pair, Rule 4 brand collision, Rule 5 taxonomy CB pair). Lives in the */
+/* this chip is implicated in (Rule 1 contrast, Rule 2 hover delta,        */
+/* Rule 3 brand collision, Rule 4 taxonomy CB pair). Lives in the          */
 /* top-left corner so the top-right stays free for the remove-x affordance.*/
 /* Tooltip can carry multiple lines via <br> when more than one rule fails.*/
 .swatch .swatch-warn {
@@ -1122,7 +1122,7 @@ button { cursor: pointer; }
   background: var(--paper-2);
   border: 1px solid var(--hair);
   font-family: var(--poppins);
-  font-size: 13px;
+  font-size: var(--text-body);
   color: var(--lm-ink);
   line-height: 1.5;
   resize: vertical;
@@ -1829,7 +1829,7 @@ button { cursor: pointer; }
    when no PM is set, so an empty-state callout was unreachable. */
 
 /* ─────────────────────────────────────────── */
-/* RULE 5 OVERRIDE CONTROLS                    */
+/* RULE 4 OVERRIDE CONTROLS                    */
 /* ─────────────────────────────────────────── */
 .rule-override-row {
   margin-top: 10px;
@@ -1861,13 +1861,13 @@ button { cursor: pointer; }
 }
 .rule-override-btn.is-active:hover { color: #fff; background: var(--warn); border-color: var(--warn); }
 
-/* When Rule 5 is overridden, the row in the panel reads as "skipped by PM"
+/* When Rule 4 is overridden, the row in the panel reads as "skipped by PM"
    instead of failing. The dot gets a muted treatment to communicate that
    it's no longer being enforced. */
 .rule-row.is-overridden .rule-dot { background: var(--lm-quiet); color: #fff; }
 .rule-row.is-overridden .rule-status { color: var(--lm-quiet); }
 .rule-row.is-overridden .rule-detail::after {
-  content: 'Overridden by PM – hidden in client share links.';
+  content: 'Overridden by PM - hidden in client share links.';
   display: block;
   margin-top: 6px;
   color: var(--warn);
@@ -1927,9 +1927,10 @@ body.ro .sec-feedback.no-pm { display: none; }
 /* Client notes editor section is editor-only; in client view the content
    appears as a top-of-doc banner instead of an editable textarea. */
 body.ro .sec-clientnotes { display: none !important; }
+body.ro .sec-staffnotes { display: none !important; }
 /* The notes banner is the inverse - editor view never shows it. */
 body:not(.ro) .client-notes-banner { display: none !important; }
-/* Rule 5 row is hidden entirely in client view when PM has overridden it */
+/* Rule 4 row is hidden entirely in client view when PM has overridden it */
 body.ro .rule-row.is-overridden { display: none !important; }
 /* Override toggle is staff-only - never expose it to clients via share URL */
 body.ro .rule-override-row { display: none !important; }
@@ -2358,7 +2359,7 @@ body.ro .ann-card { cursor: default !important; }
         <div class="sec-titlewrap">
           <div class="sec-num">SECTION 07</div>
           <div class="sec-title">Accessibility Test Results</div>
-          <div class="sec-intro">The five Library Market color rules evaluated against the current palette, plus a full contrast matrix for staff documentation.</div>
+          <div class="sec-intro">The four Library Market color rules evaluated against the current palette, plus a full contrast matrix for staff documentation.</div>
         </div>
       </div>
       <div class="sec-body">
@@ -2477,7 +2478,7 @@ const S = {
   notes: '',
   readOnly: false,
   pm: '',                // Project Manager (one of the LM PM names, or empty)
-  rule5Override: false,  // PM-only override: suppresses Rule 5 from per-chip badges and from client-facing test results
+  rule4Override: false,  // PM-only override: suppresses Rule 4 from per-chip badges and from client-facing test results
   clientNotes: '',       // Free-form notes shown to the client at the top of their share-link view
   colors: [
     { id:'primary',   label:'Primary',          hex:'#3A3A3A', role:'primary',          group:'brand', removable:false },
@@ -2578,7 +2579,7 @@ function simulateCB(hex, mode) {
   return ('#' + hx(nr) + hx(ng) + hx(nb)).toUpperCase();
 }
 // ─── PERCEPTUAL COLOR DIFFERENCE (CIE76 deltaE) ───────────────────────────
-// Why this exists, and why it matters for Rule 3 / Rule 5:
+// Why this exists, and why it matters for Rule 4:
 //
 // The original CB-distinguishability metric was WCAG contrast applied to
 // the two CB-simulated hexes. That measures luminance ratio only - it
@@ -2596,7 +2597,7 @@ function simulateCB(hex, mode) {
 // 5 is "perceptible at a glance", 10+ is "two different colors").
 //
 // CIEDE2000 is more accurate but ~3x the code; CIE76 is enough for
-// triage. The PM override on Rule 5 absorbs any borderline cases this
+// triage. The PM override on Rule 4 absorbs any borderline cases this
 // metric misses. If we ever port this back to Vesper Colors, the
 // reasoning above is the rationale.
 function _srgbToLinear(c) {
@@ -3054,13 +3055,13 @@ function brandCollision(c) {
   const hit = brandSlots.find(b => b.hex.toUpperCase() === target);
   return hit ? hit.role : null;
 }
-// Rule 5 per-chip diagnostic: returns every other taxonomy chip that this
+// Rule 4 per-chip diagnostic: returns every other taxonomy chip that this
 // chip fails the colorblind-distinguishability test against. Brand chips
-// return [] because Rule 5 is taxonomy-only (Rule 3 covers Primary vs
-// Secondary). Each entry is { partnerLabel, modes } where modes is a
-// comma-separated string of failing CB mode labels. Both halves of a
-// failing pair will see each other in their fails arrays, so fixing
-// either chip clears both badges automatically on the next render.
+// return [] because Rule 4 is taxonomy-only. Each entry is { partnerLabel,
+// modes } where modes is a comma-separated string of failing CB mode
+// labels. Both halves of a failing pair will see each other in their
+// fails arrays, so fixing either chip clears both badges automatically
+// on the next render.
 function taxonomyCBFailures(c) {
   if (!c || c.group !== 'age') return [];
   const others = visibleColors().filter(x => x.group === 'age' && x.id !== c.id);
@@ -3078,10 +3079,10 @@ function taxonomyCBFailures(c) {
 }
 // Unified per-chip rule-failure aggregator. Returns every rule that this
 // specific chip is implicated in failing, with a human-readable message
-// per rule. Brand chips can fail Rules 1, 2, and 3; taxonomy chips can
-// fail Rules 4 and 5. A single chip may fail multiple rules at once
-// (e.g. a low-contrast Primary that also collapses against Secondary
-// under colorblindness), in which case all of them appear in the tooltip.
+// per rule. Brand chips can fail Rules 1 and 2; taxonomy chips can
+// fail Rules 3 and 4. A single chip may fail multiple rules at once
+// (e.g. a low-contrast Primary that also has a hover delta out of
+// range), in which case all of them appear in the tooltip.
 function chipRuleFailures(c) {
   if (!c) return [];
   const fails = [];
@@ -3120,48 +3121,32 @@ function chipRuleFailures(c) {
         }
       }
     }
-    // Rule 3: Primary vs Secondary distinguishable under colorblindness.
-    // Both chips get the badge when the pair fails.
-    if ((c.role === 'primary' || c.role === 'secondary') && S.hasSecondary) {
-      const primary = S.colors.find(x => x.role === 'primary');
-      const secondary = S.colors.find(x => x.role === 'secondary');
-      if (primary && secondary) {
-        const result = pairCBDistinguishable(primary.hex, secondary.hex);
-        if (!result.pass) {
-          const modes = result.failingModes.map(fm => fm.label).join(', ');
-          fails.push({
-            rule: 3,
-            msg: `Rule 3: Primary and Secondary indistinguishable under ${modes}.`,
-          });
-        }
-      }
-    }
   }
   if (c.group === 'age') {
-    // Rule 4: taxonomy chip duplicates a brand color.
+    // Rule 3: taxonomy chip duplicates a brand color.
     const collidesWith = brandCollision(c);
     if (collidesWith) {
       fails.push({
-        rule: 4,
-        msg: `Rule 4: this color is also used as ${collidesWith}. Brand colors cannot be reused for taxonomy.`,
+        rule: 3,
+        msg: `Rule 3: this color is also used as ${collidesWith}. Brand colors cannot be reused for taxonomy.`,
       });
     }
-    // Rule 5: taxonomy pair fails colorblindness distinguishability.
-    // PM override (set in editor) suppresses Rule 5 from per-chip badges
+    // Rule 4: taxonomy pair fails colorblindness distinguishability.
+    // PM override (set in editor) suppresses Rule 4 from per-chip badges
     // so the client view never lights up a `!` for a rule the PM has
     // already accepted as "good enough."
-    const cbFails = S.rule5Override ? [] : taxonomyCBFailures(c);
+    const cbFails = S.rule4Override ? [] : taxonomyCBFailures(c);
     if (cbFails.length === 1) {
       const f = cbFails[0];
       fails.push({
-        rule: 5,
-        msg: `Rule 5: indistinguishable from ${f.partnerLabel} under ${f.modes}. Patrons with that form of color blindness will see these as the same color.`,
+        rule: 4,
+        msg: `Rule 4: indistinguishable from ${f.partnerLabel} under ${f.modes}. Patrons with that form of color blindness will see these as the same color.`,
       });
     } else if (cbFails.length > 1) {
       const list = cbFails.map(f => `${f.partnerLabel} (${f.modes})`).join('; ');
       fails.push({
-        rule: 5,
-        msg: `Rule 5: indistinguishable under colorblindness from ${list}.`,
+        rule: 4,
+        msg: `Rule 4: indistinguishable under colorblindness from ${list}.`,
       });
     }
   }
@@ -3441,37 +3426,12 @@ function evaluateRules() {
     });
   }
 
-  // R3 - Primary vs Secondary distinguishable under colorblindness
-  if (S.hasSecondary && primary && secondary) {
-    const result = pairCBDistinguishable(primary.hex, secondary.hex);
-    const parts = result.pass
-      ? [{ label: 'Distinguishable in all four CB modes', pass: true }]
-      : result.failingModes.map(fm => ({
-          label: `Fails in ${fm.label}`, deltaE: fm.deltaE, pass: false
-        }));
-    rules.push({
-      id: 3,
-      title: 'Primary distinguishable from Secondary',
-      detail: `Patrons with color-vision impairments must be able to tell Primary and Secondary apart. Tested under deuteranopia, protanopia, tritanopia, and achromatopsia simulation; pair must keep a perceptual difference (CIE76 ΔE) of at least ${CB_DELTA_E_THRESHOLD} in each.`,
-      parts,
-      pass: result.pass,
-    });
-  } else {
-    rules.push({
-      id: 3,
-      title: 'Primary distinguishable from Secondary',
-      detail: 'Skipped: no secondary color in use.',
-      parts: [],
-      pass: null,
-    });
-  }
-
-  // R4 - Brand colors not duplicated in age groups
+  // R3 - Brand colors not duplicated in age groups
   {
     const brandHexes = [primary, secondary].filter(Boolean).map(c => c.hex.toUpperCase());
     const collisions = ageColors.filter(c => brandHexes.includes(c.hex.toUpperCase()));
     rules.push({
-      id: 4,
+      id: 3,
       title: 'No collision with age-group colors',
       detail: 'Primary/Secondary cannot be reused as age-group / taxonomy colors.',
       parts: collisions.length
@@ -3481,13 +3441,13 @@ function evaluateRules() {
     });
   }
 
-  // R5 - Taxonomy colors distinguishable from each other under colorblindness
+  // R4 - Taxonomy colors distinguishable from each other under colorblindness
   // Each pair of calendar taxonomy colors must remain distinguishable under
   // each of the four CB simulations. Skipped if fewer than two taxonomy
   // colors exist (nothing to test).
   if (ageColors.length < 2) {
     rules.push({
-      id: 5,
+      id: 4,
       title: 'Taxonomy colors distinguishable under colorblindness',
       detail: 'Skipped: at least two taxonomy colors are needed to test pairwise distinguishability.',
       parts: [],
@@ -3509,8 +3469,8 @@ function evaluateRules() {
         }
       }
     }
-    const r5 = {
-      id: 5,
+    const r4 = {
+      id: 4,
       title: 'Taxonomy colors distinguishable under colorblindness',
       detail: `Each pair of taxonomy colors must keep a perceptual difference (CIE76 ΔE) of at least ${CB_DELTA_E_THRESHOLD} under deuteranopia, protanopia, tritanopia, and achromatopsia simulation. Tests every pair (${pairCount} for ${ageColors.length} colors).`,
       parts: failingPairs.length
@@ -3521,16 +3481,16 @@ function evaluateRules() {
         : [{ label: `All ${pairCount} pairs distinguishable in every CB mode`, pass: true }],
       pass: failingPairs.length === 0,
     };
-    // PM override: rule 5 is so subjective in the corner cases that we
+    // PM override: rule 4 is so subjective in the corner cases that we
     // give the PM a way to accept it without bothering the client with
     // a warning. We mark `pass: null` so it drops out of the failing
     // count and the float-panel listing, plus an `overridden` flag the
     // renderer uses to relabel and (in client view) hide the row.
-    if (S.rule5Override) {
-      r5.pass = null;
-      r5.overridden = true;
+    if (S.rule4Override) {
+      r4.pass = null;
+      r4.overridden = true;
     }
-    rules.push(r5);
+    rules.push(r4);
   }
 
   return rules;
@@ -3553,21 +3513,21 @@ function renderRules() {
               · ${p.label}${p.ratio !== undefined ? ` (${p.ratio.toFixed(2)}:1)` : (p.deltaE !== undefined ? ` (ΔE ${p.deltaE.toFixed(1)})` : '')}
             </span>`).join('')}</div>`
       : '';
-    // Rule 5 specifically gets an editor-only override toggle. Shown when
+    // Rule 4 specifically gets an editor-only override toggle. Shown when
     // the rule is currently failing OR currently overridden, so the PM can
     // turn the override on (when failing) or off (to re-enforce). Hidden in
     // .ro client view via the no-print class is wrong here - we want it
     // visible to staff but not to clients, so guard with body:not(.ro) in CSS.
     let overrideBtnHTML = '';
-    if (rule.id === 5 && (rule.pass === false || overridden)) {
-      const btnLabel = overridden ? 'Undo override' : 'Override Rule 5 (PM)';
+    if (rule.id === 4 && (rule.pass === false || overridden)) {
+      const btnLabel = overridden ? 'Undo override' : 'Override Rule 4 (PM)';
       const btnCls = overridden ? 'rule-override-btn is-active' : 'rule-override-btn';
       const note = overridden
-        ? 'Rule 5 is currently overridden. Client share links will not show this rule.'
+        ? 'Rule 4 is currently overridden. Client share links will not show this rule.'
         : 'If this rule is failing in an edge case the PM has reviewed and accepted, you can override it. Client share links will hide the rule.';
       overrideBtnHTML = `
         <div class="rule-override-row no-print" data-pm-only>
-          <button class="${btnCls}" type="button" onclick="toggleRule5Override()">${btnLabel}</button>
+          <button class="${btnCls}" type="button" onclick="toggleRule4Override()">${btnLabel}</button>
           <span class="hint">${escapeHtml(note)}</span>
         </div>`;
     }
@@ -3588,11 +3548,11 @@ function renderRules() {
   return rules;
 }
 
-// Rule 5 PM override toggle. State serializes via captureState() so JSON
+// Rule 4 PM override toggle. State serializes via captureState() so JSON
 // saves and share URLs both round-trip the override. Re-renders everything
 // so per-chip badges update and the float panel recounts.
-function toggleRule5Override() {
-  S.rule5Override = !S.rule5Override;
+function toggleRule4Override() {
+  S.rule4Override = !S.rule4Override;
   renderAll();
 }
 function renderValidation(rules) {
@@ -4148,7 +4108,7 @@ function captureState() {
     logoMime: S.logoMime,
     logoBg: S.logoBg,
     pm: S.pm,
-    rule5Override: S.rule5Override,
+    rule4Override: S.rule4Override,
     clientNotes: S.clientNotes,
   };
 }
@@ -4189,7 +4149,7 @@ function restoreState(obj) {
   if (obj.logoData) { S.logoData = obj.logoData; S.logoMime = obj.logoMime; }
   if (obj.logoBg) S.logoBg = obj.logoBg;
   if (typeof obj.pm === 'string') S.pm = obj.pm;
-  S.rule5Override = obj.rule5Override === true;
+  S.rule4Override = obj.rule4Override === true;
   if (typeof obj.clientNotes === 'string') S.clientNotes = obj.clientNotes;
   // Refresh UI inputs
   const cn = document.getElementById('clientName');
