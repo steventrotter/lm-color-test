@@ -1206,6 +1206,108 @@ button { cursor: pointer; }
   margin-top: 2px;
 }
 
+/* Actions menu: thin group separator between item clusters */
+.export-menu .menu-sep {
+  height: 1px;
+  background: var(--hair);
+  margin: 0;
+  border: none;
+}
+
+/* --------------------------------------------- */
+/* IMPORT PALETTE OVERLAY                         */
+/* --------------------------------------------- */
+.import-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 8500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s;
+}
+.import-overlay.open { opacity: 1; pointer-events: all; }
+.import-sheet {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px 24px 20px;
+  width: 400px;
+  max-width: calc(100vw - 32px);
+  border: 1px solid var(--hair);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.16);
+  transform: scale(0.97) translateY(8px);
+  transition: transform 0.18s;
+}
+.import-overlay.open .import-sheet { transform: scale(1) translateY(0); }
+.import-title {
+  font-family: var(--poppins);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--lm-ink);
+  margin-bottom: 8px;
+}
+.import-hint {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--lm-quiet);
+  letter-spacing: 0.03em;
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+.import-input {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--lm-ink);
+  background: var(--paper);
+  border: 1px solid var(--hair);
+  border-radius: 6px;
+  padding: 9px 10px;
+  outline: none;
+  transition: border-color 0.12s;
+  margin-bottom: 6px;
+}
+.import-input:focus { border-color: var(--lm-teal); }
+.import-input.invalid { border-color: #c0392b; }
+.import-error {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #c0392b;
+  min-height: 14px;
+  margin-bottom: 14px;
+  letter-spacing: 0.03em;
+}
+.import-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.import-actions button {
+  font-family: var(--poppins);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.import-actions .import-cancel {
+  background: var(--paper);
+  color: var(--lm-quiet);
+  border: 1px solid var(--hair);
+}
+.import-actions .import-cancel:hover { background: var(--hair-light); }
+.import-actions .import-confirm {
+  background: var(--lm-purple);
+  color: #fff;
+}
+.import-actions .import-confirm:hover { background: var(--lm-purple-hover); }
+
 /* Colorblind dropdown (collapses 5 mode buttons into a single trigger) */
 .cb-wrap { position: relative; flex-shrink: 0; }
 .cb-trigger { white-space: nowrap; }
@@ -1888,7 +1990,7 @@ button { cursor: pointer; }
 body.ro .toolbar > * { display: none; }
 body.ro .toolbar .toolbar-logo,
 body.ro .toolbar .toolbar-sep,
-body.ro .toolbar .tb-feedback { display: flex; }
+body.ro .toolbar .tb-ro-right { display: flex; }
 /* Toolbar Send Feedback button. Replaces the v2.12 read-only badge: in    */
 /* client view this is the always-visible primary CTA, sticky at the top  */
 /* of the page. Hidden in editor view and hidden in client view when the  */
@@ -1896,6 +1998,23 @@ body.ro .toolbar .tb-feedback { display: flex; }
 /* Section 08 stays as the bottom-of-doc CTA with explainer copy; this    */
 /* button is the toolbar twin and shares buildFeedbackMailto() so both    */
 /* pull from the same memoized share URL.                                 */
+
+/* Right-side button group: Share + Palette Editor + Send Feedback.       */
+/* Lives at the far right of the client-view toolbar. Editor view hides   */
+/* the whole container; individual buttons have no editor visibility to   */
+/* worry about since the container itself is the gate.                    */
+.tb-ro-right {
+  display: none; /* hidden in editor; client view re-shows via body.ro rule */
+}
+body.ro .toolbar .tb-ro-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto; /* push the group to the far right */
+}
+/* Share and Palette Editor inherit .tb-btn look; no overrides needed.    */
+/* "Copied!" feedback is handled inline by roShareUrl(btn).               */
+
 body.ro .tb-feedback {
   display: inline-flex;
   align-items: center;
@@ -1914,8 +2033,7 @@ body.ro .tb-feedback {
   cursor: pointer;
 }
 body.ro .tb-feedback:hover { background: var(--lm-purple-hover); border-color: var(--lm-purple-hover); }
-body.ro .tb-feedback[hidden] { display: none; }
-body:not(.ro) .tb-feedback { display: none; }
+body.ro .tb-feedback[hidden] { display: none !important; }
 
 body.ro .sec-controls,
 body.ro .add-color-card,
@@ -2115,10 +2233,6 @@ body.ro .ann-card { cursor: default !important; }
     <span class="toolbar-brand"><span class="tl">Library</span><span class="or">Market</span><span class="lbl">Color Test</span></span>
   </div>
 
-  <a id="tbFeedbackMailto" class="tb-feedback" href="#" rel="noopener" target="_blank" hidden>
-    <span class="tb-feedback-label" id="tbFeedbackBtnLabel">Send feedback</span>
-  </a>
-
   <div class="toolbar-sep"></div>
 
   <div class="tb-group">
@@ -2159,37 +2273,63 @@ body.ro .ann-card { cursor: default !important; }
   <button class="tb-btn" onclick="document.getElementById('loadJsonInput').click()">Open</button>
 
   <div class="export-wrap">
-    <button class="tb-btn primary" onclick="toggleExportMenu()">Export ▾</button>
+    <button class="tb-btn primary" onclick="toggleExportMenu()">Actions &#9662;</button>
     <div class="export-menu" id="exportMenu" role="menu">
-      <button role="menuitem" onclick="exportShare(false)">
-        <span class="ico">⤴</span>
-        <div>
-          <div class="lbl">Share</div>
-          <div class="hint">Editable URL for internal review</div>
-        </div>
-      </button>
       <button role="menuitem" onclick="exportShare(true)">
-        <span class="ico">⤴</span>
+        <span class="ico">&#10548;</span>
         <div>
-          <div class="lbl">Share read only (client)</div>
-          <div class="hint">Locked URL for client review</div>
+          <div class="lbl">Share Client View</div>
+          <div class="hint">Read-only URL for client review</div>
         </div>
       </button>
-      <button role="menuitem" onclick="exportDeveloperMD()">
-        <span class="ico">⤓</span>
+      <button role="menuitem" onclick="exportShare(false)">
+        <span class="ico">&#10548;</span>
         <div>
-          <div class="lbl">Developer Spec (MD)</div>
+          <div class="lbl">Share Staff View</div>
+          <div class="hint">Editable URL for internal use</div>
+        </div>
+      </button>
+      <button role="menuitem" onclick="exportSharePaletteEditor()">
+        <span class="ico">&#10548;</span>
+        <div>
+          <div class="lbl">Share Palette Editor</div>
+          <div class="hint">Vesper Colors URL with color labels</div>
+        </div>
+      </button>
+      <hr class="menu-sep">
+      <button role="menuitem" onclick="openImport()">
+        <span class="ico">&#10549;</span>
+        <div>
+          <div class="lbl">Import Palette</div>
+          <div class="hint">Load colors from a Vesper palette URL</div>
+        </div>
+      </button>
+      <hr class="menu-sep">
+      <button role="menuitem" onclick="exportDeveloperMD()">
+        <span class="ico">&#10515;</span>
+        <div>
+          <div class="lbl">Download Spec (MD)</div>
           <div class="hint">Markdown summary for theme-build tickets</div>
         </div>
       </button>
       <button role="menuitem" onclick="exportSave()">
-        <span class="ico">⤓</span>
+        <span class="ico">&#10515;</span>
         <div>
           <div class="lbl">Save</div>
           <div class="hint">Download JSON for revisions</div>
         </div>
       </button>
     </div>
+  </div>
+
+  <!-- Client-view right-side buttons: Share + Palette Editor + Send Feedback.  -->
+  <!-- Visible only in ?ro=1 client view; tb-ro-right is hidden in editor mode. -->
+  <div class="tb-ro-right">
+    <button class="tb-btn" onclick="roShareUrl(this)" title="Copy this page's URL to the clipboard">Share</button>
+    <button class="tb-btn" onclick="openPaletteUrl()" title="Open the color palette in Vesper Colors">Palette Editor &#8599;</button>
+    <a id="tbFeedbackMailto" class="tb-feedback" href="#" rel="noopener" target="_blank" hidden>
+      <span class="tb-feedback-label" id="tbFeedbackBtnLabel">Send feedback</span>
+    </a>
   </div>
 </div>
 
@@ -2475,6 +2615,25 @@ body.ro .ann-card { cursor: default !important; }
     <div class="vc-picker-actions">
       <button class="vc-picker-cancel" onclick="closePicker()">Cancel</button>
       <button class="vc-picker-done" onclick="confirmPicker()">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import Palette overlay - paste a Vesper Colors URL to load colors + labels -->
+<div class="import-overlay" id="importOverlay" role="dialog" aria-modal="true"
+     aria-labelledby="importTitle" aria-hidden="true"
+     onclick="if(event.target===this) closeImport()">
+  <div class="import-sheet">
+    <div class="import-title" id="importTitle">Import Palette</div>
+    <p class="import-hint">Paste a Vesper Colors palette URL below. Brand colors (Primary, Primary Hover, Secondary, Secondary Hover) are matched by label when present, or by position when labels are absent. Taxonomy colors replace the current set.</p>
+    <input class="import-input" id="importUrlInput" type="text"
+           placeholder="https://vesperapps.com/colors/view/..."
+           autocomplete="off" autocorrect="off" spellcheck="false"
+           oninput="clearImportError()">
+    <div class="import-error" id="importError"></div>
+    <div class="import-actions">
+      <button class="import-cancel" onclick="closeImport()">Cancel</button>
+      <button class="import-confirm" onclick="confirmImport()">Import</button>
     </div>
   </div>
 </div>
@@ -2806,6 +2965,8 @@ function applyLogoBg() {
 }
 
 // ─── PALETTE URL (auto-generated Vesper Colors) ────────────────────────────
+// Hex-only URL for the toolbar Palette button. Labels not included here -
+// that's buildPaletteUrlWithLabels() in the Actions > Share Palette Editor path.
 function buildPaletteUrl() {
   const hexes = visibleColors().map(c => c.hex.replace('#','').toLowerCase()).join('-');
   return `https://vesperapps.com/colors/view/${hexes}`;
@@ -4101,12 +4262,14 @@ function initPickerPointer() {
   hue .addEventListener('touchstart', e => { hu(e.touches[0].clientX); }, { passive: true });
   hue .addEventListener('touchmove',  e => { hu(e.touches[0].clientX); e.preventDefault(); }, { passive: false });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && PK.open) closePicker(); });
-  // Arrow-key nudges. Only fires when picker is open and focus is not inside
-  // the hex input (where arrow keys move the text caret natively).
+  // Arrow-key nudges. Fires whenever the picker is open, including when
+  // focus is inside the hex input. ArrowUp/Down have no native meaning in a
+  // single-line text input (they don't move the caret), so intercepting them
+  // there is safe and is exactly the interaction the PM expects: click the
+  // hex value, then use arrows to nudge brightness or jump between shades.
   document.addEventListener('keydown', e => {
     if (!PK.open) return;
     if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
-    if (e.target && e.target.id === 'vcHexInput') return;
     e.preventDefault();
     const dir = e.key === 'ArrowUp' ? +1 : -1;
     if (e.shiftKey) _pickerJumpShade(dir);
@@ -4124,6 +4287,229 @@ document.addEventListener('click', e => {
   if (!m) return;
   const wrap = m.parentElement;
   if (!wrap.contains(e.target)) m.classList.remove('open');
+});
+
+// ─── SHARE PALETTE EDITOR ─────────────────────────────────────────────────
+// Builds a Vesper Colors palette URL that includes color labels so the
+// round-trip through Import Palette matches colors by name rather than
+// position. Format: HEX~Label-HEX~Label-... (tilde separates hex from label;
+// hyphens and tildes are stripped from label text per Vesper's parser rules).
+function buildPaletteUrlWithLabels() {
+  function part(colorObj) {
+    const hex = colorObj.hex.replace('#', '').toLowerCase();
+    // Strip hyphens and tildes from label text - Vesper's parser removes them.
+    // Spaces are safe (URL-encoded as %20 and decoded back correctly).
+    const raw = colorObj.label.replace(/[-~]/g, '').trim();
+    const label = encodeURIComponent(raw);
+    return raw ? `${hex}~${label}` : hex;
+  }
+  const parts = [];
+  const primary   = S.colors.find(c => c.role === 'primary');
+  const pHover    = S.colors.find(c => c.role === 'primary-hover');
+  const secondary = S.colors.find(c => c.role === 'secondary');
+  const sHover    = S.colors.find(c => c.role === 'secondary-hover');
+  if (primary)  parts.push(part(primary));
+  if (pHover)   parts.push(part(pHover));
+  if (S.hasSecondary) {
+    if (secondary) parts.push(part(secondary));
+    if (sHover)    parts.push(part(sHover));
+  }
+  S.colors.filter(c => c.group === 'age').forEach(c => parts.push(part(c)));
+  return `https://vesperapps.com/colors/view/${parts.join('-')}`;
+}
+function exportSharePaletteEditor() {
+  document.getElementById('exportMenu').classList.remove('open');
+  const url = buildPaletteUrlWithLabels();
+  navigator.clipboard.writeText(url).then(() => {
+    flashToolbar('Copied');
+  }).catch(() => {
+    flashToolbar('Copy failed');
+  });
+  window.open(url, '_blank', 'noopener');
+}
+
+// ─── CLIENT-VIEW TOOLBAR: SHARE ────────────────────────────────────────────
+// Copies the current page URL (which in ?ro=1 client view IS the share URL)
+// to the clipboard and briefly changes the button label to "Copied!" as
+// confirmation. No URL rebuild needed - window.location.href is authoritative.
+function roShareUrl(btn) {
+  const url = window.location.href;
+  const orig = btn.textContent;
+  navigator.clipboard.writeText(url).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = orig; }, 1500);
+  }).catch(() => {
+    // Fallback for browsers without async clipboard access.
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      ta.style.cssText = 'position:fixed;opacity:0;pointer-events:none;';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    } catch (_) {}
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = orig; }, 1500);
+  });
+}
+
+// ─── IMPORT PALETTE ────────────────────────────────────────────────────────
+function openImport() {
+  document.getElementById('exportMenu').classList.remove('open');
+  const ov = document.getElementById('importOverlay');
+  ov.classList.add('open');
+  ov.removeAttribute('aria-hidden');
+  const inp = document.getElementById('importUrlInput');
+  inp.value = '';
+  inp.classList.remove('invalid');
+  document.getElementById('importError').textContent = '';
+  // Delay focus slightly so the CSS transition has started - avoids a focus
+  // flash on the backdrop before the sheet has animated in.
+  setTimeout(() => inp.focus(), 60);
+}
+function closeImport() {
+  const ov = document.getElementById('importOverlay');
+  ov.classList.remove('open');
+  ov.setAttribute('aria-hidden', 'true');
+}
+function clearImportError() {
+  document.getElementById('importUrlInput').classList.remove('invalid');
+  document.getElementById('importError').textContent = '';
+}
+function setImportError(msg) {
+  const inp = document.getElementById('importUrlInput');
+  inp.classList.add('invalid');
+  document.getElementById('importError').textContent = msg;
+  inp.focus();
+}
+function confirmImport() {
+  const raw = (document.getElementById('importUrlInput').value || '').trim();
+  const entries = parsePaletteUrl(raw);
+  if (!entries) {
+    setImportError('Could not parse a palette from this URL. Paste a Vesper Colors /colors/view/ URL.');
+    return;
+  }
+  if (entries.length === 0) {
+    setImportError('No valid hex colors found in this URL.');
+    return;
+  }
+  applyImportedPalette(entries);
+  closeImport();
+  flashToolbar('Imported');
+}
+// Parse a Vesper Colors palette URL into [{hex, label}] entries.
+// Handles both hex-only (/view/HEX-HEX) and labeled (/view/HEX~Label-HEX~Label).
+// Returns null if the URL structure is unrecognizable, [] if no valid colors found.
+function parsePaletteUrl(url) {
+  const match = url.match(/\/colors\/view\/([^?#\s]+)/);
+  if (!match) return null;
+  const segment = match[1];
+  // The palette segment is split on '-'. The catch: labeled entries use
+  // 'HEX~Label' and the label itself may not contain hyphens (the Vesper
+  // parser strips them). So every '-' in the segment is a color separator.
+  const entries = segment.split('-').map(tok => {
+    const tildeIdx = tok.indexOf('~');
+    const hexPart = tildeIdx === -1 ? tok : tok.slice(0, tildeIdx);
+    const clean = hexPart.replace(/[^0-9a-fA-F]/g, '');
+    if (clean.length !== 6) return null;
+    let label = '';
+    if (tildeIdx !== -1) {
+      try {
+        label = decodeURIComponent(tok.slice(tildeIdx + 1)).replace(/[-~]/g, '').trim();
+      } catch (_) {
+        label = tok.slice(tildeIdx + 1).replace(/[-~%]/g, '').trim();
+      }
+    }
+    return { hex: '#' + clean.toUpperCase(), label };
+  }).filter(Boolean);
+  return entries; // may be empty array
+}
+// Apply a parsed palette entry array to the current color state.
+// Brand colors are matched by label first (case-insensitive, normalized),
+// then by position for any that weren't found by label.
+// Taxonomy colors (anything not matched to a brand role) replace all current
+// taxonomy entries. Brand hex values are updated in place; labels stay unchanged.
+function applyImportedPalette(entries) {
+  const norm = s => s.toLowerCase().replace(/\s+/g, ' ').trim();
+  const BRAND_LABELS = {
+    'primary':        'primary',
+    'primary hover':  'primary-hover',
+    'secondary':      'secondary',
+    'secondary hover':'secondary-hover',
+  };
+  // Index entries by normalized label for label-based matching.
+  const byNormLabel = {};
+  entries.forEach(e => {
+    if (e.label) {
+      const k = norm(e.label);
+      if (!byNormLabel[k]) byNormLabel[k] = e; // first match wins
+    }
+  });
+  const hasBrandLabels = Object.keys(BRAND_LABELS).some(k => byNormLabel[k]);
+  let primaryE, pHoverE, secondaryE, sHoverE;
+  const usedSet = new Set();
+  if (hasBrandLabels) {
+    const pick = labelKey => {
+      const e = byNormLabel[labelKey];
+      if (e) usedSet.add(e);
+      return e || null;
+    };
+    primaryE   = pick('primary');
+    pHoverE    = pick('primary hover');
+    secondaryE = pick('secondary');
+    sHoverE    = pick('secondary hover');
+    // Positional fallback for any brand slot not matched by label,
+    // using entries that weren't claimed by a label match.
+    const unused = entries.filter(e => !usedSet.has(e));
+    let pos = 0;
+    if (!primaryE   && unused[pos]) { primaryE   = unused[pos]; usedSet.add(unused[pos]); pos++; }
+    if (!pHoverE    && unused[pos]) { pHoverE    = unused[pos]; usedSet.add(unused[pos]); pos++; }
+    if (!secondaryE && unused[pos]) { secondaryE = unused[pos]; usedSet.add(unused[pos]); pos++; }
+    if (!sHoverE    && unused[pos]) { sHoverE    = unused[pos]; usedSet.add(unused[pos]); pos++; }
+  } else {
+    // No brand labels at all - pure positional.
+    primaryE   = entries[0] || null;
+    pHoverE    = entries[1] || null;
+    secondaryE = entries.length > 2 ? entries[2] : null;
+    sHoverE    = entries.length > 3 ? entries[3] : null;
+    [primaryE, pHoverE, secondaryE, sHoverE].filter(Boolean).forEach(e => usedSet.add(e));
+  }
+  // Update brand hex values (labels stay as-is in the color test).
+  const setHex = (role, entry) => {
+    if (!entry) return false;
+    const c = S.colors.find(x => x.role === role);
+    if (c) { c.hex = entry.hex; return true; }
+    return false;
+  };
+  setHex('primary',       primaryE);
+  setHex('primary-hover', pHoverE);
+  const hadSecondary = setHex('secondary',       secondaryE);
+  setHex('secondary-hover', sHoverE);
+  if (hadSecondary) S.hasSecondary = true;
+  // Taxonomy: entries not consumed by brand slots replace the current set.
+  const taxEntries = entries.filter(e => !usedSet.has(e));
+  if (taxEntries.length > 0) {
+    S.colors = S.colors.filter(c => c.group !== 'age');
+    taxEntries.forEach(e => {
+      S.colors.push({
+        id: 'age-' + (ageCtr++),
+        label: e.label || ('Color ' + (S.colors.filter(c => c.group === 'age').length + 1)),
+        hex: e.hex,
+        role: 'age',
+        group: 'age',
+        removable: true,
+      });
+    });
+  }
+  renderAll();
+}
+// Close import overlay on Escape (mirrors picker and export-menu behavior).
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const ov = document.getElementById('importOverlay');
+    if (ov && ov.classList.contains('open')) closeImport();
+  }
 });
 
 // ─── STATE SERIALIZATION ──────────────────────────────────────────────────
