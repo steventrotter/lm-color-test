@@ -4928,14 +4928,20 @@ function _stateHashShallow() {
 }
 
 // Shorten a URL via is.gd (free, no key, CORS-enabled).
+// Uses POST so the long state URL goes in the request body rather than
+// the query string - GET was hitting URL length limits for large palettes.
 // Falls back to the original on any failure (network error, timeout,
 // rate limit, or unexpected response) so the mailto is never blocked.
 async function shortenUrl(longUrl) {
   try {
-    const endpoint = 'https://is.gd/create.php?format=simple&url=' + encodeURIComponent(longUrl);
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 4000); // 4s timeout
-    const res = await fetch(endpoint, { signal: controller.signal });
+    const timer = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch('https://is.gd/create.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'format=simple&url=' + encodeURIComponent(longUrl),
+      signal: controller.signal,
+    });
     clearTimeout(timer);
     if (!res.ok) return longUrl;
     const short = (await res.text()).trim();
