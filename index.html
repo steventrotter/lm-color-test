@@ -2633,7 +2633,7 @@ body.ro .ann-card { cursor: default !important; }
     <div class="doc-footer">
       <span class="sig">Prepared by <span class="tl">Library</span><span class="or">Market</span></span>
       <span id="footerMeta">v1 · April 30, 2026</span>
-      <span class="build-badge">tool v2.16</span>
+      <span class="build-badge">tool v2.17</span>
     </div>
   </div>
 </div>
@@ -4927,30 +4927,46 @@ function _stateHashShallow() {
   try { return JSON.stringify(captureState()); } catch (e) { return String(Date.now()); }
 }
 
-// Shorten a URL via is.gd (free, no key, CORS-enabled).
-// Uses POST so the long state URL goes in the request body rather than
-// the query string - GET was hitting URL length limits for large palettes.
-// Falls back to the original on any failure (network error, timeout,
-// rate limit, or unexpected response) so the mailto is never blocked.
+// Shorten a URL before copying to clipboard or embedding in mailto bodies.
+// CleanURI is used first - it explicitly supports browser-side CORS with no
+// API key. is.gd POST is the fallback. Both use POST so the long state URL
+// goes in the request body rather than the query string (GET was hitting URL
+// length limits for large palettes). Falls back to the full URL silently on
+// any failure so share/mailto is never blocked.
 async function shortenUrl(longUrl) {
+  // --- Primary: CleanURI ---
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 4000);
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 5000);
+    const res = await fetch('https://cleanuri.com/api/v1/shorten', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'url=' + encodeURIComponent(longUrl),
+      signal: ctrl.signal,
+    });
+    clearTimeout(t);
+    if (res.ok) {
+      const d = await res.json();
+      if (d.result_url && /^https?:\/\//.test(d.result_url)) return d.result_url;
+    }
+  } catch (_) {}
+  // --- Fallback: is.gd POST ---
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 5000);
     const res = await fetch('https://is.gd/create.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'format=simple&url=' + encodeURIComponent(longUrl),
-      signal: controller.signal,
+      signal: ctrl.signal,
     });
-    clearTimeout(timer);
-    if (!res.ok) return longUrl;
-    const short = (await res.text()).trim();
-    // is.gd returns a valid https URL on success; any other response
-    // (e.g. an error message string) is treated as a failure.
-    return /^https?:\/\//.test(short) ? short : longUrl;
-  } catch (_) {
-    return longUrl;
-  }
+    clearTimeout(t);
+    if (res.ok) {
+      const s = (await res.text()).trim();
+      if (/^https?:\/\//.test(s)) return s;
+    }
+  } catch (_) {}
+  return longUrl;
 }
 
 async function buildFeedbackMailto() {
