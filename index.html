@@ -2652,7 +2652,7 @@ body.ro .ann-card { cursor: default !important; }
     <div class="doc-footer">
       <span class="sig">Prepared by <span class="tl">Library</span><span class="or">Market</span></span>
       <span id="footerMeta">v1 · April 30, 2026</span>
-      <span class="build-badge">tool v2.20</span>
+      <span class="build-badge">tool v2.21</span>
     </div>
   </div>
 </div>
@@ -5200,11 +5200,6 @@ async function exportDeveloperMD() {
     });
   }
   lines.push('');
-  // Logo background
-  lines.push('## Logo Background');
-  lines.push('');
-  lines.push(`Hex: \`${S.logoBg || '#FFFFFF'}\``);
-  lines.push('');
   // Typography
   lines.push('## Typography');
   lines.push('');
@@ -5222,37 +5217,20 @@ async function exportDeveloperMD() {
     lines.push(`| ${row.tag} | ${fontName} | ${sizeLabel} | ${row.weight} | ${caseLabel} |`);
   });
   lines.push('');
-  // Buttons (base + hover, contrast delta)
-  lines.push('## Buttons');
-  lines.push('');
-  const primary = S.colors.find(x => x.role === 'primary');
-  const primaryHover = S.colors.find(x => x.role === 'primary-hover');
-  if (primary && primaryHover) {
-    const delta = contrast(primary.hex, primaryHover.hex);
-    lines.push(`**Primary button:** base \`${primary.hex}\` → hover \`${primaryHover.hex}\` (${delta.toFixed(2)}:1 delta)`);
-  }
-  if (S.hasSecondary) {
-    const sec = S.colors.find(x => x.role === 'secondary');
-    const secHover = S.colors.find(x => x.role === 'secondary-hover');
-    if (sec && secHover) {
-      const delta = contrast(sec.hex, secHover.hex);
-      lines.push(`**Secondary button:** base \`${sec.hex}\` → hover \`${secHover.hex}\` (${delta.toFixed(2)}:1 delta)`);
-    }
-  }
-  lines.push('');
   // Announcements
   lines.push('## Announcements');
   lines.push('');
   if (S.announcements.length === 0) {
     lines.push('_No announcements defined._');
   } else {
-    lines.push('| # | Tint | Mode | Body |');
-    lines.push('|---|------|------|------|');
-    S.announcements.forEach((a, i) => {
-      const tintLabel = a.tint === 'Custom' ? `Custom \`${(a.customHex || '').toUpperCase()}\`` : a.tint;
+    lines.push('| Mode | Color |');
+    lines.push('|------|-------|');
+    S.announcements.forEach((a) => {
       const modeLabel = a.mode === 'full' ? 'Full' : 'Tinted';
-      const bodyClean = (a.body || '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
-      lines.push(`| ${i + 1} | ${tintLabel} | ${modeLabel} | ${bodyClean} |`);
+      const tintHex = a.tint === 'Custom'
+        ? (a.customHex || '#888888').toUpperCase()
+        : (S.status[a.tint] || '#888888').toUpperCase();
+      lines.push(`| ${modeLabel} | \`${tintHex}\` |`);
     });
   }
   lines.push('');
