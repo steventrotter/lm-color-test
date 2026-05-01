@@ -2051,6 +2051,18 @@ body.ro .tb-feedback {
 }
 body.ro .tb-feedback:hover { background: var(--lm-purple-hover); border-color: var(--lm-purple-hover); }
 body.ro .tb-feedback[hidden] { display: none !important; }
+/* Match Send Feedback button size/font to the Share and Palette Editor     */
+/* siblings. The base .tb-feedback rule uses Poppins 13px 8/16px padding;   */
+/* inside .tb-ro-right all three buttons should be a uniform set.           */
+body.ro .tb-ro-right .tb-feedback {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-family: var(--mono);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  gap: 6px;
+}
 
 body.ro .sec-controls,
 body.ro .add-color-card,
