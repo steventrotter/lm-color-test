@@ -824,6 +824,11 @@ button { cursor: pointer; }
   color: var(--lm-ink);
 }
 .font-control input:focus { outline: none; border-color: var(--lm-teal); }
+/* Apply Fonts button matches the height of the .font-control inputs beside */
+/* it. The default .mini-btn padding (5px 10px) read as visibly shorter than */
+/* the inputs (8px 12px on a 13px font); bumping vertical padding to 10px   */
+/* lines the button's box up exactly with the input box at the bottom edge. */
+.font-controls .mini-btn { padding: 10px 14px; }
 
 .type-block {
   background: var(--paper-2);
@@ -1883,23 +1888,34 @@ button { cursor: pointer; }
 body.ro .toolbar > * { display: none; }
 body.ro .toolbar .toolbar-logo,
 body.ro .toolbar .toolbar-sep,
-body.ro .toolbar .ro-pill { display: flex; }
-body.ro .ro-pill {
+body.ro .toolbar .tb-feedback { display: flex; }
+/* Toolbar Send Feedback button. Replaces the v2.12 read-only badge: in    */
+/* client view this is the always-visible primary CTA, sticky at the top  */
+/* of the page. Hidden in editor view and hidden in client view when the  */
+/* PM dropdown is unset (renderFeedback toggles the `hidden` attribute).  */
+/* Section 08 stays as the bottom-of-doc CTA with explainer copy; this    */
+/* button is the toolbar twin and shares buildFeedbackMailto() so both    */
+/* pull from the same memoized share URL.                                 */
+body.ro .tb-feedback {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
+  padding: 8px 16px;
+  background: var(--lm-purple);
+  border: 1px solid var(--lm-purple);
   border-radius: 4px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: rgba(255,255,255,0.85);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-family: var(--poppins);
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: background 0.15s, border-color 0.15s;
+  cursor: pointer;
 }
-body.ro .ro-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--lm-orange); }
-body:not(.ro) .ro-pill { display: none; }
+body.ro .tb-feedback:hover { background: var(--lm-purple-hover); border-color: var(--lm-purple-hover); }
+body.ro .tb-feedback[hidden] { display: none; }
+body:not(.ro) .tb-feedback { display: none; }
 
 body.ro .sec-controls,
 body.ro .add-color-card,
@@ -2099,7 +2115,9 @@ body.ro .ann-card { cursor: default !important; }
     <span class="toolbar-brand"><span class="tl">Library</span><span class="or">Market</span><span class="lbl">Color Test</span></span>
   </div>
 
-  <span class="ro-pill"><span class="dot"></span>Read-only · Sent by Library Market</span>
+  <a id="tbFeedbackMailto" class="tb-feedback" href="#" rel="noopener" target="_blank" hidden>
+    <span class="tb-feedback-label" id="tbFeedbackBtnLabel">Send feedback</span>
+  </a>
 
   <div class="toolbar-sep"></div>
 
@@ -2502,7 +2520,7 @@ const S = {
   ],
   // Typography rows with per-row weights
   typeRows: [
-    { tag: 'H1',         font: 'secondary', size: 45,   weight: 600, case: 'title', sample: 'Find your next favorite book' },
+    { tag: 'H1',         font: 'secondary', size: 45,   weight: 600, case: 'title', sample: 'Page Titles' },
     { tag: 'H2',         font: 'secondary', size: 36,   weight: 600, case: 'title', sample: 'Upcoming events this week' },
     { tag: 'H3',         font: 'secondary', size: 31.5, weight: 500, case: 'title', sample: 'Children\u2019s Storytime' },
     { tag: 'H4',         font: 'secondary', size: 27,   weight: 500, case: 'title', sample: 'Registration required' },
@@ -4007,14 +4025,26 @@ function _pickerJumpShade(direction) {
   syncPicker();
 }
 function syncPicker() {
-  drawPickerField();
-  setFieldThumb();
-  setHueThumb();
-  renderShades();
+  // 1. Compute hex first. PK.hex is the underlying state confirmPicker
+  //    reads - keep this correct even if a downstream redraw step fails.
   const rgb = hsvToRgb(PK.h, PK.s, PK.v);
   PK.hex = rgbToHex(rgb.r, rgb.g, rgb.b);
-  document.getElementById('vcPickerPreview').style.background = '#' + PK.hex;
-  document.getElementById('vcHexInput').value = PK.hex;
+  // 2. Update the most visible feedback channels next: the hex input value
+  //    and the small preview swatch in the picker title row. These are the
+  //    quickest confirmation a keystroke registered. Null-guarded in case
+  //    syncPicker fires before the picker overlay is in the DOM.
+  const hexEl = document.getElementById('vcHexInput');
+  if (hexEl) hexEl.value = PK.hex;
+  const previewEl = document.getElementById('vcPickerPreview');
+  if (previewEl) previewEl.style.background = '#' + PK.hex;
+  // 3. Canvas + thumb redraws last, each guarded so a failure in one step
+  //    doesn't block the rest. drawPickerField touches a canvas context;
+  //    setFieldThumb / setHueThumb / renderShades touch DOM elements that
+  //    should always exist but are defensively guarded for the same reason.
+  try { drawPickerField(); } catch (_) {}
+  try { setFieldThumb();   } catch (_) {}
+  try { setHueThumb();     } catch (_) {}
+  try { renderShades();    } catch (_) {}
 }
 function onPickerHexInput(raw) {
   const clean = raw.replace(/[^0-9a-fA-F]/g, '').toUpperCase().slice(0, 6);
@@ -4458,26 +4488,37 @@ async function renderFeedback() {
   const sec     = document.getElementById('feedbackSection');
   const link    = document.getElementById('feedbackMailto');
   const labelEl = document.getElementById('feedbackBtnLabel');
+  // Toolbar twin: same mailto, hidden via the `hidden` attribute when no PM.
+  // Lives in the toolbar in client view; CSS handles the editor-view hide.
+  const tbLink    = document.getElementById('tbFeedbackMailto');
+  const tbLabelEl = document.getElementById('tbFeedbackBtnLabel');
   if (!sec) return;
   // Mark no-pm so the client-view CSS can hide the section when no
   // recipient is set. Editor view hides the section unconditionally
   // via a separate body:not(.ro) rule.
   sec.classList.toggle('no-pm', !S.pm);
   if (!S.pm) {
-    if (link) link.hidden = true;
+    if (link)   link.hidden   = true;
+    if (tbLink) tbLink.hidden = true;
     return;
   }
-  if (link) link.hidden = false;
-  if (labelEl) labelEl.textContent = `Send feedback to ${pmDisplayName(S.pm)}`;
+  if (link)   link.hidden   = false;
+  if (tbLink) tbLink.hidden = false;
+  const displayName = pmDisplayName(S.pm);
+  if (labelEl)   labelEl.textContent   = `Send feedback to ${displayName}`;
+  if (tbLabelEl) tbLabelEl.textContent = `Send feedback to ${displayName}`;
   const mailto = await buildFeedbackMailto();
-  if (link && mailto) link.href = mailto;
+  if (mailto) {
+    if (link)   link.href   = mailto;
+    if (tbLink) tbLink.href = mailto;
+  }
 }
 
 // ─── DEVELOPER MD EXPORT ──────────────────────────────────────
 // Markdown summary intended to attach to a Jira theme-build ticket so
 // devs don't have to crawl the client-ready color test and pick out
 // hex codes. Skips WCAG rules + reference constants per scope.
-function exportDeveloperMD() {
+async function exportDeveloperMD() {
   document.getElementById('exportMenu').classList.remove('open');
   const lines = [];
   const client = (S.clientName || 'Untitled Client').trim();
@@ -4491,6 +4532,27 @@ function exportDeveloperMD() {
   } else {
     lines.push(`**Project Manager:** (not set)`);
   }
+  // Reference URLs: Palette (Vesper Colors view of the brand+taxonomy hexes)
+  // and Client (read-only share URL with all state encoded). Reuses the
+  // memoized read-only URL when fresh; rebuilds only on cache miss. If the
+  // share URL build fails for any reason we still emit the file with a
+  // placeholder rather than throwing.
+  const paletteUrl = buildPaletteUrl();
+  let clientUrl = null;
+  try {
+    const hash = _stateHashShallow();
+    if (_feedbackUrlCache.stateHash === hash && _feedbackUrlCache.url) {
+      clientUrl = _feedbackUrlCache.url;
+    } else {
+      const result = await buildShareUrl(true);
+      if (result && result.url) {
+        clientUrl = result.url;
+        _feedbackUrlCache = { stateHash: hash, url: result.url };
+      }
+    }
+  } catch (e) {}
+  lines.push(`**Palette URL:** ${paletteUrl}`);
+  lines.push(`**Client (read-only):** ${clientUrl || '(share URL unavailable - try again or rebuild from the Share menu)'}`);
   lines.push('');
   // Brand colors (Primary, Primary Hover, Secondary, Secondary Hover) with
   // contrast vs the calendar background.
