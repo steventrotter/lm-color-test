@@ -360,6 +360,21 @@ button { cursor: pointer; }
   width: 100%;
   padding: 0 0 4px 0;
   transition: border-color 0.15s;
+  /* v2.18: contenteditable div replaces the single-line input so long client
+     names ("St. Joseph / Maud Preston Palenske Memorial Library") wrap to
+     multiple lines instead of overflowing. display:block keeps the dashed
+     bottom border under the last wrapped line; word-break handles the rare
+     case of an unbreakable token. min-height preserves the row height when
+     the field is empty so the placeholder line doesn't collapse. */
+  display: block;
+  word-break: break-word;
+  outline: none;
+  min-height: 1.2em;
+}
+.doc-cover-title .editable:empty::before {
+  content: attr(data-placeholder);
+  color: var(--lm-quiet);
+  pointer-events: none;
 }
 .doc-cover-title .editable:hover { border-bottom-color: var(--hair); }
 .doc-cover-title .editable:focus { outline: none; border-bottom-color: var(--lm-teal); }
@@ -1308,6 +1323,12 @@ button { cursor: pointer; }
   color: #fff;
 }
 .import-actions .import-confirm:hover { background: var(--lm-purple-hover); }
+.import-actions .import-confirm:disabled,
+.import-actions .import-confirm:disabled:hover {
+  background: var(--hair);
+  color: var(--lm-quiet);
+  cursor: not-allowed;
+}
 
 /* Colorblind dropdown (collapses 5 mode buttons into a single trigger) */
 .cb-wrap { position: relative; flex-shrink: 0; }
@@ -2367,7 +2388,7 @@ body.ro .ann-card { cursor: default !important; }
         <line x1="5.5" y1="7.1" x2="10.5" y2="4.4"/><line x1="5.5" y1="8.9" x2="10.5" y2="11.6"/>
       </svg>
     </button>
-    <button class="tb-btn" onclick="openPaletteUrl()" title="Open the color palette in Vesper Colors">
+    <button class="tb-btn" onclick="openPaletteUrlWithLabels()" title="Open the color palette in Vesper Colors">
       <span class="tb-ro-label">Palette Editor</span>
       <svg class="tb-ro-ico" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M2.5 10A5.5 5.5 0 1 1 13 12.5 2 2 0 0 0 11.2 14H9.5a1 1 0 0 1 0-2 1 1 0 0 0 .8-1.6"/>
@@ -2406,7 +2427,7 @@ body.ro .ann-card { cursor: default !important; }
       <div>
         <div class="doc-cover-meta" id="coverMeta">COLOR TEST · APR 2026</div>
         <div class="doc-cover-title">
-          <input class="editable" id="coverTitle" placeholder="Client Name" oninput="updateClient(this.value)">
+          <div class="editable" id="coverTitle" contenteditable="plaintext-only" data-placeholder="Client Name" oninput="updateClient(this.textContent)" role="textbox" aria-label="Client name" aria-multiline="true" spellcheck="false"></div>
         </div>
         <div class="doc-cover-pm" id="coverPmRow">
           <span class="lbl">Project Manager</span>
@@ -2633,7 +2654,7 @@ body.ro .ann-card { cursor: default !important; }
     <div class="doc-footer">
       <span class="sig">Prepared by <span class="tl">Library</span><span class="or">Market</span></span>
       <span id="footerMeta">v1 · April 30, 2026</span>
-      <span class="build-badge">tool v2.17</span>
+      <span class="build-badge">tool v2.18</span>
     </div>
   </div>
 </div>
@@ -2679,15 +2700,15 @@ body.ro .ann-card { cursor: default !important; }
      onclick="if(event.target===this) closeImport()">
   <div class="import-sheet">
     <div class="import-title" id="importTitle">Import Palette</div>
-    <p class="import-hint">Paste a Vesper Colors palette URL below. Brand colors (Primary, Primary Hover, Secondary, Secondary Hover) are matched by label when present, or by position when labels are absent. Taxonomy colors replace the current set.</p>
+    <p class="import-hint">Paste a Vesper Colors palette URL below. The URL must include brand labels (Primary, Primary Hover, Secondary, or Secondary Hover) - export from Actions → Share Palette Editor to get them. Brand colors are matched by label; remaining colors replace the taxonomy.</p>
     <input class="import-input" id="importUrlInput" type="text"
            placeholder="https://vesperapps.com/colors/view/..."
            autocomplete="off" autocorrect="off" spellcheck="false"
-           oninput="clearImportError()">
+           oninput="validateImportInput()">
     <div class="import-error" id="importError"></div>
     <div class="import-actions">
       <button class="import-cancel" onclick="closeImport()">Cancel</button>
-      <button class="import-confirm" onclick="confirmImport()">Import</button>
+      <button class="import-confirm" id="importConfirmBtn" onclick="confirmImport()">Import</button>
     </div>
   </div>
 </div>
@@ -2934,10 +2955,12 @@ function changeVersion(d) {
 }
 function updateClient(v) {
   S.clientName = v;
-  const cn = document.getElementById('clientName');
   const ct = document.getElementById('coverTitle');
-  if (cn && cn.value !== v) cn.value = v;
-  if (ct && ct.value !== v) ct.value = v;
+  // ct is a contenteditable div (since v2.18). The textContent !== v guard
+  // matters during programmatic restoration so we don't reset the caret on
+  // every keystroke - during user input, oninput hands us this.textContent
+  // so the values already match and we never reach the assignment.
+  if (ct && ct.textContent !== v) ct.textContent = v;
 }
 
 // ─── SECONDARY ─────────────────────────────────────────────────────────────
@@ -3042,6 +3065,13 @@ function copyPaletteUrl() {
 }
 function openPaletteUrl() {
   window.open(buildPaletteUrl(), '_blank', 'noopener');
+}
+// Labeled variant: opens the palette in Vesper Colors with role labels
+// attached to each hex. Used by the client-view Palette Editor button so
+// the round-trip through Import Palette can match colors by name. The
+// hex-only openPaletteUrl above is preserved for any caller that needs it.
+function openPaletteUrlWithLabels() {
+  window.open(buildPaletteUrlWithLabels(), '_blank', 'noopener');
 }
 let _flashTimer;
 function flashToolbar(msg) {
@@ -4423,6 +4453,11 @@ function openImport() {
   inp.value = '';
   inp.classList.remove('invalid');
   document.getElementById('importError').textContent = '';
+  // Reset Import button to enabled state every time the dialog opens.
+  // Otherwise a previously-disabled state from a prior invalid paste
+  // could persist into a fresh session.
+  const btn = document.getElementById('importConfirmBtn');
+  if (btn) btn.disabled = false;
   // Delay focus slightly so the CSS transition has started - avoids a focus
   // flash on the backdrop before the sheet has animated in.
   setTimeout(() => inp.focus(), 60);
@@ -4435,6 +4470,64 @@ function closeImport() {
 function clearImportError() {
   document.getElementById('importUrlInput').classList.remove('invalid');
   document.getElementById('importError').textContent = '';
+}
+// Returns true if the URL has at least one brand-recognized label,
+// false if it parses as a valid Vesper palette URL but has zero brand
+// labels, null if it doesn't look like a complete Vesper URL yet (still
+// being typed, malformed, etc.). Used by the live oninput validator on
+// the Import dialog so a staff member pasting an unlabeled URL gets
+// immediate feedback rather than finding out at click time.
+//
+// "At least one brand label" (vs. "all four required") accommodates the
+// real-world case of a client that doesn't use Secondary - the staff
+// export in that mode produces a URL with only Primary + Primary Hover
+// labels, which is a legitimate palette and should round-trip cleanly.
+function paletteHasBrandLabels(url) {
+  const entries = parsePaletteUrl(url);
+  if (entries === null) return null;       // not a /colors/view/ URL
+  if (entries.length === 0) return null;   // looks like Vesper but no valid hexes
+  const norm = s => s.toLowerCase().replace(/\s+/g, ' ').trim();
+  const BRAND_KEYS = ['primary', 'primary hover', 'secondary', 'secondary hover'];
+  for (const e of entries) {
+    if (e.label && BRAND_KEYS.includes(norm(e.label))) return true;
+  }
+  return false;
+}
+// Live validator wired to the Import dialog input. Three states:
+//  - empty / not yet a recognizable Vesper URL → field neutral, button enabled
+//    (clicking Import in this state surfaces the generic "Could not parse"
+//    error from confirmImport)
+//  - parseable Vesper URL with NO brand labels → field marked invalid,
+//    error message shown, Import button disabled
+//  - parseable Vesper URL WITH at least one brand label → field clean,
+//    button enabled
+// The labels-required rule is staff policy as of v2.18: brand colors
+// round-trip via Vesper labels, so an unlabeled URL would silently
+// misalign brand slots on import.
+function validateImportInput() {
+  const inp = document.getElementById('importUrlInput');
+  const btn = document.getElementById('importConfirmBtn');
+  const errEl = document.getElementById('importError');
+  const raw = (inp.value || '').trim();
+  if (!raw) {
+    inp.classList.remove('invalid');
+    errEl.textContent = '';
+    if (btn) btn.disabled = false;
+    return;
+  }
+  const result = paletteHasBrandLabels(raw);
+  if (result === false) {
+    inp.classList.add('invalid');
+    errEl.textContent = 'This palette has no brand labels. Re-export from Actions → Share Palette Editor so Primary, Primary Hover, Secondary, and Secondary Hover travel with the colors.';
+    if (btn) btn.disabled = true;
+  } else {
+    // result === true (has brand labels) OR result === null (not yet a
+    // recognizable Vesper URL - let the user keep typing/pasting; the
+    // confirmImport path handles malformed URLs with its own error)
+    inp.classList.remove('invalid');
+    errEl.textContent = '';
+    if (btn) btn.disabled = false;
+  }
 }
 function setImportError(msg) {
   const inp = document.getElementById('importUrlInput');
@@ -4451,6 +4544,14 @@ function confirmImport() {
   }
   if (entries.length === 0) {
     setImportError('No valid hex colors found in this URL.');
+    return;
+  }
+  // Defensive: the live validator already disables the button for this
+  // case, but a paste-and-immediately-press-Enter race or a programmatic
+  // call could bypass the UI. Enforce labels-required at the action site
+  // too so this never sneaks through.
+  if (paletteHasBrandLabels(raw) === false) {
+    setImportError('This palette has no brand labels. Re-export from Actions → Share Palette Editor so Primary, Primary Hover, Secondary, and Secondary Hover travel with the colors.');
     return;
   }
   applyImportedPalette(entries);
@@ -4485,18 +4586,29 @@ function parsePaletteUrl(url) {
   return entries; // may be empty array
 }
 // Apply a parsed palette entry array to the current color state.
-// Brand colors are matched by label first (case-insensitive, normalized),
-// then by position for any that weren't found by label.
-// Taxonomy colors (anything not matched to a brand role) replace all current
-// taxonomy entries. Brand hex values are updated in place; labels stay unchanged.
+//
+// Brand colors are matched by label only - the Import dialog's live
+// validator and confirmImport's defensive check both reject URLs with
+// no brand labels, so we never reach this function with a label-less
+// payload. Each of the four brand labels (Primary, Primary Hover,
+// Secondary, Secondary Hover) that's present in the URL updates its
+// matching slot. Slots whose labels are absent from the URL keep their
+// previous hex value in S.colors (still there, just potentially hidden
+// by the Secondary toggle).
+//
+// Secondary toggle is a direct function of Secondary-label presence in
+// the URL: ON if Secondary or Secondary Hover label is found, OFF
+// otherwise. The URL is the source of truth - the imported state
+// matches the export state of whoever sent the URL. This is a stronger
+// contract than the older "ON is sticky, OFF requires manual toggle"
+// rule and avoids the surprise of importing a Primary-only palette
+// while Secondary stays visible in the document.
+//
+// Taxonomy: any entries not consumed by a brand label wipe and replace
+// the current taxonomy set. If the URL has zero non-brand entries,
+// existing taxonomy is left alone.
 function applyImportedPalette(entries) {
   const norm = s => s.toLowerCase().replace(/\s+/g, ' ').trim();
-  const BRAND_LABELS = {
-    'primary':        'primary',
-    'primary hover':  'primary-hover',
-    'secondary':      'secondary',
-    'secondary hover':'secondary-hover',
-  };
   // Index entries by normalized label for label-based matching.
   const byNormLabel = {};
   entries.forEach(e => {
@@ -4505,35 +4617,16 @@ function applyImportedPalette(entries) {
       if (!byNormLabel[k]) byNormLabel[k] = e; // first match wins
     }
   });
-  const hasBrandLabels = Object.keys(BRAND_LABELS).some(k => byNormLabel[k]);
-  let primaryE, pHoverE, secondaryE, sHoverE;
   const usedSet = new Set();
-  if (hasBrandLabels) {
-    const pick = labelKey => {
-      const e = byNormLabel[labelKey];
-      if (e) usedSet.add(e);
-      return e || null;
-    };
-    primaryE   = pick('primary');
-    pHoverE    = pick('primary hover');
-    secondaryE = pick('secondary');
-    sHoverE    = pick('secondary hover');
-    // Positional fallback for any brand slot not matched by label,
-    // using entries that weren't claimed by a label match.
-    const unused = entries.filter(e => !usedSet.has(e));
-    let pos = 0;
-    if (!primaryE   && unused[pos]) { primaryE   = unused[pos]; usedSet.add(unused[pos]); pos++; }
-    if (!pHoverE    && unused[pos]) { pHoverE    = unused[pos]; usedSet.add(unused[pos]); pos++; }
-    if (!secondaryE && unused[pos]) { secondaryE = unused[pos]; usedSet.add(unused[pos]); pos++; }
-    if (!sHoverE    && unused[pos]) { sHoverE    = unused[pos]; usedSet.add(unused[pos]); pos++; }
-  } else {
-    // No brand labels at all - pure positional.
-    primaryE   = entries[0] || null;
-    pHoverE    = entries[1] || null;
-    secondaryE = entries.length > 2 ? entries[2] : null;
-    sHoverE    = entries.length > 3 ? entries[3] : null;
-    [primaryE, pHoverE, secondaryE, sHoverE].filter(Boolean).forEach(e => usedSet.add(e));
-  }
+  const pick = labelKey => {
+    const e = byNormLabel[labelKey];
+    if (e) usedSet.add(e);
+    return e || null;
+  };
+  const primaryE   = pick('primary');
+  const pHoverE    = pick('primary hover');
+  const secondaryE = pick('secondary');
+  const sHoverE    = pick('secondary hover');
   // Update brand hex values (labels stay as-is in the color test).
   const setHex = (role, entry) => {
     if (!entry) return false;
@@ -4543,9 +4636,22 @@ function applyImportedPalette(entries) {
   };
   setHex('primary',       primaryE);
   setHex('primary-hover', pHoverE);
-  const hadSecondary = setHex('secondary',       secondaryE);
+  setHex('secondary',       secondaryE);
   setHex('secondary-hover', sHoverE);
-  if (hadSecondary) S.hasSecondary = true;
+  // Secondary toggle reflects what the URL described. Presence of EITHER
+  // Secondary or Secondary Hover label flips the toggle ON; absence of
+  // both flips it OFF. The toggle is no longer sticky across imports.
+  S.hasSecondary = (secondaryE !== null || sHoverE !== null);
+  // Sync the toolbar Secondary toggle button to the new state. Its text
+  // and active class are otherwise only updated by toggleSecondary() and
+  // restoreState(); since import bypasses both, the button would
+  // otherwise be left out of sync with S.hasSecondary - especially
+  // visible now that import can flip the toggle in either direction.
+  const tb = document.getElementById('secondaryToggle');
+  if (tb) {
+    tb.textContent = S.hasSecondary ? 'ON' : 'OFF';
+    tb.classList.toggle('active', S.hasSecondary);
+  }
   // Taxonomy: entries not consumed by brand slots replace the current set.
   const taxEntries = entries.filter(e => !usedSet.has(e));
   if (taxEntries.length > 0) {
@@ -4651,10 +4757,8 @@ function restoreState(obj) {
   S.rule4Override = obj.rule4Override === true;
   if (typeof obj.clientNotes === 'string') S.clientNotes = obj.clientNotes;
   // Refresh UI inputs
-  const cn = document.getElementById('clientName');
   const ct = document.getElementById('coverTitle');
-  if (cn) cn.value = S.clientName;
-  if (ct) ct.value = S.clientName;
+  if (ct) ct.textContent = S.clientName;
   const pi = document.getElementById('primaryFontInput');
   const si = document.getElementById('secondaryFontInput');
   if (pi) pi.value = S.primaryFont;
@@ -4824,6 +4928,11 @@ async function tryRestoreFromUrl() {
     if (isRo) {
       S.readOnly = true;
       document.body.classList.add('ro');
+      // Cover title is a contenteditable div (v2.18). pointer-events:none
+      // already blocks click-to-edit in client view; explicitly turning
+      // contentEditable off closes the keyboard-focus path too.
+      const ct = document.getElementById('coverTitle');
+      if (ct) ct.contentEditable = 'false';
       // Hide notes block if no content
       const rev = document.querySelector('.rev-block');
       if (rev) rev.parentElement.parentElement.classList.toggle('has-content', !!(S.notes && S.notes.trim()));
@@ -4927,46 +5036,30 @@ function _stateHashShallow() {
   try { return JSON.stringify(captureState()); } catch (e) { return String(Date.now()); }
 }
 
-// Shorten a URL before copying to clipboard or embedding in mailto bodies.
-// CleanURI is used first - it explicitly supports browser-side CORS with no
-// API key. is.gd POST is the fallback. Both use POST so the long state URL
-// goes in the request body rather than the query string (GET was hitting URL
-// length limits for large palettes). Falls back to the full URL silently on
-// any failure so share/mailto is never blocked.
+// Shorten a URL via is.gd (free, no key, CORS-enabled).
+// Uses POST so the long state URL goes in the request body rather than
+// the query string - GET was hitting URL length limits for large palettes.
+// Falls back to the original on any failure (network error, timeout,
+// rate limit, or unexpected response) so the mailto is never blocked.
 async function shortenUrl(longUrl) {
-  // --- Primary: CleanURI ---
   try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 5000);
-    const res = await fetch('https://cleanuri.com/api/v1/shorten', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'url=' + encodeURIComponent(longUrl),
-      signal: ctrl.signal,
-    });
-    clearTimeout(t);
-    if (res.ok) {
-      const d = await res.json();
-      if (d.result_url && /^https?:\/\//.test(d.result_url)) return d.result_url;
-    }
-  } catch (_) {}
-  // --- Fallback: is.gd POST ---
-  try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 5000);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4000);
     const res = await fetch('https://is.gd/create.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'format=simple&url=' + encodeURIComponent(longUrl),
-      signal: ctrl.signal,
+      signal: controller.signal,
     });
-    clearTimeout(t);
-    if (res.ok) {
-      const s = (await res.text()).trim();
-      if (/^https?:\/\//.test(s)) return s;
-    }
-  } catch (_) {}
-  return longUrl;
+    clearTimeout(timer);
+    if (!res.ok) return longUrl;
+    const short = (await res.text()).trim();
+    // is.gd returns a valid https URL on success; any other response
+    // (e.g. an error message string) is treated as a failure.
+    return /^https?:\/\//.test(short) ? short : longUrl;
+  } catch (_) {
+    return longUrl;
+  }
 }
 
 async function buildFeedbackMailto() {
