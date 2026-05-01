@@ -376,20 +376,28 @@ button { cursor: pointer; }
   position: relative;
 }
 .sec-header {
-  display: grid;
-  grid-template-columns: 60px 1fr auto;
+  /* Option B (v2.10): section number is a kicker ABOVE the title, not a
+     left-column badge. Header becomes a flex row so sec-controls stays
+     pinned to the right while the title stack flows naturally on the left. */
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 24px;
   margin-bottom: 28px;
-  align-items: start;
 }
 .sec-num {
+  /* Kicker treatment - small mono caps, sits above the title. */
+  display: block;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--text-mono-tag);
   color: var(--lm-quiet);
-  padding-top: 10px;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-bottom: 6px;
 }
 .sec-titlewrap {
+  flex: 1;
   min-width: 0;
 }
 .sec-title {
@@ -411,7 +419,7 @@ button { cursor: pointer; }
   gap: 8px;
   align-items: center;
 }
-.sec-body { padding-left: 84px; }
+.sec-body { padding-left: 0; }
 
 /* Mini-button (in-doc, no-print) */
 .mini-btn {
@@ -1762,6 +1770,35 @@ button { cursor: pointer; }
 .font-browse-link:hover { color: var(--lm-teal); border-color: var(--lm-teal); }
 
 /* ─────────────────────────────────────────── */
+/* CLIENT NOTES BANNER (top of client view)    */
+/* ─────────────────────────────────────────── */
+.client-notes-banner {
+  margin: 0 72px 32px;
+  padding: 20px 26px;
+  background: rgba(70, 50, 135, 0.05);
+  border-left: 4px solid var(--lm-purple);
+  border-radius: 0 4px 4px 0;
+}
+.client-notes-banner[hidden] { display: none; }
+.cnb-header {
+  font-family: var(--mono);
+  font-size: var(--text-mono-meta);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lm-purple);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+.cnb-header span { color: var(--lm-purple); }
+.cnb-body {
+  font-family: var(--poppins);
+  font-size: var(--text-body);
+  line-height: 1.6;
+  color: var(--lm-ink);
+  white-space: pre-wrap;
+}
+
+/* ─────────────────────────────────────────── */
 /* SEND FEEDBACK SECTION (Section 08, mailto)  */
 /* ─────────────────────────────────────────── */
 .feedback-block {
@@ -1770,46 +1807,26 @@ button { cursor: pointer; }
   gap: 14px;
 }
 .feedback-btn {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
-  background: var(--lm-teal-deep);
+  /* Single-line purple CTA. AAA on white text (10.16:1 vs --lm-purple). */
+  display: inline-block;
+  background: var(--lm-purple);
   color: #fff;
   padding: 16px 28px;
   border-radius: 4px;
   text-decoration: none;
   font-family: var(--poppins);
-  transition: background 0.18s ease;
-  align-self: flex-start;
-  max-width: 100%;
-}
-.feedback-btn:hover { background: #004142; color: #fff; }
-.feedback-btn[hidden] { display: none; }
-.feedback-btn-label {
   font-size: var(--text-button);
   font-weight: 700;
   line-height: 1.2;
+  transition: background 0.18s ease;
+  max-width: 100%;
 }
-.feedback-btn-pm {
-  font-family: var(--mono);
-  font-size: var(--text-mono-tag);
-  letter-spacing: 0.05em;
-  margin-top: 4px;
-  text-transform: uppercase;
-  opacity: 0.88;
-}
-.feedback-empty {
-  font-family: var(--poppins);
-  font-size: var(--text-body);
-  color: var(--lm-mute);
-  background: rgba(0,0,0,0.025);
-  border-left: 3px solid var(--lm-quiet);
-  padding: 16px 20px;
-  border-radius: 0 4px 4px 0;
-  max-width: 640px;
-  line-height: 1.55;
-}
-.feedback-empty[hidden] { display: none; }
+.feedback-btn:hover { background: var(--lm-purple-hover); color: #fff; }
+.feedback-btn[hidden] { display: none; }
+.feedback-btn-label { display: inline; }
+/* .feedback-empty was removed in v2.10 (Phase 6) - the section is hidden in
+   editor view entirely, and in client view the entire .sec-feedback collapses
+   when no PM is set, so an empty-state callout was unreachable. */
 
 /* ─────────────────────────────────────────── */
 /* RULE 5 OVERRIDE CONTROLS                    */
@@ -1903,8 +1920,15 @@ body.ro .pm-select { display: none; }
 body.ro .pm-readonly { display: inline; }
 body:not(.ro) .pm-readonly { display: none; }
 /* Hide entire feedback section if no PM selected in client view (set by JS) */
+/* Send Feedback is client-facing only - hidden entirely in editor view. */
+body:not(.ro) .sec-feedback { display: none !important; }
+/* In client view, hide the feedback section if no PM is set (no recipient). */
 body.ro .sec-feedback.no-pm { display: none; }
-body.ro .sec-feedback .feedback-empty { display: none !important; }
+/* Client notes editor section is editor-only; in client view the content
+   appears as a top-of-doc banner instead of an editable textarea. */
+body.ro .sec-clientnotes { display: none !important; }
+/* The notes banner is the inverse - editor view never shows it. */
+body:not(.ro) .client-notes-banner { display: none !important; }
 /* Rule 5 row is hidden entirely in client view when PM has overridden it */
 body.ro .rule-row.is-overridden { display: none !important; }
 /* Override toggle is staff-only - never expose it to clients via share URL */
@@ -2191,11 +2215,17 @@ body.ro .ann-card { cursor: default !important; }
       </div>
     </div>
 
+    <!-- CLIENT NOTES BANNER - shown at top of ?ro=1 view when PM + content are both set -->
+    <div class="client-notes-banner" id="clientNotesBanner" hidden>
+      <div class="cnb-header">Notes from <span id="cnbName"></span></div>
+      <div class="cnb-body" id="cnbBody"></div>
+    </div>
+
     <!-- SECTION 01 - LOGO LOCKUP -->
     <section class="sec">
       <div class="sec-header">
-        <div class="sec-num">01</div>
         <div class="sec-titlewrap">
+          <div class="sec-num">SECTION 01</div>
           <div class="sec-title">Logo Lockup</div>
           <div class="sec-intro">Confirm the approved wordmark treatment. Default background is white (most library headers); click the color chip below to change it if the logo will sit on a colored header.</div>
         </div>
@@ -2224,8 +2254,8 @@ body.ro .ann-card { cursor: default !important; }
     <!-- SECTION 02 - COLOR PALETTE -->
     <section class="sec">
       <div class="sec-header">
-        <div class="sec-num">02</div>
         <div class="sec-titlewrap">
+          <div class="sec-num">SECTION 02</div>
           <div class="sec-title">Color Palette</div>
           <div class="sec-intro" id="paletteIntro">Brand and calendar taxonomy colors. Contrast ratios shown beneath each swatch are measured against #EFEFEF (calendar background).</div>
         </div>
@@ -2254,8 +2284,8 @@ body.ro .ann-card { cursor: default !important; }
     <!-- SECTION 03 - STATUS COLORS -->
     <section class="sec">
       <div class="sec-header">
-        <div class="sec-num">03</div>
         <div class="sec-titlewrap">
+          <div class="sec-num">SECTION 03</div>
           <div class="sec-title">Status Colors</div>
           <div class="sec-intro">Calibrated success, danger, warning, and info indicators. Body text auto-flips to #1A1A1A or #FFFFFF based on background luminance, so each color is guaranteed readable without manual contrast tuning.</div>
         </div>
@@ -2268,8 +2298,8 @@ body.ro .ann-card { cursor: default !important; }
     <!-- SECTION 04 - ANNOUNCEMENT COLORS -->
     <section class="sec">
       <div class="sec-header">
-        <div class="sec-num">04</div>
         <div class="sec-titlewrap">
+          <div class="sec-num">SECTION 04</div>
           <div class="sec-title">Announcement Colors</div>
           <div class="sec-intro">Preview of leveled announcements. Each row can be set to <strong>Tinted</strong> (status hex at 20% opacity, dark body, primary link) or <strong>Full</strong> (status hex at 100%, body auto-flips to dark or white based on background luminance). On a light Full background the link tries Primary first and auto-flips to dark when Primary fails WCAG AA against that background. Add as many as the client uses.</div>
         </div>
@@ -2285,8 +2315,8 @@ body.ro .ann-card { cursor: default !important; }
     <!-- SECTION 05 - TYPOGRAPHY -->
     <section class="sec">
       <div class="sec-header">
-        <div class="sec-num">05</div>
         <div class="sec-titlewrap">
+          <div class="sec-num">SECTION 05</div>
           <div class="sec-title">Typography</div>
           <div class="sec-intro" id="typographyIntro">Secondary font drives all headings (H1-H6) by default; primary font is locked for body and small text. Use the dropdown on any heading row to override that row to primary. Base size is 18px; the heading scale steps up by 1.25x, 1.5x, 1.75x, 2x, and 2.5x.</div>
         </div>
@@ -2311,8 +2341,8 @@ body.ro .ann-card { cursor: default !important; }
     <!-- SECTION 06 - BUTTON STATES -->
     <section class="sec">
       <div class="sec-header">
-        <div class="sec-num">06</div>
         <div class="sec-titlewrap">
+          <div class="sec-num">SECTION 06</div>
           <div class="sec-title">Button States</div>
           <div class="sec-intro">Buttons displayed on the calendar background (#EFEFEF) to show real in-context contrast at base and hover.</div>
         </div>
@@ -2325,8 +2355,8 @@ body.ro .ann-card { cursor: default !important; }
     <!-- SECTION 07 - TEST RESULTS -->
     <section class="sec">
       <div class="sec-header">
-        <div class="sec-num">07</div>
         <div class="sec-titlewrap">
+          <div class="sec-num">SECTION 07</div>
           <div class="sec-title">Accessibility Test Results</div>
           <div class="sec-intro">The five Library Market color rules evaluated against the current palette, plus a full contrast matrix for staff documentation.</div>
         </div>
@@ -2342,8 +2372,8 @@ body.ro .ann-card { cursor: default !important; }
     <!-- SECTION 08 - SEND FEEDBACK (client mailto path) -->
     <section class="sec sec-feedback" id="feedbackSection">
       <div class="sec-header">
-        <div class="sec-num">08</div>
         <div class="sec-titlewrap">
+          <div class="sec-num">SECTION 08</div>
           <div class="sec-title">Send Feedback</div>
           <div class="sec-intro">When you have reviewed the colors, typography, and contrast above, send your decision back to your project manager. Approve as-is or request revisions; the email opens in your default mail program with the share link already attached.</div>
         </div>
@@ -2351,28 +2381,38 @@ body.ro .ann-card { cursor: default !important; }
       <div class="sec-body">
         <div class="feedback-block" id="feedbackBlock">
           <a id="feedbackMailto" class="feedback-btn" href="#" rel="noopener" target="_blank">
-            <span class="feedback-btn-label">Send Feedback to Project Manager</span>
-            <span class="feedback-btn-pm" id="feedbackBtnPm"></span>
+            <span class="feedback-btn-label" id="feedbackBtnLabel">Send feedback to your project manager</span>
           </a>
-          <div class="feedback-empty" id="feedbackEmpty" hidden>
-            No project manager has been selected for this color test yet. Once a PM is set on the cover, this button will compose an email back to them.
-          </div>
         </div>
       </div>
     </section>
 
-    <!-- REVISION NOTES -->
-    <section class="sec no-print">
+    <!-- STAFF-ONLY NOTES (was Revision Notes - editor view only, gated by .has-content in client view) -->
+    <section class="sec sec-staffnotes no-print">
       <div class="sec-header">
-        <div class="sec-num">↺</div>
         <div class="sec-titlewrap">
-          <div class="sec-title">Revision Notes</div>
+          <div class="sec-title">Staff-only Notes</div>
           <div class="sec-intro">Internal notes for this round. Visible to staff only; never appears in client-facing share links.</div>
         </div>
       </div>
       <div class="sec-body">
         <div class="rev-block">
           <textarea id="revNotes" oninput="S.notes = this.value" placeholder="e.g. Round 02: Client requested deeper teal for primary; pushed Age Group 3 toward warmer brown."></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLIENT NOTES (editor view only - content surfaces as a banner at the top of the client share view) -->
+    <section class="sec sec-clientnotes no-print" id="clientNotesSection">
+      <div class="sec-header">
+        <div class="sec-titlewrap">
+          <div class="sec-title">Client Notes</div>
+          <div class="sec-intro">Notes the client will see at the top of their share-link view, addressed from the project manager. Set the PM on the cover so the message can identify itself.</div>
+        </div>
+      </div>
+      <div class="sec-body">
+        <div class="rev-block">
+          <textarea id="clientNotesInput" oninput="onClientNotesInput(this.value)" placeholder="e.g. Hey Sara - here are the colors we discussed last week. Take a look at the green for kids; let me know if it feels right against the new logo."></textarea>
         </div>
       </div>
     </section>
@@ -2438,6 +2478,7 @@ const S = {
   readOnly: false,
   pm: '',                // Project Manager (one of the LM PM names, or empty)
   rule5Override: false,  // PM-only override: suppresses Rule 5 from per-chip badges and from client-facing test results
+  clientNotes: '',       // Free-form notes shown to the client at the top of their share-link view
   colors: [
     { id:'primary',   label:'Primary',          hex:'#3A3A3A', role:'primary',          group:'brand', removable:false },
     { id:'p-hover',   label:'Primary Hover',    hex:'#1F1F1F', role:'primary-hover',    group:'brand', removable:false },
@@ -2536,22 +2577,66 @@ function simulateCB(hex, mode) {
   const hx = v => clamp(v).toString(16).padStart(2, '0');
   return ('#' + hx(nr) + hx(ng) + hx(nb)).toUpperCase();
 }
-// Distinguishability threshold between two simulated colors. Lowered from
-// 1.5 to 1.15 after real-world testing: realistic taxonomy palettes (e.g.
-// Babies/Children/Teens/Adults/Everyone with light-yellow/red/olive/teal/
-// sage at varied luminance) had pairs collapsing to ratios around 1.16-
-// 1.22 under tritanopia and achromatopsia that designers consider visually
-// distinct. 1.15 still flags pairs that genuinely map to near-identical
-// luminance under simulation. Tighten back if too lenient in production.
+// ─── PERCEPTUAL COLOR DIFFERENCE (CIE76 deltaE) ───────────────────────────
+// Why this exists, and why it matters for Rule 3 / Rule 5:
+//
+// The original CB-distinguishability metric was WCAG contrast applied to
+// the two CB-simulated hexes. That measures luminance ratio only - it
+// has no concept of hue. Two simulated colors with very different hues
+// but similar luminance score very low on contrast even when they look
+// obviously different to the eye. The Kids/Teens screenshot from the
+// real-world test (lime + jade under tritanopia) was a textbook example:
+// the simulated hexes are clearly a mauve and a teal, but their contrast
+// ratio sits around 1.04:1 because they're at near-equal luminance.
+//
+// CIE76 deltaE in Lab space combines lightness, chroma, and hue into a
+// single perceptual distance, which is what "are these the same color?"
+// actually means. Threshold 10 corresponds to the standard "two distinct
+// colors" boundary in the literature (deltaE 1-2 is "barely perceptible",
+// 5 is "perceptible at a glance", 10+ is "two different colors").
+//
+// CIEDE2000 is more accurate but ~3x the code; CIE76 is enough for
+// triage. The PM override on Rule 5 absorbs any borderline cases this
+// metric misses. If we ever port this back to Vesper Colors, the
+// reasoning above is the rationale.
+function _srgbToLinear(c) {
+  c /= 255;
+  return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+}
+function hexToLab(hex) {
+  const { r, g, b } = hexToRgb(hex);
+  // sRGB -> linear RGB -> XYZ (D65) -> Lab.
+  const rl = _srgbToLinear(r), gl = _srgbToLinear(g), bl = _srgbToLinear(b);
+  const X = (rl * 0.4124564 + gl * 0.3575761 + bl * 0.1804375) / 0.95047;
+  const Y = (rl * 0.2126729 + gl * 0.7151522 + bl * 0.0721750) / 1.00000;
+  const Z = (rl * 0.0193339 + gl * 0.1191920 + bl * 0.9503041) / 1.08883;
+  const f = t => t > 0.008856 ? Math.cbrt(t) : (7.787 * t + 16 / 116);
+  const fx = f(X), fy = f(Y), fz = f(Z);
+  return { L: 116 * fy - 16, a: 500 * (fx - fy), b: 200 * (fy - fz) };
+}
+function deltaE76(hex1, hex2) {
+  const a = hexToLab(hex1), b = hexToLab(hex2);
+  const dL = a.L - b.L, da = a.a - b.a, db = a.b - b.b;
+  return Math.sqrt(dL * dL + da * da + db * db);
+}
+
+// CIE76 deltaE threshold for "perceptually distinct under simulation."
+// 10 is the literature standard for "two different colors." Tunable in one
+// place if production testing suggests a different value.
+const CB_DELTA_E_THRESHOLD = 10;
+
+// Legacy WCAG-contrast threshold retained as a fallback - kept for any
+// future need to fall back to the luminance-only metric.
 const CB_DISTINGUISH_THRESHOLD = 1.15;
-// Returns { pass, failingModes: [{mode, label, ratio}] } for a color pair
+
+// Returns { pass, failingModes: [{mode, label, deltaE}] } for a color pair
 // across all four CB simulations. Normal vision is excluded - the question
 // is specifically "do they remain distinct under color blindness?"
-function pairCBDistinguishable(hex1, hex2, threshold = CB_DISTINGUISH_THRESHOLD) {
+function pairCBDistinguishable(hex1, hex2, threshold = CB_DELTA_E_THRESHOLD) {
   const failingModes = [];
   for (const mode of ['deut', 'prot', 'trit', 'achr']) {
-    const r = contrast(simulateCB(hex1, mode), simulateCB(hex2, mode));
-    if (r < threshold) failingModes.push({ mode, label: CB_SIM_LABELS[mode], ratio: r });
+    const dE = deltaE76(simulateCB(hex1, mode), simulateCB(hex2, mode));
+    if (dE < threshold) failingModes.push({ mode, label: CB_SIM_LABELS[mode], deltaE: dE });
   }
   return { pass: failingModes.length === 0, failingModes };
 }
@@ -3362,12 +3447,12 @@ function evaluateRules() {
     const parts = result.pass
       ? [{ label: 'Distinguishable in all four CB modes', pass: true }]
       : result.failingModes.map(fm => ({
-          label: `Fails in ${fm.label}`, ratio: fm.ratio, pass: false
+          label: `Fails in ${fm.label}`, deltaE: fm.deltaE, pass: false
         }));
     rules.push({
       id: 3,
       title: 'Primary distinguishable from Secondary',
-      detail: `Patrons with color-vision impairments must be able to tell Primary and Secondary apart. Tested under deuteranopia, protanopia, tritanopia, and achromatopsia simulation; pair must keep ≥ ${CB_DISTINGUISH_THRESHOLD}:1 contrast in each.`,
+      detail: `Patrons with color-vision impairments must be able to tell Primary and Secondary apart. Tested under deuteranopia, protanopia, tritanopia, and achromatopsia simulation; pair must keep a perceptual difference (CIE76 ΔE) of at least ${CB_DELTA_E_THRESHOLD} in each.`,
       parts,
       pass: result.pass,
     });
@@ -3427,7 +3512,7 @@ function evaluateRules() {
     const r5 = {
       id: 5,
       title: 'Taxonomy colors distinguishable under colorblindness',
-      detail: `Each pair of taxonomy colors must keep ≥ ${CB_DISTINGUISH_THRESHOLD}:1 contrast under deuteranopia, protanopia, tritanopia, and achromatopsia simulation. Tests every pair (${pairCount} for ${ageColors.length} colors).`,
+      detail: `Each pair of taxonomy colors must keep a perceptual difference (CIE76 ΔE) of at least ${CB_DELTA_E_THRESHOLD} under deuteranopia, protanopia, tritanopia, and achromatopsia simulation. Tests every pair (${pairCount} for ${ageColors.length} colors).`,
       parts: failingPairs.length
         ? failingPairs.map(fp => ({
             label: `${fp.a.label} ↔ ${fp.b.label} fails in ${fp.modes}`,
@@ -3465,7 +3550,7 @@ function renderRules() {
     const partsHTML = rule.parts.length && !overridden
       ? `<div class="rule-parts">${rule.parts.map(p => `
             <span class="part ${p.pass === false ? 'fail' : (p.pass === true ? 'pass' : '')}">
-              · ${p.label}${p.ratio !== undefined ? ` (${p.ratio.toFixed(2)}:1)` : ''}
+              · ${p.label}${p.ratio !== undefined ? ` (${p.ratio.toFixed(2)}:1)` : (p.deltaE !== undefined ? ` (ΔE ${p.deltaE.toFixed(1)})` : '')}
             </span>`).join('')}</div>`
       : '';
     // Rule 5 specifically gets an editor-only override toggle. Shown when
@@ -3940,6 +4025,27 @@ function pickShade(v) {
   PK.v = v;
   syncPicker();
 }
+
+// ─── PICKER KEYBOARD NUDGE (Vesper macOS pattern) ──────────────────────────
+// Up/Down       = fine V (brightness) nudge by ~2%
+// Shift+Up/Down = jump between SHADE_VALS preset rows
+// Skipped when focus is in the hex input so native caret movement still works.
+const _PICKER_NUDGE_STEP = 0.02;
+function _pickerNudgeV(delta) {
+  PK.v = Math.max(0, Math.min(1, PK.v + delta));
+  syncPicker();
+}
+function _pickerJumpShade(direction) {
+  // SHADE_VALS is descending (index 0 = brightest). +1 = brighter, -1 = darker.
+  // Pick whichever chip is closest to current PK.v as the starting point.
+  const ci = SHADE_VALS.reduce(
+    (best, v, i) => Math.abs(v - PK.v) < Math.abs(SHADE_VALS[best] - PK.v) ? i : best,
+    0
+  );
+  const nextI = Math.max(0, Math.min(SHADE_VALS.length - 1, ci - direction));
+  PK.v = SHADE_VALS[nextI];
+  syncPicker();
+}
 function syncPicker() {
   drawPickerField();
   setFieldThumb();
@@ -3995,6 +4101,17 @@ function initPickerPointer() {
   hue .addEventListener('touchstart', e => { hu(e.touches[0].clientX); }, { passive: true });
   hue .addEventListener('touchmove',  e => { hu(e.touches[0].clientX); e.preventDefault(); }, { passive: false });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && PK.open) closePicker(); });
+  // Arrow-key nudges. Only fires when picker is open and focus is not inside
+  // the hex input (where arrow keys move the text caret natively).
+  document.addEventListener('keydown', e => {
+    if (!PK.open) return;
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    if (e.target && e.target.id === 'vcHexInput') return;
+    e.preventDefault();
+    const dir = e.key === 'ArrowUp' ? +1 : -1;
+    if (e.shiftKey) _pickerJumpShade(dir);
+    else            _pickerNudgeV(dir * _PICKER_NUDGE_STEP);
+  });
 }
 
 // ─── EXPORT MENU ──────────────────────────────────────────────────────────
@@ -4032,6 +4149,7 @@ function captureState() {
     logoBg: S.logoBg,
     pm: S.pm,
     rule5Override: S.rule5Override,
+    clientNotes: S.clientNotes,
   };
 }
 function restoreState(obj) {
@@ -4072,6 +4190,7 @@ function restoreState(obj) {
   if (obj.logoBg) S.logoBg = obj.logoBg;
   if (typeof obj.pm === 'string') S.pm = obj.pm;
   S.rule5Override = obj.rule5Override === true;
+  if (typeof obj.clientNotes === 'string') S.clientNotes = obj.clientNotes;
   // Refresh UI inputs
   const cn = document.getElementById('clientName');
   const ct = document.getElementById('coverTitle');
@@ -4085,6 +4204,8 @@ function restoreState(obj) {
   if (tb) { tb.textContent = S.hasSecondary ? 'ON' : 'OFF'; tb.classList.toggle('active', S.hasSecondary); }
   const rn = document.getElementById('revNotes');
   if (rn) rn.value = S.notes || '';
+  const cni = document.getElementById('clientNotesInput');
+  if (cni) cni.value = S.clientNotes || '';
   if (S.logoData) setLogoPreview(S.logoData);
   applyLogoBg();
   return true;
@@ -4261,6 +4382,7 @@ function renderAll() {
   renderValidation(rules);
   renderMatrix();
   renderPMDisplay();
+  renderClientNotesBanner();
   // Feedback section is async (it builds a share URL for the mailto body).
   // Fire-and-forget; renderAll() callers do not need to wait on it.
   renderFeedback();
@@ -4286,6 +4408,28 @@ function onPMChange(val) {
   S.pm = (val || '').trim();
   renderPMDisplay();
   renderFeedback();
+  renderClientNotesBanner();
+}
+
+// Client notes input (editor textarea) -> state -> banner re-render.
+function onClientNotesInput(val) {
+  S.clientNotes = val || '';
+  renderClientNotesBanner();
+}
+
+// Banner at the top of the client share view. Visible only when both a PM
+// has been chosen AND there is content to show; CSS gates the editor view
+// out unconditionally so this just toggles the [hidden] attribute.
+function renderClientNotesBanner() {
+  const banner = document.getElementById('clientNotesBanner');
+  const nameEl = document.getElementById('cnbName');
+  const bodyEl = document.getElementById('cnbBody');
+  if (!banner) return;
+  const hasContent = !!(S.clientNotes && S.clientNotes.trim());
+  const hasPM = !!S.pm;
+  banner.hidden = !(hasContent && hasPM);
+  if (nameEl) nameEl.textContent = pmDisplayName(S.pm) || '';
+  if (bodyEl) bodyEl.textContent = S.clientNotes || '';
 }
 
 function renderPMDisplay() {
@@ -4351,22 +4495,20 @@ async function buildFeedbackMailto() {
 }
 
 async function renderFeedback() {
-  const sec   = document.getElementById('feedbackSection');
-  const link  = document.getElementById('feedbackMailto');
-  const empty = document.getElementById('feedbackEmpty');
-  const pmLbl = document.getElementById('feedbackBtnPm');
+  const sec     = document.getElementById('feedbackSection');
+  const link    = document.getElementById('feedbackMailto');
+  const labelEl = document.getElementById('feedbackBtnLabel');
   if (!sec) return;
-  // Toggle a marker class so body.ro CSS can hide the entire section in
-  // client view when no PM has been chosen (an empty CTA is worse than no CTA).
+  // Mark no-pm so the client-view CSS can hide the section when no
+  // recipient is set. Editor view hides the section unconditionally
+  // via a separate body:not(.ro) rule.
   sec.classList.toggle('no-pm', !S.pm);
   if (!S.pm) {
-    if (link)  link.hidden = true;
-    if (empty) empty.hidden = false;
+    if (link) link.hidden = true;
     return;
   }
-  if (empty) empty.hidden = true;
   if (link) link.hidden = false;
-  if (pmLbl) pmLbl.textContent = `to ${pmDisplayName(S.pm)} at Library Market`;
+  if (labelEl) labelEl.textContent = `Send feedback to ${pmDisplayName(S.pm)}`;
   const mailto = await buildFeedbackMailto();
   if (link && mailto) link.href = mailto;
 }
