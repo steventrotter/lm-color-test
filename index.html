@@ -5062,29 +5062,8 @@ async function exportDeveloperMD() {
   } else {
     lines.push(`**Project Manager:** (not set)`);
   }
-  // Reference URLs: Palette (Vesper Colors view of the brand+taxonomy hexes)
-  // and Client (read-only share URL with all state encoded). Reuses the
-  // memoized read-only URL when fresh; rebuilds only on cache miss. If the
-  // share URL build fails for any reason we still emit the file with a
-  // placeholder rather than throwing.
   const paletteUrl = buildPaletteUrl();
-  let clientUrl = null;
-  try {
-    const hash = _stateHashShallow();
-    if (_feedbackUrlCache.stateHash === hash && _feedbackUrlCache.url) {
-      clientUrl = _feedbackUrlCache.url;
-    } else {
-      const result = await buildShareUrl(true);
-      if (result && result.url) {
-        clientUrl = result.url;
-        // Preserve any shortUrl already cached for this hash (buildFeedbackMailto
-        // may have shortened it already; we don't want to clobber that).
-        _feedbackUrlCache = { stateHash: hash, url: result.url, shortUrl: _feedbackUrlCache.shortUrl || null };
-      }
-    }
-  } catch (e) {}
   lines.push(`**Palette URL:** ${paletteUrl}`);
-  lines.push(`**Client (read-only):** ${clientUrl || '(share URL unavailable - try again or rebuild from the Share menu)'}`);
   lines.push('');
   // Brand colors (Primary, Primary Hover, Secondary, Secondary Hover) with
   // contrast vs the calendar background.
